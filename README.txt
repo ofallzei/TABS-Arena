@@ -13,6 +13,8 @@ NOTE : ( READ THE LATEST RELEASE NOTES TO SEE IF IT WILL DELETE YOUR SAVED GAMES
 
 
 
+
+
 SETUP TO BEGIN PLAYING: 
 
 1. Strongly recommend to download and subscribe to all the maps and especially factions only involving the name (Fallz) in the game workshop for best experience. 
@@ -22,9 +24,17 @@ SETUP TO BEGIN PLAYING:
 5. Once in go to a sandbox and begin playing!
 
 
+
+
 HOW TO PLAY :
 
 Welcome to TABS Arena ! To begin playing you must understand the mechanics of how the app will work. Once opening the app, you will be prompted to choose a gamemode either select 1v1 or 2v2. If you have 2 monitors you can always move the app to your other monitor using this built in windows feature bind : WINDOWS KEY + SHIFT + ARROW (Direction of monitor) Once you have chosen a gamemode, you can begin change the player names in the UI and press select to confirm. Now onto explaining the interface and its mechanics: All players will start with 1200 gold that is tied to the games value gold, there is a button where you can click at the start of every match who goes first on their turn, that player will receive additional gold to compensate for being counterpicked on round 1. Turn order for the rest of the game : Highest points player must go first, they can then choose any options they would like, whether its buy upgrades, moving,selling or buying troops etc.. once they are done the player with less points goes after, then the round begins. If tied on points whoever had won the last round to make the points tied has to go first. If there seems to be a tie because one of the units bugged out or whatever the reason is, then both players have to mutually agree to do a tie, or if both cant agree then set a 3 minute timer if no winner then force a tie. Once a winner is decided, click on the winner of the match and press next round, or if its a tie click tie. There is also a Undo button if someone accidently changes their mind on something or there was a mistake in button clicks. Important rule : If a player buys a unit in their turn, they have the option to keep the unit , move it as much as they want or sell the unit for full refund back, once next round has happened, sellback % and moving units take effect. They are allowed to undo anything they have done in that current round, except if its faction mode, as it can be exploited to get a good faction they want, that would be the only exception in where Undo is illegal in the same turn. If both teams/players are at match point for ex : 19/19 in ft20 , 29/29 ft30, then win by 2 rule activates, a player has to win by 2 points over the opponent to win the game. Finally last thing you should know is there is a save feature if you cant finish a game up, make sure to save the game and you can always load it back up, or delete any old saved games.
+
+
+
+
+
+
 
 Player UI buttons: 
 
@@ -41,6 +51,12 @@ Player UI buttons:
 - (2V2 ONLY) BFT (buy for teammate): You can buy a unit for your teammate and place it on their side of the board for a 15% extra cost (surcharge).
 
 - Replay : This can be used to rewatch/replay a battle for informational purposes only. The buy may choose to specify what to watch and if they want even control the camera as much as they want. This button does not change the outcome of the round, and this can only be bought before any changes are made to the battle ex: moving units , buying troops , selling troops. Can only be bought once per round. 
+
+
+
+
+
+
 
 UI mechanics : 
 
@@ -59,6 +75,12 @@ UI mechanics :
 - Milestone points scaling : For Milestone rewards in ft30 it will be every 5 points a player/team reaches, so rewards would be 5,10,15,20 etc.. In ft20 modes it will be every 4 so 4,8,12,16,20 etc..
 
 
+
+
+
+
+
+
 Gamemodes: 
 
 1v1 : First player to 30 points to win, all factions are allowed.(unless win by 2 rule activates)
@@ -72,4 +94,3 @@ Gamemodes:
 2v2 faction mode :  Only the factions that you own in the app are allowed to be used. 
 
 2v2 ft20 mode : First team to 20 points to win. (unless win by 2 rule activates)
-
