@@ -50,10 +50,13 @@ as top left there is a save battle feature, make sure to name it and have the op
 
 NOTE :
 
--2V2 MAP RULES : No placing highground , no placing in the middle circle or crevices / the entrances of the circle, or entrances of the crevices.
+
+- **BANNED UNITS** THAT ARE NOT ALLOWED TO BE PLAYED IN THE GAME CURRENTLY : Present elf (Secret faction) , Dragon (Dynasty faction).
+
+- 2V2 MAP RULES : No placing highground , no placing in the middle circle or crevices / the entrances of the circle, or entrances of the crevices.
 2 armys per side, 1 army per player. 4 armys total!!
 
-**BANNED UNITS** THAT ARE NOT ALLOWED TO BE PLAYED IN THE GAME CURRENTLY : Present elf (Secret faction) , Dragon (Dynasty faction).
+- No one is allowed to control any units in match. 
 
 
 
