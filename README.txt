@@ -49,9 +49,11 @@ make sure to save the game and you can always load it back up, or delete any old
 
 
 
+
 Player UI buttons: 
 
-- Buy income : You can spend 100 gold to buy the upgrade, that will then permanently increase your income per round, can only buy it once per round and the price increases each time bought by 24%. Since buy income eventually will get really expensive to buy, and that is when a income decay mechanic I have comes in.
+- Buy income : You can spend 100 gold to buy the upgrade, that will then permanently increase your income per round, can only buy it once per round and the price increases each time bought by 24%.
+Since buy income eventually will get really expensive to buy, and that is when a income decay mechanic I have comes in.
 
 - Perm move upgrade : You can freely move a unit once per round , if you have the upgrade. ( can be bought up to 2 times )
 
@@ -63,7 +65,10 @@ Player UI buttons:
 
 - (2V2 ONLY) BFT (buy for teammate): You can buy a unit for your teammate and place it on their side of the board for a 15% extra cost (surcharge).
 
-- Replay : This can be used to rewatch/replay a battle for informational purposes only. The buy may choose to specify what to watch and if they want even control the camera as much as they want. This button does not change the outcome of the round, and this can only be bought before any changes are made to the battle ex: moving units , buying troops , selling troops. Can only be bought once per round. 
+- Replay : This can be used to rewatch/replay a battle for informational purposes only. The buy may choose to specify what to watch and if they want even control the camera as much as they want.
+This button does not change the outcome of the round, and this can only be bought before any changes are made to the battle ex: moving units , buying troops , selling troops.
+Can only be bought once per round. 
+
 
 
 
@@ -73,20 +78,23 @@ Player UI buttons:
 
 UI mechanics : 
 
-- Interest : For every 50 gold a player has they will gain 10 extra that round. for example if someone had 105 gold they would gain 20 gold next round. This interest caps at 500 gold, to a whopping 100 gold per round.
+- Interest : For every 50 gold a player has they will gain 10 extra that round. for example if someone had 105 gold they would gain 20 gold next round. This interest caps at 500 gold,
+to a whopping 100 gold per round.
 
 - Income decay : After a couple of rounds of not buying income for a while decay begins , a % decrease in price now happens every round that you dont buy income. 
 
-- Income decay scaling : In a ft30 points match, after not buying income for 4 rounds in a row, income decay activates starting at 2% discount then increasing 2% more for every round not bought after. In a ft20 points match , it activates after 3 rounds of not buying income and goes with 4% scaling for every round after of not buying. Once income is bought it will reset to 0.
+- Income decay scaling : In a ft30 points match, after not buying income for 4 rounds in a row, income decay activates starting at 2% discount then increasing 2% more for every round not bought after.
+In a ft20 points match , it activates after 3 rounds of not buying income and goes with 4% scaling for every round after of not buying. Once income is bought it will reset to 0.
 
 - Match rewards : Base rewards are 55 gold for winner and a point and 85 gold to the loser. 
 
-- Gold match rewards scaling : In a ft30 points match, match rewards scale 10 gold for winner and loser every 5 rounds that pass. In a ft20 points mode, every 3 rounds that pass it would be 15+ gold to winner and loser for every 3 rounds that pass. 
+- Gold match rewards scaling : In a ft30 points match, match rewards scale 10 gold for winner and loser every 5 rounds that pass.
+In a ft20 points mode, every 3 rounds that pass it would be 15+ gold to winner and loser for every 3 rounds that pass. 
 
-- Milestones : Milestones are rewards that are given to a player for reaching a certain amount of points first. Only one player may win a milestone so there is a incentive to always try to win rounds. There is ingame UI showing the milestone progress per player/team, the current next milestone reward and the possible rewards left in the reward pool. All rewards are randomized for the order.
+- Milestones : Milestones are rewards that are given to a player for reaching a certain amount of points first. Only one player may win a milestone so there is a incentive to always try to win rounds.
+There is ingame UI showing the milestone progress per player/team, the current next milestone reward and the possible rewards left in the reward pool. All rewards are randomized for the order.
 
 - Milestone points scaling : For Milestone rewards in ft30 it will be every 5 points a player/team reaches, so rewards would be 5,10,15,20 etc.. In ft20 modes it will be every 4 so 4,8,12,16,20 etc..
-
 
 
 
