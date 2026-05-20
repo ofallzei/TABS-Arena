@@ -43,7 +43,8 @@ They are allowed to undo anything they have done in that current round, except i
 that would be the only exception in where Undo is illegal in the same turn. If both teams/players are at match point for ex : 19/19 in ft20 , 29/29 ft30, then win by 2 rule activates,
 a player has to win by 2 points over the opponent to win the game. When buying any units from the game,make sure to buy from the rebalanced faction I created 
 (find in workshop searching "Fallz" if you dont have it already).Finally last thing you should know is there is a save feature if you cant finish a game up,
-make sure to save the game and you can always load it back up, or delete any old saved games.
+make sure to save the game and you can always load it back up, or delete any old saved games. Also when saving a game, make sure to also save in the game itself on TABS
+as top left there is a save battle feature and make sure to name it, and have the option "save friendly units" enabled.
 
 
 
