@@ -41,10 +41,16 @@ There is also a Undo button if someone accidently changes their mind on somethin
 they have the option to keep the unit , move it as much as they want or sell the unit for full refund back, once next round has happened, sellback % and moving units take effect.
 They are allowed to undo anything they have done in that current round, except if its faction mode, as it can be exploited to get a good faction they want,
 that would be the only exception in where Undo is illegal in the same turn. If both teams/players are at match point for ex : 19/19 in ft20 , 29/29 ft30, then win by 2 rule activates,
-a player has to win by 2 points over the opponent to win the game. When buying any units from the game, make sure to buy from the rebalanced faction I created (find in workshop searching "Fallz" if you dont have it already).  Finally last thing you should know is there is a save feature if you cant finish a game up,
+a player has to win by 2 points over the opponent to win the game. When buying any units from the game,make sure to buy from the rebalanced faction I created 
+(find in workshop searching "Fallz" if you dont have it already).Finally last thing you should know is there is a save feature if you cant finish a game up,
 make sure to save the game and you can always load it back up, or delete any old saved games.
 
 
+
+NOTE :
+
+-2V2 MAP RULES : No placing highground , no placing in the middle circle or crevices / the entrances of the circle, or entrances of the crevices.
+2 armys per side, 1 army per player. 4 armys total!!
 
 **BANNED UNITS** THAT ARE NOT ALLOWED TO BE PLAYED IN THE GAME CURRENTLY : Present elf (Secret faction) , Dragon (Dynasty faction).
 
