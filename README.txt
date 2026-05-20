@@ -44,7 +44,7 @@ that would be the only exception in where Undo is illegal in the same turn. If b
 a player has to win by 2 points over the opponent to win the game. When buying any units from the game,make sure to buy from the rebalanced faction I created 
 (find in workshop searching "Fallz" if you dont have it already).Finally last thing you should know is there is a save feature if you cant finish a game up,
 make sure to save the game and you can always load it back up, or delete any old saved games. Also when saving a game, make sure to also save in the game itself on TABS
-as top left there is a save battle feature and make sure to name it, and have the option "save friendly units" enabled.
+as top left there is a save battle feature, make sure to name it and have the option "save friendly units" enabled.
 
 
 
