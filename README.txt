@@ -21,8 +21,9 @@ SETUP TO BEGIN PLAYING:
 MAKE SURE TO READ THE DESCRIPTIONS OF THE MAPS ON WORKSHOP ON HOW TO PLAY ON THOSE MAPS!!
 2. Strongly advise to have atleast 1 player on steam be the host of the match they must own TABS on steam, the other player does not have to own the game.
 3. Once the host opens the game press shift + tab for steam overlay, then click on "Remote play together" at the bottom of the screen.
-4. Invite your friend through that Remote play together window with either a friend invite or a link that steam provides.
-5. Once in go to a sandbox and begin playing!
+4. Invite your friend through that Remote play together window with either a friend invite or a link that steam provides. 
+5. Make sure the host gives the other players Mouse and keyboard access or controller access in the Remote play together menu. 
+6. Once in, go to a sandbox and begin playing!
 
 
 
