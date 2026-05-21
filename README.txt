@@ -17,7 +17,7 @@ NOTE : ( READ THE LATEST RELEASE NOTES TO SEE IF IT WILL DELETE YOUR SAVED GAMES
 
 SETUP TO BEGIN PLAYING: 
 
-1. Strongly recommend to download and subscribe to all the maps and especially factions involving the name (Fallz) in the game workshop for best experience. 
+1. Strongly recommend to download and subscribe to all the maps and especially factions involving the name (Fallz) in the game workshop for the best experience. 
 MAKE SURE TO READ THE DESCRIPTIONS OF THE MAPS ON WORKSHOP ON HOW TO PLAY ON THOSE MAPS!!
 2. Strongly advise to have atleast 1 player on steam be the host of the match they must own TABS on steam, the other player does not have to own the game.
 3. Once the host opens the game press shift + tab for steam overlay, then click on "Remote play together" at the bottom of the screen.
