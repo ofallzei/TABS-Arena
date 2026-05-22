@@ -101,7 +101,7 @@ In a ft20 points match , it activates after 3 rounds of not buying income and go
 - Match rewards : Base rewards are 55 gold for winner and a point and 85 gold to the loser. 
 
 - Gold match rewards scaling : In a ft30 points match, match rewards scale 10 gold for winner and loser every 5 rounds that pass.
-In a ft20 points mode, every 3 rounds that pass it would be 15+ gold to winner and loser for every 3 rounds that pass. 
+In a ft20 points mode, it would be 15+ gold to winner and loser for every 3 rounds that pass. 
 
 - Milestones : Milestones are rewards that are given to a player for reaching a certain amount of points first. Only one player may win a milestone so there is a incentive to always try to win rounds.
 There is ingame UI showing the milestone progress per player/team, the current next milestone reward and the possible rewards left in the reward pool. All rewards are randomized for the order.
