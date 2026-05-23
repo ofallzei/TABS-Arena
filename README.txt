@@ -32,7 +32,7 @@ HOW TO PLAY :
 
 Welcome to TABS Arena ! To begin playing you must understand the mechanics of how the app will work. Once opening the app, you will be prompted to choose a gamemode either select 1v1 or 2v2.
 If you have 2 monitors you can always move the app to your other monitor using this built in windows feature bind : WINDOWS KEY + SHIFT + ARROW (Direction of monitor) Once you have chosen a gamemode,
-you can begin change the player names in the UI and press select to confirm. Now onto explaining the interface and its mechanics: All players will start with 1200 gold that is tied to the games value gold,
+you can change the player names in the UI and press select to confirm. Now onto explaining the interface and its mechanics: All players will start with 1200 gold that is tied to the games value gold,
 there is a button where you can click at the start of every match who goes first on their turn, that player will receive additional gold to compensate for being counterpicked on round 1. 
 Turn order for the rest of the game : Highest points player must go first, they can then choose any options they would like, whether its buy upgrades, moving,selling or buying troops etc..
 once they are done the player with less points goes after, then the round begins. If tied on points whoever had won the last round to make the points tied has to go first.
