@@ -19,7 +19,8 @@ SETUP TO BEGIN PLAYING:
 
 1. Strongly recommend to download and subscribe to all the maps and especially factions involving the name (Fallz) in the game workshop for the best experience. 
 MAKE SURE TO READ THE DESCRIPTIONS OF THE MAPS ON WORKSHOP ON HOW TO PLAY ON THOSE MAPS!!
-2. NEED to have atleast 1 player on steam be the host of the match they must own TABS on steam, the other player does not need to own the game.
+2. NEED to have atleast 1 player on steam be the host of the match they must own TABS on steam, 
+the other player does not need to own the game, although they will need the steam app at minimum.
 3. Once the host opens the game press shift + tab for steam overlay, then click on "Remote play together" at the bottom of the screen.
 4. Invite your friend through that Remote play together window with either a friend invite or a link that steam provides. 
 5. Make sure the host gives the other players Mouse and keyboard access or controller access in the Remote play together menu. 
