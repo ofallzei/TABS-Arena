@@ -1,130 +1,298 @@
-HOW TO INSTALL :
+# TABS Arena Guide
 
-1.Make sure to download all the files in the TABS-Arena repository 
-2.Next go to the latest version of TABS Arena download only the 2 files it provides which will be "Newtonsoft.Json.dll" and "TABS.exe" 
-3. Extract the zip folder from the TABS-ARENA to a location
-4.Then put the 2 files you downloaded from the latest release in that folder.
-5.It will prompt to replace the files, go ahead and replace those files and that will get you the latest version.
+## How To Install
 
-REPEAT STEP 4 IF YOU WANT TO UPDATE TO THE LATEST VERSION.
-NOTE : ( READ THE LATEST RELEASE NOTES TO SEE IF IT WILL DELETE YOUR SAVED GAMES OR NOT AS LARGE UPDATES CAN CORRUPT OLDER SAVES) 
+1. Download all files from the `TABS-Arena` repository.
 
+2. Go to the latest TABS Arena release and download only the two provided files:
+   - `Newtonsoft.Json.dll`
+   - `TABS.exe`
 
+3. Extract the `TABS-Arena` zip folder to any location on your computer.
 
+4. Place the two files from the latest release into the extracted `TABS-Arena` folder.
 
+5. When prompted to replace existing files, choose to replace them. This will update the app to the latest version.
 
+### Updating To The Latest Version
 
+To update later, download the newest release files again and repeat the replacement step.
 
-SETUP TO BEGIN PLAYING: 
+Important: Read the latest release notes before updating. Some larger updates may delete, break, or corrupt older saved games.
 
-1. Strongly recommend to download and subscribe to all the maps and especially factions involving the name (Fallz) in the game workshop for the best experience. 
-MAKE SURE TO READ THE DESCRIPTIONS OF THE MAPS ON WORKSHOP ON HOW TO PLAY ON THOSE MAPS!!
-2. NEED to have atleast 1 player on steam be the host of the match they must own TABS on steam, 
-the other player does not need to own the game, although they will need the steam app at minimum.
-3. Once the host opens the game press shift + tab for steam overlay, then click on "Remote play together" at the bottom of the screen.
-4. Invite your friend through that Remote play together window with either a friend invite or a link that steam provides. 
-5. Make sure the host gives the other players Mouse and keyboard access or controller access in the Remote play together menu. 
-6. Once in, go to a sandbox and begin playing!
+---
 
+## Setup Before Playing
 
+1. It is strongly recommended that you download and subscribe to all workshop maps and factions involving the name `Fallz` for the best experience.
 
+2. Make sure to read the workshop descriptions for the maps, since some maps have specific instructions on how they should be played.
 
-HOW TO PLAY :
+3. At least one player must own TABS on Steam and act as the host.
 
-Welcome to TABS Arena ! To begin playing you must understand the mechanics of how the app will work. Once opening the app, you will be prompted to choose a gamemode either select 1v1 or 2v2.
-If you have 2 monitors you can always move the app to your other monitor using this built in windows feature bind : WINDOWS KEY + SHIFT + ARROW (Direction of monitor) Once you have chosen a gamemode,
-you can change the player names in the UI and press select to confirm. Now onto explaining the interface and its mechanics: All players will start with 1200 gold that is tied to the games value gold,
-there is a button where you can click at the start of every match who goes first on their turn, that player will receive additional gold to compensate for being counterpicked on round 1. 
-Turn order for the rest of the game : Highest points player must go first, they can then choose any options they would like, whether its buy upgrades, moving,selling or buying troops etc..
-once they are done the player with less points goes after, then the round begins. If tied on points whoever had won the last round to make the points tied has to go first.
-If there seems to be a tie because one of the units bugged out or whatever the reason is, then both players have to mutually agree to do a tie,
-or if both cant agree then set a 3 minute timer if no winner then force a tie. Once a winner is decided, click on the winner of the match and press next round, or if its a tie click tie.
-There is also a Undo button if someone accidently changes their mind on something or there was a mistake in button clicks. Important rule : If a player buys a unit in their turn,
-they have the option to keep the unit , move it as much as they want or sell the unit for full refund back, once next round has happened, sellback % and moving units take effect.
-They are allowed to undo anything they have done in that current round, except if its faction mode, as it can be exploited to get a good faction they want,
-that would be the only exception in where Undo is illegal in the same turn. If both teams/players are at match point for ex : 19/19 in ft20 , 29/29 ft30, then win by 2 rule activates,
-a player has to win by 2 points over the opponent to win the game. When buying any units from the game,make sure to buy from the rebalanced faction I created 
-(find in workshop searching "Fallz" if you dont have it already).Finally last thing you should know is there is a save feature if you cant finish a game up,
-make sure to save the game and you can always load it back up, or delete any old saved games. Also when saving a game, make sure to also save in the game itself on TABS
-as top left there is a save battle feature, make sure to name it and have the option "save friendly units" enabled.
+4. The other player does not need to own TABS, but they must have the Steam app installed.
 
+5. The host should open TABS, then press `Shift + Tab` to open the Steam overlay.
 
+6. In the Steam overlay, click `Remote Play Together` at the bottom of the screen.
 
-NOTE :
+7. Invite your friend through the Remote Play Together window using either a Steam friend invite or the link Steam provides.
 
+8. Make sure the host gives the other players mouse and keyboard access, or controller access, through the Remote Play Together menu.
 
-- **BANNED UNITS** THAT ARE NOT ALLOWED TO BE PLAYED IN THE GAME CURRENTLY : Present elf (Secret faction) , Dragon (Dynasty faction).
+9. Once everyone is connected, go into Sandbox and begin playing.
 
-- 2V2 MAP RULES : No placing highground , no placing in the middle circle or crevices / the entrances of the circle, or entrances of the crevices.
-2 armys per side, 1 army per player. 4 armys total!!
+---
 
-- No one is allowed to control any units in match. 
+## How To Play
 
+Welcome to TABS Arena.
 
+When you open the app, you will be prompted to choose a game mode. Select either `1v1` or `2v2`.
 
+If you have two monitors, you can move the app to your other monitor using this Windows shortcut:
 
-Player UI buttons: 
+`Windows Key + Shift + Arrow Key`
 
-- Buy income : You can spend 100 gold to buy the upgrade, that will then permanently increase your income per round, can only buy it once per round and the price increases each time bought by 24%.
-Since buy income eventually will get really expensive to buy, and that is when a income decay mechanic I have comes in.
+After choosing a game mode, you can change the player names in the UI and press `Set` to confirm them.
 
-- Perm move upgrade : You can freely move a unit once per round , if you have the upgrade. ( can be bought up to 2 times )
+All players start with `1200 gold`. This gold is tied to the in-game TABS unit cost system.
 
-- (FACTION MODE ONLY) Buy faction : You will gain a new faction to play. Starts at 50 gold, for every faction you get more of price will increase by 20.
+At the start of every match, use the first-turn button to choose who goes first. The player or team going first receives extra gold to compensate for being counterpicked in round 1.
 
-- Single troop move : Allows you to move 1 unit for a round for 25 gold. 
+### Turn Order
 
-- Custom troop spend: This is the button you use to input the value of the units you bought to deduct it from your gold.
+The player or team with the highest points must go first.
 
-- (2V2 ONLY) BFT (buy for teammate): You can buy a unit for your teammate and place it on their side of the board for a 15% extra cost (surcharge).
+On their turn, they may choose to buy upgrades, move units, sell units, buy troops, or use any other available options.
 
-- Replay : This can be used to rewatch/replay a battle for informational purposes only. The buy may choose to specify what to watch and if they want even control the camera as much as they want.
-This button does not change the outcome of the round, and this can only be bought before any changes are made to the battle ex: moving units , buying troops , selling troops.
-Can only be bought once per round. 
+After they are done, the player or team with fewer points takes their turn. Then the round begins.
 
+If both players or teams are tied in points, the player or team that won the last round to create the tie must go first.
 
+### Ties
 
+If a round appears to be tied because a unit bugged out or for any other reason, both players must mutually agree to call it a tie.
 
+If both players cannot agree, set a 3-minute timer. If there is still no winner after the timer ends, force a tie.
 
+Once a winner is decided, click the winner of the match and then press `Next Round`.
 
+If the round is a tie, click `Tie` instead.
 
+### Undo Rule
 
-UI mechanics : 
+The app has an `Undo` button in case someone changes their mind or clicks the wrong button by mistake.
 
-- Interest : For every 50 gold a player has they will gain 10 extra that round. for example if someone had 105 gold they would gain 20 gold next round. This interest caps at 500 gold,
-to a whopping 100 gold per round.
+A player may undo anything they did during the current round.
 
-- Income decay : After a couple of rounds of not buying income for a while decay begins , a % decrease in price now happens every round that you dont buy income. 
+Exception: In Faction Mode, undoing after receiving a random faction is not allowed, because it can be exploited to reroll for a better faction.
 
-- Income decay scaling : In a ft30 points match, after not buying income for 4 rounds in a row, income decay activates starting at 2% discount then increasing 2% more for every round not bought after.
-In a ft20 points match , it activates after 3 rounds of not buying income and goes with 4% scaling for every round after of not buying. Once income is bought it will reset to 0.
+### Buying, Moving, And Selling Units
 
-- Match rewards : Base rewards are 55 gold for winner and a point and 85 gold to the loser. 
+If a player buys a unit during their turn, they may keep it, move it as much as they want, or sell it for a full refund during that same turn.
 
-- Gold match rewards scaling : In a ft30 points match, match rewards scale 10 gold for winner and loser every 5 rounds that pass.
-In a ft20 points mode, it would be 15+ gold to winner and loser for every 3 rounds that pass. 
+Once `Next Round` has been pressed, normal sellback percentage and unit movement rules take effect.
 
-- Milestones : Milestones are rewards that are given to a player for reaching a certain amount of points first. Only one player may win a milestone so there is a incentive to always try to win rounds.
-There is ingame UI showing the milestone progress per player/team, the current next milestone reward and the possible rewards left in the reward pool. All rewards are randomized for the order.
+### Match Point And Win By 2
 
-- Milestone points scaling : For Milestone rewards in ft30 it will be every 5 points a player/team reaches, so rewards would be 5,10,15,20 etc.. In ft20 modes it will be every 4 so 4,8,12,16,20 etc..
+If both players or teams are at match point, the win-by-2 rule activates.
 
+Examples:
+- `19/19` in FT20
+- `29/29` in FT30
 
+When this happens, a player or team must win by 2 points to win the game.
 
+### Unit Factions
 
+When buying units in TABS, make sure to buy from the rebalanced faction I created.
 
+You can find it in the Steam Workshop by searching `Fallz`.
 
+### Saving Games
 
-Gamemodes: 
+The app has a save feature if you cannot finish a match.You can save your game, load it later, or delete old saved games.
+When saving in the TABS Arena app, also save the battle inside TABS itself. In TABS, use the top-left 
+`Save Battle` feature, name the battle, and make sure `Save Friendly Units` is enabled.
 
-1v1 : First player to 30 points to win, all factions are allowed.(unless win by 2 rule activates)
+---
 
-1v1 faction mode : Only the factions that you own in the app are allowed to be used. 
+## Important Notes
 
-1v1 ft20 mode : First to 20 points to win. (unless win by 2 rule activates)
+### Banned Units
 
-2v2 : First team to 30 points to win, all factions are allowed.(unless win by 2 rule activates)
+The following units are currently banned and may not be used:
 
-2v2 faction mode :  Only the factions that you own in the app are allowed to be used. 
+- Present Elf, Secret faction
+- Dragon, Dynasty faction
 
-2v2 ft20 mode : First team to 20 points to win. (unless win by 2 rule activates)
+### 2v2 Map Rules
+
+- Do not place units on high ground.
+- Do not place units in the middle circle.
+- Do not place units in crevices.
+- Do not place units at the entrances of the circle.
+- Do not place units at the entrances of crevices.
+- There should be 2 armies per side.
+- There should be 1 army per player.
+- There should be 4 armies total.
+
+### Unit Control Rule
+
+No player is allowed to control any units during the match.
+
+---
+
+## Player UI Buttons
+
+-Buy Income
+
+Spend `100 gold` to buy an income upgrade.
+
+This permanently increases your income per round.
+
+Income can only be bought once per round, and the price increases by `24%` each time it is bought.
+
+Since income eventually becomes very expensive, the app includes an income decay mechanic.
+
+-Perm Move Upgrade
+
+Allows you to freely move a unit once per round.
+
+This upgrade can be bought up to 2 times.
+
+-Buy Faction
+
+Faction Mode only.
+
+Buying a faction gives you a new faction that you are allowed to play.
+
+The first faction costs `50 gold`. Each additional faction increases the price by `20 gold`.
+
+-Single Troop Move
+
+Allows you to move 1 unit for the round for `25 gold`.
+
+-Custom Troop Spend
+
+Use this to enter the total value of units you bought so the app can deduct that amount from your gold.
+
+-BFT, Buy For Teammate
+
+2v2 only.
+
+Allows you to buy a unit for your teammate and place it on their side of the board.
+
+This costs an extra `15%` surcharge.
+
+-Replay
+
+Replay can be used to rewatch a battle for informational purposes only.
+
+The buyer may choose what to watch and may control the camera if they want.
+
+Replay does not change the outcome of the round.
+
+Replay can only be bought before any changes are made to the battle, such as moving units, buying troops, or selling troops.
+
+Replay can only be bought once per round.
+
+---
+
+## UI Mechanics
+
+-Interest
+
+For every `50 gold` a player has, they gain `10 extra gold` that round.
+
+Example: If a player has `105 gold`, they gain `20 gold` next round.
+
+Interest caps at `500 gold`, meaning the maximum interest is `100 gold` per round.
+
+-Income Decay
+
+After several rounds of not buying income, income decay begins.
+
+Income decay reduces the price of buying income by a percentage every round that income is not bought.
+
+Once income is bought, the decay resets to `0%`.
+
+-Income Decay Scaling
+
+In FT30, income decay activates after not buying income for 4 rounds in a row.
+
+It starts at a `2%` discount and increases by another `2%` every round after that.
+
+In FT20, income decay activates after not buying income for 3 rounds in a row.
+
+It increases by `4%` every round after that.
+
+-Match Rewards
+
+Base match rewards are:
+
+- Winner: `55 gold` and 1 point
+- Loser: `85 gold`
+
+-Gold Match Reward Scaling
+
+In FT30, match rewards increase by `10 gold` for both winner and loser every 5 rounds.
+
+In FT20, match rewards increase by `15 gold` for both winner and loser every 3 rounds.
+
+-Milestones
+
+Milestones are rewards given to a player or team for reaching certain point totals first.
+
+Only one player or team may win each milestone, which creates an incentive to keep winning rounds.
+
+The in-game UI shows:
+
+- Milestone progress for each player or team
+- The next milestone reward
+- The possible rewards left in the reward pool
+
+All milestone reward order is randomized.
+
+-Milestone Point Scaling
+
+In FT30, milestone rewards happen every 5 points:
+
+`5, 10, 15, 20`, and so on.
+
+In FT20, milestone rewards happen every 4 points:
+
+`4, 8, 12, 16, 20`, and so on.
+
+---
+
+## Game Modes
+
+-1v1
+
+First player to `30 points` wins.
+
+All factions are allowed unless the win-by-2 rule activates.
+
+-1v1 Faction Mode
+
+Only the factions owned in the app are allowed to be used.
+
+-1v1 FT20 Mode
+
+First player to `20 points` wins unless the win-by-2 rule activates.
+
+-2v2
+
+First team to `30 points` wins.
+
+All factions are allowed unless the win-by-2 rule activates.
+
+-2v2 Faction Mode
+
+Only the factions owned in the app are allowed to be used.
+
+-2v2 FT20 Mode
+
+First team to `20 points` wins unless the win-by-2 rule activates.
