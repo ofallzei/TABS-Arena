@@ -150,6 +150,8 @@ No player is allowed to control any units during the match.
 
 Spend `100 gold` to buy an income upgrade.
 
+Income base cost is 100 in normal modes, except for ft20 modes where it is 130.
+
 This permanently increases your income per round.
 
 Income can only be bought once per round, and the price increases by `24%` each time it is bought.
