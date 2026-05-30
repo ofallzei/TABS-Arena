@@ -11,7 +11,7 @@
 4. Run "TABS.exe"
 
 ### Updating To The Latest Version
-<img width="1065" height="846" alt="image" src="https://github.com/user-attachments/assets/f9dae25b-8817-48cd-9151-4d33e6b0e6a4" />
+
 
 1. Delete the old app folder and use the new extracted folder. ( deleting appdata folder will delete your saves ). 
 
