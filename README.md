@@ -2,11 +2,10 @@
 
 ## How To Install
 
-<img width="219" height="98" alt="image" src="https://github.com/user-attachments/assets/9ecd4bc1-c8c9-49cc-8b12-fa8f4ba439e8" />
-
-
 
 1. Go to releases on the right hand side click on the latest release. 
+
+<img width="219" height="98" alt="image" src="https://github.com/user-attachments/assets/9ecd4bc1-c8c9-49cc-8b12-fa8f4ba439e8" />
 
 2. Scroll down and find the zip file with the correct version on it.
 
