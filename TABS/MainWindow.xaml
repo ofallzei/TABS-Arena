@@ -1,0 +1,1269 @@
+﻿<Window x:Class="TABS.MainWindow" PreviewMouseWheel="Window_PreviewMouseWheel"
+        MouseDown="Window_MouseDown"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="TABS Tracker"
+        WindowStyle="None"
+        WindowState="Maximized"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+                Background="#16181B" FontFamily="Segoe UI">
+
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0"
+                            ResizeBorderThickness="8"
+                            GlassFrameThickness="0"
+                            CornerRadius="0"
+                            UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+    <Window.Resources>
+        <SolidColorBrush x:Key="PanelBg"   Color="#23272F"/>
+        <SolidColorBrush x:Key="Panel2Bg"  Color="#1A1D23"/>
+        <SolidColorBrush x:Key="TextMain"  Color="#F2F4F7"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#A7ACB2"/>
+
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Background" Value="#2B2F33"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#3A3F45"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                CornerRadius="14" BorderBrush="{TemplateBinding BorderBrush}"
+                                                                BorderThickness="1" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.92"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.82"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="#161B22"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="#34404D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="NameBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#161B22"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="#34404D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="UtilityInputStyle" TargetType="TextBox">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="#161B22"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="#34404D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="UtilityButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="#E8EDF3"/>
+            <Setter Property="Background" Value="#4B5563"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.82"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.65"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="#1A1C1F"/>
+            <Setter Property="Foreground" Value="#F2F4F7"/>
+            <Setter Property="BorderBrush" Value="#3A3D41"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Focusable="False"
+                                IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay,
+                                            RelativeSource={RelativeSource TemplatedParent}}"
+                                ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="bd"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            CornerRadius="8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="24"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Path Grid.Column="1"
+                                                    Data="M 0 0 L 4 4 L 8 0 Z"
+                                                    Fill="#A7ACB2"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bd" Property="Background" Value="#22252A"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+
+                            <ContentPresenter x:Name="ContentSite"
+                                Content="{TemplateBinding SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                IsHitTestVisible="False"
+                                Margin="10,0,28,0"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Left">
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#F2F4F7"/>
+                                        <Setter Property="FontSize" Value="13"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+
+                            <Popup x:Name="Popup"
+                                Placement="Bottom"
+                                IsOpen="{TemplateBinding IsDropDownOpen}"
+                                AllowsTransparency="True"
+                                Focusable="False"
+                                PopupAnimation="Slide">
+                                <Grid SnapsToDevicePixels="True"
+                                    MinWidth="{TemplateBinding ActualWidth}"
+                                    MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border Background="#202225"
+                                        BorderBrush="#3A3D41"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Margin="0,2,0,0">
+                                        <ScrollViewer SnapsToDevicePixels="True">
+                                            <StackPanel IsItemsHost="True"
+                                                KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#F2F4F7"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="bd"
+                            Background="{TemplateBinding Background}"
+                            Padding="{TemplateBinding Padding}"
+                            CornerRadius="6"
+                            Margin="4,2">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#2A2D31"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#2E5070"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#F2F4F7"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="Bd"
+                                Background="#1A1C1F"
+                                BorderBrush="#3A3F45"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="12,8"
+                                Margin="0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border x:Name="Indicator"
+                                        Width="18" Height="18"
+                                        CornerRadius="5"
+                                        Background="#2A2D31"
+                                        BorderBrush="#54606D"
+                                        BorderThickness="1"
+                                        Margin="0,0,10,0">
+                                    <Path x:Name="CheckMark"
+                                          Visibility="Collapsed"
+                                          Stroke="White"
+                                          StrokeThickness="2.2"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          Data="M 4 9 L 7.5 12.5 L 14 5.5"/>
+                                </Border>
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#223847"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#5B8AA3"/>
+                                <Setter TargetName="Indicator" Property="Background" Value="#5B8AA3"/>
+                                <Setter TargetName="Indicator" Property="BorderBrush" Value="#5B8AA3"/>
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.94"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Background" Value="#17181A"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Track x:Name="PART_Track" IsDirectionReversed="True">
+                                <Track.Thumb>
+                                    <Thumb Background="#4A5058">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        CornerRadius="5"
+                                                        Margin="2"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="CustomTitleBarRow" Height="0"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border x:Name="CustomTitleBar"
+        Grid.Row="0"
+        Panel.ZIndex="10000"
+        Background="#23272F"
+                BorderBrush="#323A46"
+                BorderThickness="0,0,0,1"
+                Visibility="Collapsed"
+                MouseDown="CustomTitleBar_MouseDown"
+MouseMove="CustomTitleBar_MouseMove"
+MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
+            <Grid>
+                <TextBlock Text="TABS Tracker"
+                           Foreground="#E8EDF3"
+                           FontSize="12"
+                           VerticalAlignment="Center"
+                           Margin="12,0,0,0"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="&#xE921;" Width="52" Height="40" Margin="0"
+            Background="Transparent"
+            FontFamily="Segoe MDL2 Assets"
+            FontSize="12"
+            Click="WindowMinimize_Click"/>
+
+                    <Button Content="&#xE922;" Width="52" Height="40" Margin="0"
+            Background="Transparent"
+            FontFamily="Segoe MDL2 Assets"
+            FontSize="12"
+            Click="WindowMaximize_Click"/>
+
+                    <Button Content="&#xE8BB;" Width="52" Height="40" Margin="0"
+            Background="Transparent"
+            FontFamily="Segoe MDL2 Assets"
+            FontSize="12"
+            Click="WindowClose_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ScrollViewer x:Name="AppScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  PanningMode="VerticalOnly" Focusable="False">
+            <Grid x:Name="RootScaleHost" Margin="18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2.1*"/>
+                <ColumnDefinition Width="1.2*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button x:Name="MainMenuButton"
+                            Content="← Main Menu"
+                            Height="34"
+                            Padding="14,0"
+                            FontSize="12"
+                            FontWeight="SemiBold"
+                            Background="#313843"
+                            Foreground="#7FC0E0"
+                            Click="MainMenuButton_Click"/>
+
+                    <Button x:Name="SettingsButton"
+                            Width="34" Height="34"
+                            Margin="12,0,0,6"
+                            Background="#313843"
+                            Padding="0"
+                            Click="SettingsButton_Click"
+                            ToolTip="Settings">
+                        <Path Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.95C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.95L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"
+                              Fill="White" Width="18" Height="18" Stretch="Uniform"/>
+                    </Button>
+
+                    <Button x:Name="GuideButton"
+                            Width="34" Height="34"
+                            Margin="12,0,0,6"
+                            Background="#313843"
+                            Padding="0"
+                            Click="GuideButton_Click"
+                            ToolTip="1v1 Guide">
+                        <Path Data="M21,5C19.89,4.65 18.67,4.5 17.5,4.5C15.55,4.5 13.45,4.9 12,6C10.55,4.9 8.45,4.5 6.5,4.5C4.55,4.5 2.45,4.9 1,6V19.5C2.45,18.4 4.55,18 6.5,18C8.45,18 10.55,18.4 12,19.5C13.45,18.4 15.55,18 17.5,18C18.67,18 19.89,18.15 21,18.5V5Z M11,17.1C9.95,16.35 8.2,16 6.5,16C6,16 5.49,16.03 5,16.1V6.6C5.49,6.53 6,6.5 6.5,6.5C8.2,6.5 9.95,7.15 11,7.9V17.1Z M13,17.1V7.9C14.05,7.15 15.8,6.5 17.5,6.5C18,6.5 18.51,6.53 19,6.6V16.1C18.51,16.03 18,16 17.5,16C15.8,16 14.05,16.35 13,17.1Z"
+                              Fill="White" Width="19" Height="19" Stretch="Uniform"/>
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button x:Name="DiscordButton"
+                            Width="34" Height="34"
+                            Margin="0,0,12,0"
+                            Background="#313843"
+                            Padding="0"
+                            Click="DiscordButton_Click"
+                            ToolTip="Discord">
+                        <Viewbox Width="19" Height="19">
+                            <Path Fill="#5865F2" Stretch="Uniform"
+                                  Data="M216.856,16.597A208.502,208.502 0,0 0,164.042,0C161.767,4.113 159.109,9.645 157.276,14.046C137.584,11.085 118.073,11.085 98.743,14.046C96.911,9.646 94.193,4.113 91.897,0A207.809,207.809 0,0 0,39.042,16.638C5.618,67.147 -3.443,116.4 1.087,164.956C23.256,181.511 44.74,191.568 65.862,198.149A161.094,161.094 0,0 0,79.735,175.3A136.413,136.413 0,0 1,57.889,164.668A108.636,108.636 0,0 0,63.245,160.431C105.367,180.133 151.135,180.133 192.755,160.431A131.66,131.66 0,0 0,198.11,164.668A136.07,136.07 0,0 1,176.224,175.321C180.23,183.341 184.862,190.991 190.097,198.169C211.239,191.589 232.743,181.532 254.912,164.956C260.228,108.668 245.832,59.866 216.856,16.597ZM85.474,135.095C72.829,135.095 62.459,123.29 62.459,108.915C62.459,94.54 72.608,82.715 85.474,82.715C98.341,82.715 108.71,94.519 108.489,108.915C108.509,123.29 98.341,135.095 85.474,135.095ZM170.525,135.095C157.88,135.095 147.511,123.29 147.511,108.915C147.511,94.54 157.659,82.715 170.525,82.715C183.392,82.715 193.761,94.519 193.54,108.915C193.54,123.29 183.392,135.095 170.525,135.095Z"/>
+                        </Viewbox>
+                    </Button>
+
+                    <TextBlock x:Name="AppTitleText"
+                               Text="TABS Arena v.1.1.0"
+                               FontSize="26"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+            <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource PanelBg}"
+                    CornerRadius="18" Padding="18" Margin="0,0,14,14">
+                <StackPanel>
+                    <TextBlock x:Name="OverviewTitle" Text="Match Overview" FontSize="24" FontWeight="Bold"/>
+                    <TextBlock x:Name="OverviewSub" Text="Use the controls below, then press Next Round to apply interest, upgrades, and spending."
+                               Foreground="{StaticResource TextMuted}" Margin="0,6,0,14" TextWrapping="Wrap"/>
+                    <UniformGrid Columns="5" Margin="0,0,0,8">
+                            <Border Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
+                                <StackPanel>
+                                    <TextBlock x:Name="LblCurrentRound" Text="CURRENT ROUND" Foreground="{StaticResource TextMuted}" FontSize="12"/>
+                                    <TextBlock x:Name="RoundText" Text="1" FontSize="30" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
+                                <StackPanel>
+                                    <TextBlock x:Name="LblNextTurnOrder" Text="NEXT TURN ORDER" Foreground="{StaticResource TextMuted}" FontSize="12"/>
+                                    <TextBlock x:Name="TurnOrderText" Text="Not available yet" FontSize="18" FontWeight="Bold" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
+                                <StackPanel>
+                                    <TextBlock x:Name="LblPendingResult" Text="PENDING RESULT" Foreground="{StaticResource TextMuted}" FontSize="12"/>
+                                    <TextBlock x:Name="PendingResultText" Text="Not set" FontSize="18" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,10,10">
+                                <StackPanel>
+                                    <TextBlock x:Name="LblFactionMode" Text="FACTION MODE" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
+                                    <CheckBox x:Name="FactionModeToggle"
+                      Content="Faction Mode: OFF"
+                      Click="FactionModeToggle_Click"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <TextBlock x:Name="LblFT20Mode" Text="FT20 MODE" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
+                                    <CheckBox x:Name="Ft20ModeToggle"
+                      Content="FT20 Mode: OFF"
+                      Click="Ft20ModeToggle_Click"/>
+                                </StackPanel>
+                            </Border>
+                    </UniformGrid>
+
+                    <Border x:Name="FirstTurnPromptBorder" Background="#1A1C1F" CornerRadius="16"
+                            Padding="14" Margin="0,6,0,10" Visibility="Visible">
+                        <StackPanel>
+                            <TextBlock x:Name="LblWhichPlayerFirst" Text="Which player is doing their turn first?" FontSize="16"
+                                       FontWeight="Bold" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="P1FirstTurnButton" Grid.Column="0" Content="Player 1 Goes First"
+        Margin="0,0,8,0" Background="#8B3F3F" Click="P1FirstTurnButton_Click"/>
+                                <Button x:Name="P2FirstTurnButton" Grid.Column="1" Content="Player 2 Goes First"
+        Margin="8,0,0,0" Background="#315F7D" Click="P2FirstTurnButton_Click"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="{StaticResource Panel2Bg}" CornerRadius="16" Padding="16" Margin="0,0,0,0">
+                        <StackPanel>
+                            <TextBlock x:Name="LblMatchSaves" Text="MATCH SAVES" Foreground="{StaticResource TextMuted}"
+                   FontSize="12" FontWeight="Bold" Margin="0,0,0,8"/>
+                            <ComboBox x:Name="SavesDropdown" Margin="0,0,0,10"
+                  SelectionChanged="SavesDropdown_SelectionChanged"/>
+                            <UniformGrid Columns="4">
+                                <Button x:Name="SaveButton" Content="💾 Save" Background="#476A52" Margin="0,0,5,0" Click="SaveButton_Click"/>
+                                <Button x:Name="LoadButton" Content="📂 Load" Background="#315F7D" Margin="5,0,5,0" Click="LoadButton_Click"/>
+                                <Button x:Name="DeleteButton" Content="🗑 Delete" Background="#8B3F3F" Margin="5,0,5,0" Click="DeleteButton_Click"/>
+                                <Button x:Name="NewGameButton" Content="🆕 New Game" Background="#6A5B33" Margin="5,0,0,0" Click="NewGameButton_Click"/>
+                            </UniformGrid>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid x:Name="MilestoneTrackerRow" Margin="0,12,0,0" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.25*"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1.25*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border x:Name="Ft20PoolTrackerBorder"
+            Grid.Column="0"
+            Background="#1A1C1F" CornerRadius="14"
+            Padding="14,12" Margin="0,0,10,0">
+                            <StackPanel>
+                                <TextBlock x:Name="Ft20PoolNextLabel"
+                       Text="MILESTONE PROGRESS"
+                       Foreground="#A7ACB2"
+                       FontSize="11" FontWeight="Bold"
+                       Margin="0,0,0,8"/>
+                                <TextBlock x:Name="Ft20PoolStatusText"
+                       Text=""
+                       Foreground="White"
+                       FontSize="15" FontWeight="Bold"
+                       TextWrapping="Wrap"
+                       LineHeight="24"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="MilestoneNextRewardBorder"
+            Grid.Column="1"
+            Background="#1A2030" CornerRadius="14"
+            Padding="14,12" Margin="0,0,10,0">
+                            <StackPanel>
+                                <TextBlock x:Name="LblNextReward" Text="NEXT REWARD"
+                       Foreground="#A7ACB2"
+                       FontSize="11" FontWeight="Bold"
+                       Margin="0,0,0,8"/>
+                                <TextBlock x:Name="MilestoneNextRewardText"
+                       Text="—"
+                       Foreground="#66DDEB"
+                       FontSize="15" FontWeight="Bold"
+                       TextWrapping="Wrap"
+                       LineHeight="24"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="MilestoneRewardPoolBorder"
+            Grid.Column="2"
+            Background="#1A1C1F" CornerRadius="14"
+            Padding="14,12">
+                            <StackPanel>
+                                <TextBlock x:Name="LblRewardsLeft" Text="POSSIBLE REWARDS LEFT"
+                       Foreground="#A7ACB2"
+                       FontSize="11" FontWeight="Bold"
+                       Margin="0,0,0,8"/>
+                                <TextBlock x:Name="Ft20PoolRewardLabel"
+                       Text="—"
+                       Foreground="White"
+                       FontSize="13" FontWeight="SemiBold"
+                       TextWrapping="Wrap"
+                       LineHeight="21"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource PanelBg}"
+                    CornerRadius="18" Padding="16" Margin="0,0,0,14">
+                <StackPanel>
+                    <Border Background="#1A1C1F" CornerRadius="16" Padding="14" MinHeight="405">
+                        <StackPanel>
+                            <TextBlock x:Name="LblActionLog" Text="Action Log" FontSize="18" FontWeight="Bold"/>
+                            <TextBlock x:Name="LblActionLogSub" Text="Shop clicks and round results appear here in order."
+                                       Foreground="{StaticResource TextMuted}" FontSize="12"
+                                       Margin="0,4,0,10" TextWrapping="Wrap"/>
+                            <StackPanel x:Name="ActionLogPanel" MinHeight="345" MaxHeight="345"/>
+                        </StackPanel>
+                    </Border>
+                    <TextBlock x:Name="LblRoundControl" Text="Round Control" FontSize="22" FontWeight="Bold" Margin="0,14,0,0"/>
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Button x:Name="P1WinsButton" Grid.Row="0" Grid.Column="0" Content="Player 1 Wins"
+            Height="44" Margin="0,0,8,8" Background="#8B3F3F" Click="Player1Wins_Click"/>
+                        <Button x:Name="TieButton" Grid.Row="0" Grid.Column="1" Content="Tie"
+            Height="44" Margin="4,0,4,8" Background="#5C6470" Click="TieRound_Click"/>
+                        <Button x:Name="P2WinsButton" Grid.Row="0" Grid.Column="2" Content="Player 2 Wins"
+            Height="44" Margin="8,0,0,8" Background="#315F7D" Click="Player2Wins_Click"/>
+                        <Button x:Name="NextRoundButton" Grid.Row="1" Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Content="Next Round" Height="56" Margin="0,0,8,0"
+            Background="#66DDEB" Click="NextRound_Click"/>
+                        <Button x:Name="UndoButton" Grid.Row="1" Grid.Column="2"
+            Content="Undo" Height="56" Margin="4,0,0,0"
+            Background="#8E6CF5" Click="UndoButton_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Popup x:Name="IncomeNoticePopup" Placement="Relative"
+                   PlacementTarget="{Binding ElementName=AppScroll}"
+                   StaysOpen="True" AllowsTransparency="True"
+                   PopupAnimation="Slide" IsOpen="False"
+                   HorizontalOffset="0" VerticalOffset="0">
+                <Border x:Name="IncomeNotice"
+                        Background="#2B2F33"
+                        CornerRadius="12"
+                        Padding="14,10"
+                                                MinWidth="620"
+                        MaxWidth="760"
+                        IsHitTestVisible="False">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="ℹ "
+                                   FontSize="14"
+                                   VerticalAlignment="Center"
+                                   Foreground="#66DDEB"/>
+                        <TextBlock x:Name="IncomeNoticeText"
+                                   Foreground="#F2F4F7"
+                                   FontSize="14"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   MaxWidth="690"/>
+                    </StackPanel>
+                </Border>
+            </Popup>
+
+            <Grid Grid.Row="2" Grid.ColumnSpan="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Player 1 Panel -->
+                <Border Grid.Column="0"
+        Background="{StaticResource PanelBg}"
+        BorderBrush="#8B3F3F"
+        BorderThickness="10"
+        CornerRadius="18"
+        Padding="16"
+        Margin="0,0,14,0">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button x:Name="P1PopOutButton"
+            Grid.Column="0"
+            Content="⤢"
+            Width="32"
+            Height="32"
+            FontSize="17"
+            FontWeight="Bold"
+            Padding="0"
+            Background="#313843"
+            Foreground="#7FC0E0"
+            Margin="0,0,10,0"
+            Click="P1PopOut_Click"
+            ToolTip="Pop out gold"/>
+
+                            <Border Grid.Column="1"
+        Background="Transparent"
+        CornerRadius="10"
+        Padding="0"
+        VerticalAlignment="Center">
+                                <Grid>
+                                    <TextBox x:Name="P1NameBox"
+                     Text="Player 1"
+                     Style="{StaticResource NameBoxStyle}"
+                     TextAlignment="Left"
+                     IsReadOnly="False"
+                     KeyDown="P1NameBox_KeyDown"/>
+
+                                    <TextBlock x:Name="P1NameDisplayText"
+                       Text="Player 1"
+                       Visibility="Collapsed"
+                       Foreground="White"
+                       FontSize="15"
+                       FontWeight="SemiBold"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+
+                            <Button x:Name="P1NameEditButton"
+            Grid.Column="2"
+            Content="Set"
+            Width="58"
+            Height="30"
+            Margin="10,0,0,0"
+            Click="P1NameEdit_Click"/>
+                        </Grid>
+
+                        <WrapPanel Margin="0,0,0,10">
+                            <Border x:Name="P1GoldBorder" Width="78" Height="64" Background="#2C3540" CornerRadius="12" Padding="8" Margin="0,0,6,6">
+                                <StackPanel>
+                                    <TextBlock x:Name="P1LblGold" Text="GOLD" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                    <TextBlock x:Name="P1GoldText" Text="950" FontSize="18" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                            <Border x:Name="P1PointsBorder" Width="78" Height="64" Background="#2C3540" CornerRadius="12" Padding="8" Margin="0,0,6,6">
+                                <StackPanel>
+                                    <TextBlock x:Name="P1LblPoints" Text="POINTS" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                    <TextBlock x:Name="P1PointsText" Text="0" FontSize="18" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Width="78" Height="64" Background="#2C3540" CornerRadius="12" Padding="8" Margin="0,0,6,6">
+                                <StackPanel>
+                                    <TextBlock x:Name="P1LblPermMove" Text="PERM MV" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                    <TextBlock x:Name="P1UpgradesText" Text="0" FontSize="18" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Width="78" Height="64" Background="#2C3540" CornerRadius="12" Padding="8" Margin="0,0,6,6">
+                                <StackPanel>
+                                    <TextBlock x:Name="P1LblIncome" Text="INCOME" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                    <TextBlock x:Name="P1IncomeText" Text="+0" FontSize="18" FontWeight="Bold" Foreground="#66DDEB"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Width="78" Height="64" Background="#2C3540" CornerRadius="12" Padding="8" Margin="0,0,6,6">
+                                <StackPanel>
+                                    <TextBlock x:Name="P1LblInterest" Text="INTEREST" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                    <TextBlock x:Name="P1InterestText" Text="+0" FontSize="18" FontWeight="Bold" Foreground="#66DDEB"/>
+                                </StackPanel>
+                            </Border>
+                        </WrapPanel>
+
+                        <TextBlock x:Name="P1LblUpgrades" Text="Permanent upgrades" FontWeight="Bold" Margin="0,8,0,8"/>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="250"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Button x:Name="P1BuyIncomeButton" Grid.Row="0" Grid.Column="0"
+                                    Width="250" Margin="0,0,0,10"
+                                    Content="Buy income +10 (100)" Background="#5B8AA3"
+                                    Click="P1BuyIncome_Click"/>
+                            <Border x:Name="P1IncomeDecayPctBorder" Grid.Row="0" Grid.Column="1"
+                                    Background="#1F4B3A" CornerRadius="8"
+                                    Padding="6,3" Margin="8,0,10,10" VerticalAlignment="Center"
+                                    Visibility="Collapsed">
+                                <TextBlock x:Name="P1IncomeDecayPctText"
+                                           Text="" FontSize="11" FontWeight="Bold" Foreground="#7FF0B0"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="2"
+                                    Margin="0" VerticalAlignment="Stretch" Background="Transparent">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled">
+                                    <WrapPanel x:Name="P1FactionIconsPanel" Orientation="Horizontal"/>
+                                </ScrollViewer>
+                            </Border>
+                            <Button x:Name="P1BuyPermMoveButton" Grid.Row="1" Grid.Column="0"
+                                    Width="250" Margin="0,0,0,10"
+                                    Content="Buy perm move +1 (200)" Background="#5B8AA3"
+                                    Click="P1BuyPermMove_Click"/>
+                            <Button x:Name="P1BuyFactionButton" Grid.Row="2" Grid.Column="0"
+                                    Width="250" Margin="0,0,0,10"
+                                    Content="Buy faction (50)" Background="#5B8AA3"
+                                    Click="P1BuyFactionButton_Click"/>
+                            <Button x:Name="P1BuyChosenFactionButton" Grid.Row="3" Grid.Column="0"
+                                    Width="250" Margin="0"
+                                    Content="Buy chosen faction (280)" Background="#4A6E87"
+                                    Visibility="Collapsed"
+                                    Click="P1BuyChosenFactionButton_Click"/>
+                        </Grid>
+
+                        <TextBlock x:Name="P1LblUtility" Text="Utility shop" FontWeight="Bold" Margin="0,8,0,8"/>
+                        <Button x:Name="P1SingleTroopMoveButton" Content="Single troop move (25)" Background="#2B2F33" Click="P1SingleTroopMove_Click"/>
+                        <Button x:Name="P1ReplayButton" Content="Replay (10)" Background="#2B2F33" Click="P1Replay_Click"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <TextBox x:Name="P1SpendBox"
+                                     Width="160"
+                                     Text="Custom troop spend"
+                                     Style="{StaticResource UtilityInputStyle}"/>
+                            <Button x:Name="P1SpendButton"
+                                    Content="Spend"
+                                    Width="60"
+                                    Margin="4,0,0,0"
+                                    Background="#4B5563"
+                                    Style="{StaticResource UtilityButtonStyle}"
+                                    Click="P1Spend_Click"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBox x:Name="P1UnitBox"
+                                     Width="130"
+                                     Text="Unit value"
+                                     Style="{StaticResource UtilityInputStyle}"/>
+                            <Button x:Name="P1SellUnitButton"
+                                    Content="Sell"
+                                    Width="50"
+                                    Margin="4,0,0,0"
+                                    Background="#5A7250"
+                                    Style="{StaticResource UtilityButtonStyle}"
+                                    Click="P1SellUnit_Click"/>
+                            <Border Background="#253A25"
+                                    CornerRadius="8"
+                                    Padding="5,2"
+                                    Margin="4,0,0,0"
+                                    VerticalAlignment="Center">
+                                <TextBlock x:Name="P1SellPctText"
+                                           Text="50%"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           Foreground="#80CC80"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock x:Name="P1LblCalculations" Text="Latest calculations" FontSize="18" FontWeight="Bold" Margin="0,10,0,6"/>
+                        <Border Background="#1A1C1F" CornerRadius="14" Padding="12" Margin="0,0,0,10">
+                            <TextBlock x:Name="P1CalcText" Text="No round yet." FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" Foreground="#F2F4F7"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Player 2 Panel -->
+                <Border Grid.Column="1"
+        Background="{StaticResource PanelBg}"
+        BorderBrush="#315F7D"
+        BorderThickness="10"
+        CornerRadius="18"
+        Padding="16">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button x:Name="P2PopOutButton"
+            Grid.Column="0"
+            Content="⤢"
+            Width="32"
+            Height="32"
+            FontSize="17"
+            FontWeight="Bold"
+            Padding="0"
+            Background="#313843"
+            Foreground="#7FC0E0"
+            Margin="0,0,10,0"
+            Click="P2PopOut_Click"
+            ToolTip="Pop out gold"/>
+
+                            <Border Grid.Column="1"
+        Background="Transparent"
+        CornerRadius="10"
+        Padding="0"
+        VerticalAlignment="Center">
+                                <Grid>
+                                    <TextBox x:Name="P2NameBox"
+                     Text="Player 2"
+                     Style="{StaticResource NameBoxStyle}"
+                     TextAlignment="Left"
+                     IsReadOnly="False"
+                     KeyDown="P2NameBox_KeyDown"/>
+
+                                    <TextBlock x:Name="P2NameDisplayText"
+                       Text="Player 2"
+                       Visibility="Collapsed"
+                       Foreground="White"
+                       FontSize="15"
+                       FontWeight="SemiBold"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+
+                            <Button x:Name="P2NameEditButton"
+            Grid.Column="2"
+            Content="Set"
+            Width="58"
+            Height="30"
+            Margin="10,0,0,0"
+            Click="P2NameEdit_Click"/>
+                        </Grid>
+
+                        <WrapPanel Margin="0,0,0,10">
+                            <Border x:Name="P2GoldBorder" Width="78" Height="64" Background="#2C3540" CornerRadius="12" Padding="8" Margin="0,0,6,6">
+                                <StackPanel>
+                                    <TextBlock x:Name="P2LblGold" Text="GOLD" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                    <TextBlock x:Name="P2GoldText" Text="950" FontSize="18" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                            <Border x:Name="P2PointsBorder" Width="78" Height="64" Background="#2C3540" CornerRadius="12" Padding="8" Margin="0,0,6,6">
+                                <StackPanel>
+                                    <TextBlock x:Name="P2LblPoints" Text="POINTS" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                    <TextBlock x:Name="P2PointsText" Text="0" FontSize="18" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Width="78" Height="64" Background="#2C3540" CornerRadius="12" Padding="8" Margin="0,0,6,6">
+                                <StackPanel>
+                                    <TextBlock x:Name="P2LblPermMove" Text="PERM MV" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                    <TextBlock x:Name="P2UpgradesText" Text="0" FontSize="18" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Width="78" Height="64" Background="#2C3540" CornerRadius="12" Padding="8" Margin="0,0,6,6">
+                                <StackPanel>
+                                    <TextBlock x:Name="P2LblIncome" Text="INCOME" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                    <TextBlock x:Name="P2IncomeText" Text="+0" FontSize="18" FontWeight="Bold" Foreground="#66DDEB"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Width="78" Height="64" Background="#2C3540" CornerRadius="12" Padding="8" Margin="0,0,6,6">
+                                <StackPanel>
+                                    <TextBlock x:Name="P2LblInterest" Text="INTEREST" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                    <TextBlock x:Name="P2InterestText" Text="+0" FontSize="18" FontWeight="Bold" Foreground="#66DDEB"/>
+                                </StackPanel>
+                            </Border>
+                        </WrapPanel>
+
+                        <TextBlock x:Name="P2LblUpgrades" Text="Permanent upgrades" FontWeight="Bold" Margin="0,8,0,8"/>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="250"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Button x:Name="P2BuyIncomeButton" Grid.Row="0" Grid.Column="0"
+                                    Width="250" Margin="0,0,0,10"
+                                    Content="Buy income +10 (100)" Background="#5B8AA3"
+                                    Click="P2BuyIncome_Click"/>
+                            <Border x:Name="P2IncomeDecayPctBorder" Grid.Row="0" Grid.Column="1"
+                                    Background="#1F4B3A" CornerRadius="8"
+                                    Padding="6,3" Margin="8,0,10,10" VerticalAlignment="Center"
+                                    Visibility="Collapsed">
+                                <TextBlock x:Name="P2IncomeDecayPctText"
+                                           Text="" FontSize="11" FontWeight="Bold" Foreground="#7FF0B0"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="2"
+                                    Margin="0" VerticalAlignment="Stretch" Background="Transparent">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled">
+                                    <WrapPanel x:Name="P2FactionIconsPanel" Orientation="Horizontal"/>
+                                </ScrollViewer>
+                            </Border>
+                            <Button x:Name="P2BuyPermMoveButton" Grid.Row="1" Grid.Column="0"
+                                    Width="250" Margin="0,0,0,10"
+                                    Content="Buy perm move +1 (200)" Background="#5B8AA3"
+                                    Click="P2BuyPermMove_Click"/>
+                            <Button x:Name="P2BuyFactionButton" Grid.Row="2" Grid.Column="0"
+                                    Width="250" Margin="0,0,0,10"
+                                    Content="Buy faction (50)" Background="#5B8AA3"
+                                    Click="P2BuyFactionButton_Click"/>
+                            <Button x:Name="P2BuyChosenFactionButton" Grid.Row="3" Grid.Column="0"
+                                    Width="250" Margin="0"
+                                    Content="Buy chosen faction (280)" Background="#4A6E87"
+                                    Visibility="Collapsed"
+                                    Click="P2BuyChosenFactionButton_Click"/>
+                        </Grid>
+
+                        <TextBlock x:Name="P2LblUtility" Text="Utility shop" FontWeight="Bold" Margin="0,8,0,8"/>
+                        <Button x:Name="P2SingleTroopMoveButton" Content="Single troop move (25)" Background="#2B2F33" Click="P2SingleTroopMove_Click"/>
+                        <Button x:Name="P2ReplayButton" Content="Replay (10)" Background="#2B2F33" Click="P2Replay_Click"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <TextBox x:Name="P2SpendBox"
+                                     Width="160"
+                                     Text="Custom troop spend"
+                                     Style="{StaticResource UtilityInputStyle}"/>
+                            <Button x:Name="P2SpendButton"
+                                    Content="Spend"
+                                    Width="60"
+                                    Margin="4,0,0,0"
+                                    Background="#4B5563"
+                                    Style="{StaticResource UtilityButtonStyle}"
+                                    Click="P2Spend_Click"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBox x:Name="P2UnitBox"
+                                     Width="130"
+                                     Text="Unit value"
+                                     Style="{StaticResource UtilityInputStyle}"/>
+                            <Button x:Name="P2SellUnitButton"
+                                    Content="Sell"
+                                    Width="50"
+                                    Margin="4,0,0,0"
+                                    Background="#5A7250"
+                                    Style="{StaticResource UtilityButtonStyle}"
+                                    Click="P2SellUnit_Click"/>
+                            <Border Background="#253A25"
+                                    CornerRadius="8"
+                                    Padding="5,2"
+                                    Margin="4,0,0,0"
+                                    VerticalAlignment="Center">
+                                <TextBlock x:Name="P2SellPctText"
+                                           Text="50%"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           Foreground="#80CC80"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock x:Name="P2LblCalculations" Text="Latest calculations" FontSize="18" FontWeight="Bold" Margin="0,10,0,6"/>
+                        <Border Background="#1A1C1F" CornerRadius="14" Padding="12" Margin="0,0,0,10">
+                            <TextBlock x:Name="P2CalcText" Text="No round yet." FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" Foreground="#F2F4F7"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid x:Name="SettingsOverlay"
+                  Visibility="Collapsed"
+                  Grid.RowSpan="3"
+                  Grid.ColumnSpan="2"
+                  Background="#44000000"
+                  Panel.ZIndex="999">
+                <Border Width="720" Height="520"
+                        Background="#16181B"
+                        CornerRadius="18"
+                        BorderBrush="#323A46"
+                        BorderThickness="1.5"
+                        VerticalAlignment="Top"
+                        Margin="0,20,0,0"
+                        HorizontalAlignment="Center">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0"
+                                Background="#23272F"
+                                CornerRadius="18,18,0,0"
+                                Padding="14,12,14,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0"
+                                        x:Name="SettingsBackButton"
+                                        Content="← Back"
+                                        Height="32"
+                                        Padding="14,0"
+                                        FontSize="12"
+                                        FontWeight="SemiBold"
+                                        Background="#313843"
+                                        Foreground="#7FC0E0"
+                                        BorderThickness="0"
+                                        Click="SettingsBackButton_Click"/>
+                                <TextBlock x:Name="SettingsTitleText"
+                                           Grid.Column="0"
+                                           Grid.ColumnSpan="2"
+                                           Text="Settings"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <ScrollViewer Grid.Row="1"
+                                      x:Name="SettingsScrollViewer"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      Padding="20"
+                                      PreviewMouseWheel="SettingsScrollViewer_PreviewMouseWheel">
+                            <StackPanel x:Name="SettingsContentPanel" Margin="0">
+                                <Border Background="#23272F" CornerRadius="10" Padding="16,0" Height="52" Margin="0,8,0,0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="180"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" x:Name="SettingsWindowModeLabel"
+                                                   Text="Window Mode"
+                                                   FontSize="13" FontWeight="SemiBold"
+                                                   Foreground="#E2E8F3"
+                                                   VerticalAlignment="Center"/>
+
+                                        <Button Grid.Column="1" x:Name="SettingsWindowModeLeft"
+                                                Content="&#x3C;" Width="28" Height="28"
+                                                FontSize="13" FontWeight="Bold"
+                                                Background="#313843" Foreground="#7FC0E0"
+                                                BorderThickness="0" Padding="0"
+                                                HorizontalContentAlignment="Center"
+                                                VerticalContentAlignment="Center"
+                                                Margin="0,0,8,0"
+                                                Click="SettingsWindowModeLeft_Click"/>
+
+                                        <StackPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock x:Name="SettingsWindowModeText"
+                                                       Text="Borderless Fullscreen"
+                                                       FontSize="13" FontWeight="SemiBold"
+                                                       Foreground="#6EB6DA"
+                                                       HorizontalAlignment="Center"
+                                                       TextAlignment="Center"
+                                                       Margin="0,0,0,5"/>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <Border x:Name="SettingsDot1" Width="28" Height="3" CornerRadius="2" Background="#3A4A58" Margin="3,0"/>
+                                                <Border x:Name="SettingsDot2" Width="28" Height="3" CornerRadius="2" Background="#6EB6DA" Margin="3,0"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <Button Grid.Column="3" x:Name="SettingsWindowModeRight"
+                                                Content="&#x3E;" Width="28" Height="28"
+                                                FontSize="13" FontWeight="Bold"
+                                                Background="#313843" Foreground="#7FC0E0"
+                                                BorderThickness="0" Padding="0"
+                                                HorizontalContentAlignment="Center"
+                                                VerticalContentAlignment="Center"
+                                                Margin="8,0,0,0"
+                                                Click="SettingsWindowModeRight_Click"/>
+                                    </Grid>
+                                </Border>
+
+                                <Border Background="#23272F" CornerRadius="10" Padding="16,0" Height="52" Margin="0,10,0,0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="180"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" x:Name="SettingsLanguageLabel"
+                                                   Text="Language"
+                                                   FontSize="13" FontWeight="SemiBold"
+                                                   Foreground="#E2E8F3"
+                                                   VerticalAlignment="Center"/>
+
+                                        <Button Grid.Column="1" x:Name="SettingsLanguageLeft"
+                                                Content="&#x3C;" Width="28" Height="28"
+                                                FontSize="13" FontWeight="Bold"
+                                                Background="#313843" Foreground="#7FC0E0"
+                                                BorderThickness="0" Padding="0"
+                                                HorizontalContentAlignment="Center"
+                                                VerticalContentAlignment="Center"
+                                                Margin="0,0,8,0"
+                                                Click="SettingsLanguageLeft_Click"/>
+
+                                        <StackPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock x:Name="SettingsLanguageText"
+                                                       Text="English"
+                                                       FontSize="13" FontWeight="SemiBold"
+                                                       Foreground="#6EB6DA"
+                                                       HorizontalAlignment="Center"
+                                                       TextAlignment="Center"
+                                                       Margin="0,0,0,5"/>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <Border x:Name="SettingsLangDot1" Width="28" Height="3" CornerRadius="2" Background="#6EB6DA" Margin="3,0"/>
+                                                <Border x:Name="SettingsLangDot2" Width="28" Height="3" CornerRadius="2" Background="#3A4A58" Margin="3,0"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <Button Grid.Column="3" x:Name="SettingsLanguageRight"
+                                                Content="&#x3E;" Width="28" Height="28"
+                                                FontSize="13" FontWeight="Bold"
+                                                Background="#313843" Foreground="#7FC0E0"
+                                                BorderThickness="0" Padding="0"
+                                                HorizontalContentAlignment="Center"
+                                                VerticalContentAlignment="Center"
+                                                Margin="8,0,0,0"
+                                                Click="SettingsLanguageRight_Click"/>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Grid x:Name="GuideOverlay"
+                  Visibility="Collapsed"
+                  Grid.RowSpan="3"
+                  Grid.ColumnSpan="2"
+                  Background="#44000000"
+                  Panel.ZIndex="1000">
+                <Border Width="720" Height="720"
+        Background="#16181B"
+                        CornerRadius="18"
+                        BorderBrush="#323A46"
+                        BorderThickness="1.5"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Margin="0,20,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Background="#23272F"
+        CornerRadius="18,18,0,0"
+        Padding="14,12,14,12">
+                            <Grid>
+                                <Button x:Name="GuideBackButton"
+        Content="← Back"
+        Height="32"
+        Padding="14,0"
+        FontSize="12"
+        FontWeight="SemiBold"
+        Background="#313843"
+        Foreground="#7FC0E0"
+        BorderThickness="0"
+        HorizontalAlignment="Left"
+        Click="GuideBackButton_Click"/>
+                                <TextBlock x:Name="GuideTitleText"
+                                           Text="1v1 Guide"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <ScrollViewer Grid.Row="1" Padding="20">
+                            <StackPanel x:Name="GuideContentPanel"/>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+        </ScrollViewer>
+    </Grid>
+</Window>
