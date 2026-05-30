@@ -2,9 +2,15 @@
 
 ## How To Install
 
+<img width="322" height="149" alt="image" src="https://github.com/user-attachments/assets/73d1e8fb-492b-47a9-8547-96a4fd718a18" />
+
+
 1. Go to releases on the right hand side click on the latest release. 
 
 2. Scroll down and find the zip file with the correct version on it.
+
+<img width="1211" height="184" alt="image" src="https://github.com/user-attachments/assets/bf25e08f-277d-4068-b59f-5179b3f33c09" />
+
 
 3. Extract the zip file anywhere on your pc.
 
