@@ -43,6 +43,9 @@ Important: Read the latest release notes before updating. Some larger updates ma
 
 ## How To Play
 
+<img width="1021" height="525" alt="image" src="https://github.com/user-attachments/assets/048bbedb-bc72-4a79-8515-0d3c70c5abe8" />
+
+
 Welcome to TABS Arena.
 
 When you open the app, you will be prompted to choose a game mode. Select either `1v1` or `2v2`.
@@ -139,6 +142,9 @@ No player is allowed to control any units during the match.
 
 ## Player UI Buttons
 
+<img width="930" height="864" alt="image" src="https://github.com/user-attachments/assets/5c7bc7d7-9517-46f1-a58e-dbcb9990239b" />
+
+
 -Buy Income
 
 Spend `100 gold` to buy an income upgrade.
@@ -202,6 +208,9 @@ Replay can only be bought once per round.
 ---
 
 ## UI Mechanics
+
+<img width="1907" height="885" alt="image" src="https://github.com/user-attachments/assets/ca5ea901-96f3-4dd9-b107-c5e81e228cb6" />
+
 
 -Interest
 
