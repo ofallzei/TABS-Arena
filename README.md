@@ -2,7 +2,8 @@
 
 ## How To Install
 
-<img width="322" height="149" alt="image" src="https://github.com/user-attachments/assets/73d1e8fb-492b-47a9-8547-96a4fd718a18" />
+<img width="219" height="98" alt="image" src="https://github.com/user-attachments/assets/9ecd4bc1-c8c9-49cc-8b12-fa8f4ba439e8" />
+
 
 
 1. Go to releases on the right hand side click on the latest release. 
