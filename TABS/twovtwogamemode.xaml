@@ -419,7 +419,7 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                     </Button>
 
                     <TextBlock x:Name="AppTitleText"
-                               Text="TABS Arena v.1.1.0"
+                               Text="TABS Arena v.1.1.1"
                                FontSize="26"
                                FontWeight="SemiBold"
                                Foreground="White"

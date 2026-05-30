@@ -827,10 +827,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             P3InterestText.Text = $"+{CalcInterest(_p3Gold)}";
             P4InterestText.Text = $"+{CalcInterest(_p4Gold)}";
 
-            _p1GoldWindow?.UpdateGold(_p1Gold, P1NameBox.Text, _p1GoldState);
-            _p2GoldWindow?.UpdateGold(_p2Gold, P2NameBox.Text, _p2GoldState);
-            _p3GoldWindow?.UpdateGold(_p3Gold, P3NameBox.Text, _p3GoldState);
-            _p4GoldWindow?.UpdateGold(_p4Gold, P4NameBox.Text, _p4GoldState);
+            _p1GoldWindow?.UpdateGold(_p1Gold, P1NameBox.Text, _p1GoldState, _p1Factions, FactionIconMap);
+            _p2GoldWindow?.UpdateGold(_p2Gold, P2NameBox.Text, _p2GoldState, _p2Factions, FactionIconMap);
+            _p3GoldWindow?.UpdateGold(_p3Gold, P3NameBox.Text, _p3GoldState, _p3Factions, FactionIconMap);
+            _p4GoldWindow?.UpdateGold(_p4Gold, P4NameBox.Text, _p4GoldState, _p4Factions, FactionIconMap);
         }
 
         /// <summary>Modify a player's gold, update tile color and displays.</summary>
@@ -1350,13 +1350,13 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 {
                     // FT20: grace = 3 rounds, then 4% off per round after
                     // missed 1,2,3 = 0%, missed 4 = 4%, missed 5 = 8%, etc.
-                    decay = missed >= 4 ? Math.Min(100, (missed - 3) * 4) : 0;
+                    decay = missed >= 4 ? Math.Min(100, (missed - 2) * 6) : 0;
                 }
                 else
                 {
                     // Normal / Faction: grace = 4 rounds, then 2% off per round after
                     // missed 1,2,3,4 = 0%, missed 5 = 2%, missed 6 = 4%, etc.
-                    decay = missed >= 5 ? Math.Min(100, (missed - 4) * 2) : 0;
+                    decay = missed >= 5 ? Math.Min(100, (missed - 3) * 3) : 0;
                 }
             }
 
@@ -2238,6 +2238,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         private void FactionModeToggleButton_Click(object sender, RoutedEventArgs e)
         {
             if (_round > 1 || _factionModeLocked) return;
+            CloseAllGoldWindows();
             _factionModeEnabled = !_factionModeEnabled;
             _firstTurnChosen = false;
             TurnOrderText.Text = Loc.Get("NotAvailableYet");
@@ -2284,6 +2285,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         private void FT20ModeToggleButton_Click(object sender, RoutedEventArgs e)
         {
             if (_round > 1 || _ft20ModeLocked) return;
+            CloseAllGoldWindows();
             _ft20ModeEnabled = !_ft20ModeEnabled;
             _firstTurnChosen = false;
             TurnOrderText.Text = Loc.Get("NotAvailableYet");
@@ -2343,10 +2345,16 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             var existing = GetGoldWindow(player);
             if (existing != null) { existing.Activate(); return; }
 
-            var window = new GoldPopOutWindow(GetPlayerName(player), GetGold(player), GetGoldState(player), () =>
-            {
-                SetGoldWindow(player, null);
-            });
+            var window = new GoldPopOutWindow(
+    GetPlayerName(player),
+    GetGold(player),
+    GetGoldState(player),
+    GetFactions(player),
+    FactionIconMap,
+    () =>
+    {
+        SetGoldWindow(player, null);
+    });
 
             SetGoldWindow(player, window);
             window.Show();
@@ -2435,6 +2443,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 Loc.Get("MainMenuConfirmMsg"))
             { Owner = Window.GetWindow(this) };
             if (confirm.ShowDialog() != true) return;
+
+            CloseAllGoldWindows();
 
             if (NavigationService?.CanGoBack == true)
             { NavigationService.GoBack(); return; }
@@ -3324,7 +3334,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             {
                 // Top bar
                 ["MainMenu"] = "← Menú Principal",
-                ["AppTitle"] = "TABS Arena v.1.1.0",
+                ["AppTitle"] = "TABS Arena v.1.1.1",
 
                 // Overview panel
                 ["OverviewTitle"] = "Resumen 2v2",
@@ -3561,7 +3571,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             private static readonly Dictionary<string, string> _defaults = new Dictionary<string, string>
             {
                 ["MainMenu"] = "← Main Menu",
-                ["AppTitle"] = "TABS Arena v.1.1.0",
+                ["AppTitle"] = "TABS Arena v.1.1.1",
                 ["OverviewTitle"] = "2v2 Match Overview",
                 ["OverviewSub"] = "Manage all four players then press Next Round to apply interest, milestones, rewards.",
                 ["CurrentRound"] = "CURRENT ROUND",
@@ -4289,11 +4299,24 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         private Border _outerBorder;
         private TextBlock _goldText;
         private TextBlock _nameText;
+        private WrapPanel _factionPanel;
+        private ColumnDefinition _factionColumn;
+        private Button _lockButton;
+        private bool _isLocked = false;
+
+        private const double BasePopOutWidth = 244;
+        private const double PopOutLeftWidth = 108;
+        private const double FactionIconSlot = 33;
 
         public GoldPopOutWindow(string playerName, int gold, int state, Action onClosed)
+            : this(playerName, gold, state, null, null, onClosed)
         {
-            Width = 192;
-            Height = 114;
+        }
+
+        public GoldPopOutWindow(string playerName, int gold, int state, List<string> factions, Dictionary<string, string> iconMap, Action onClosed)
+        {
+            Width = BasePopOutWidth;
+            Height = 100;
             WindowStyle = WindowStyle.None;
             AllowsTransparency = true;
             Topmost = true;
@@ -4313,7 +4336,6 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 
-            // Title bar
             var titleBar = new Border
             {
                 Background = new SolidColorBrush(Color.FromRgb(26, 29, 35)),
@@ -4321,54 +4343,90 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 Padding = new Thickness(8, 5, 6, 5),
                 Cursor = Cursors.SizeAll
             };
+
             titleBar.MouseDown += (s, e) =>
-            { if (e.ChangedButton == MouseButton.Left) DragMove(); };
+            {
+                if (!_isLocked && e.ChangedButton == MouseButton.Left)
+                    DragMove();
+            };
 
             var titleGrid = new Grid();
             titleGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            titleGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             titleGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             _nameText = new TextBlock
             {
                 Text = playerName,
-                Foreground = new SolidColorBrush(Color.FromRgb(154, 163, 175)),
+                Foreground = Brushes.White,
                 FontSize = 12,
                 FontWeight = FontWeights.Bold,
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                TextTrimming = TextTrimming.CharacterEllipsis
             };
             Grid.SetColumn(_nameText, 0);
+
+            _lockButton = new Button
+            {
+                Content = "🔓",
+                Width = 20,
+                Height = 18,
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                Foreground = Brushes.White,
+                FontSize = 11,
+                Cursor = Cursors.Hand,
+                Padding = new Thickness(0),
+                VerticalAlignment = VerticalAlignment.Center,
+                ToolTip = "Lock pop-out position"
+            };
+            _lockButton.Click += (s, e) =>
+            {
+                _isLocked = !_isLocked;
+                _lockButton.Content = _isLocked ? "🔒" : "🔓";
+                titleBar.Cursor = _isLocked ? Cursors.Arrow : Cursors.SizeAll;
+            };
+            Grid.SetColumn(_lockButton, 1);
 
             var closeBtn = new Button
             {
                 Content = "✕",
-                Width = 16,
-                Height = 16,
+                Width = 18,
+                Height = 18,
                 Background = Brushes.Transparent,
                 BorderThickness = new Thickness(0),
-                Foreground = new SolidColorBrush(Color.FromRgb(154, 163, 175)),
+                Foreground = Brushes.White,
                 FontSize = 9,
                 Cursor = Cursors.Hand,
                 Padding = new Thickness(0),
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(4, 0, 0, 0)
             };
             closeBtn.Click += (s, e) => Close();
-            Grid.SetColumn(closeBtn, 1);
+            Grid.SetColumn(closeBtn, 2);
 
             titleGrid.Children.Add(_nameText);
+            titleGrid.Children.Add(_lockButton);
             titleGrid.Children.Add(closeBtn);
             titleBar.Child = titleGrid;
             Grid.SetRow(titleBar, 0);
             root.Children.Add(titleBar);
 
-            // Gold content
-            var content = new Border { Padding = new Thickness(10, 6, 10, 8) };
-            var stack = new StackPanel();
-            stack.Children.Add(new TextBlock
+            var content = new Grid { Margin = new Thickness(10, 4, 8, 2) };
+            content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(78) });
+            content.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            _factionColumn = new ColumnDefinition { Width = new GridLength(112) };
+            content.ColumnDefinitions.Add(_factionColumn);
+
+            var goldStack = new StackPanel();
+            goldStack.Children.Add(new TextBlock
             {
                 Text = "GOLD",
-                Foreground = new SolidColorBrush(Color.FromRgb(154, 163, 175)),
-                FontSize = 10
+                Foreground = new SolidColorBrush(Color.FromRgb(242, 244, 247)),
+                FontSize = 10,
+                FontWeight = FontWeights.SemiBold
             });
+
             _goldText = new TextBlock
             {
                 Text = gold.ToString(),
@@ -4376,22 +4434,156 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 FontSize = 27,
                 FontWeight = FontWeights.Bold
             };
-            stack.Children.Add(_goldText);
-            content.Child = stack;
+
+            goldStack.Children.Add(_goldText);
+            Grid.SetColumn(goldStack, 0);
+            content.Children.Add(goldStack);
+
+            var divider = new Border
+            {
+                Width = 1,
+                Background = new SolidColorBrush(Color.FromRgb(210, 216, 224)),
+                Opacity = 0.45,
+                Margin = new Thickness(4, 0, 7, 0)
+            };
+            Grid.SetColumn(divider, 1);
+            content.Children.Add(divider);
+
+            _factionPanel = new WrapPanel
+            {
+                Width = 112,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top
+            };
+
+            Grid.SetColumn(_factionPanel, 2);
+            content.Children.Add(_factionPanel);
+
             Grid.SetRow(content, 1);
             root.Children.Add(content);
 
             _outerBorder.Child = root;
             Content = _outerBorder;
 
+            RefreshFactions(factions, iconMap);
             Closed += (s, e) => onClosed?.Invoke();
         }
 
-        public void UpdateGold(int gold, string playerName, int state)
+        public void UpdateGold(int gold, string playerName, int state, List<string> factions = null, Dictionary<string, string> iconMap = null)
         {
             _goldText.Text = gold.ToString();
             _nameText.Text = playerName;
             _outerBorder.Background = GetStateBrush(state);
+            RefreshFactions(factions, iconMap);
+        }
+
+        private void RefreshFactions(List<string> factions, Dictionary<string, string> iconMap)
+        {
+            if (_factionPanel == null) return;
+
+            _factionPanel.Children.Clear();
+
+            int count = factions?.Count ?? 0;
+
+            if (count == 0 || iconMap == null)
+            {
+                if (_factionColumn != null)
+                    _factionColumn.Width = new GridLength(112);
+
+                _factionPanel.Width = 106;
+                Width = BasePopOutWidth;
+                return;
+            }
+
+            int columns = Math.Max(3, (int)Math.Ceiling(count / 2.0));
+            double factionWidth = Math.Max(106, columns * FactionIconSlot);
+
+            if (_factionColumn != null)
+                _factionColumn.Width = new GridLength(factionWidth + 6);
+
+            _factionPanel.Width = factionWidth;
+            Width = Math.Max(BasePopOutWidth, PopOutLeftWidth + factionWidth);
+
+            foreach (var faction in factions)
+                _factionPanel.Children.Add(BuildFactionIcon(faction, iconMap));
+        }
+
+        private FrameworkElement BuildFactionIcon(string faction, Dictionary<string, string> iconMap)
+        {
+            var border = new Border
+            {
+                Width = 28,
+                Height = 28,
+                CornerRadius = new CornerRadius(6),
+                Margin = new Thickness(0, 0, 5, 2),
+                Background = new SolidColorBrush(Color.FromRgb(26, 28, 31)),
+                ClipToBounds = true
+            };
+
+            try
+            {
+                string file = iconMap.ContainsKey(faction) ? iconMap[faction] : null;
+                if (!string.IsNullOrWhiteSpace(file))
+                {
+                    var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri($"pack://application:,,,/Assets/{file}", UriKind.Absolute);
+                    bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+
+                    ImageSource source = bitmap;
+                    double scale = 1.25;
+
+                    if (string.Equals(faction, "New Units", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int cropX = (int)(bitmap.PixelWidth * 0.18);
+                        int cropWidth = bitmap.PixelWidth - cropX;
+                        int cropHeight = Math.Max(1, (int)(bitmap.PixelHeight * 0.60));
+
+                        source = new System.Windows.Media.Imaging.CroppedBitmap(
+                            bitmap,
+                            new Int32Rect(cropX, 0, cropWidth, cropHeight));
+
+                        scale = 0.77;
+                    }
+                    else if (string.Equals(faction, "New Units 2", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int cropX = (int)(bitmap.PixelWidth * 0.32);
+                        int cropWidth = bitmap.PixelWidth - cropX;
+                        int cropHeight = Math.Max(1, (int)(bitmap.PixelHeight * 0.60));
+
+                        source = new System.Windows.Media.Imaging.CroppedBitmap(
+                            bitmap,
+                            new Int32Rect(cropX, 0, cropWidth, cropHeight));
+
+                        scale = 0.80;
+                    }
+
+                    border.Child = new Image
+                    {
+                        Stretch = Stretch.UniformToFill,
+                        Source = source,
+                        RenderTransform = new ScaleTransform(scale, scale),
+                        RenderTransformOrigin = new Point(0.5, 0.5)
+                    };
+                }
+            }
+            catch { }
+
+            if (border.Child == null)
+            {
+                border.Child = new TextBlock
+                {
+                    Text = string.IsNullOrWhiteSpace(faction) ? "?" : faction.Substring(0, 1),
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontWeight = FontWeights.Bold,
+                    FontSize = 12
+                };
+            }
+
+            return border;
         }
 
         private static SolidColorBrush GetStateBrush(int state)

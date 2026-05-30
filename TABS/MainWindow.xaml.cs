@@ -288,7 +288,7 @@ namespace TABS
 
         private static readonly Dictionary<string, string> En = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v.1.1.0",
+            ["AppTitle"] = "TABS Arena v.1.1.1",
             ["Settings"] = "Settings",
             ["Guide"] = "1v1 Guide",
             ["Back"] = "← Back",
@@ -439,7 +439,7 @@ namespace TABS
 
         private static readonly Dictionary<string, string> Es = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v.1.1.0",
+            ["AppTitle"] = "TABS Arena v.1.1.1",
             ["Settings"] = "Ajustes",
             ["Guide"] = "Guía 1v1",
             ["Back"] = "← Volver",
@@ -1793,8 +1793,8 @@ T("NewGameConfirmMsg"))) return;
             Keyboard.ClearFocus();
             namesLocked = AreAnyNamesLocked();
 
-            p1GoldWindow?.UpdateGold(p1Gold, p1Name, GetGoldVisualState(1));
-            p2GoldWindow?.UpdateGold(p2Gold, p2Name, GetGoldVisualState(2));
+            p1GoldWindow?.UpdateGold(p1Gold, p1Name, GetGoldVisualState(1), p1Factions, FactionIconMap);
+            p2GoldWindow?.UpdateGold(p2Gold, p2Name, GetGoldVisualState(2), p2Factions, FactionIconMap);
         }
 
         private int GetIncomeDecayPercent(int missedRounds)
@@ -1802,10 +1802,10 @@ T("NewGameConfirmMsg"))) return;
             if (ft20ModeEnabled)
             {
                 if (missedRounds < 3) return 0;
-                return Math.Min(100, (missedRounds - 2) * 4);
+                return Math.Min(100, (missedRounds - 2) * 6);
             }
             if (missedRounds < 4) return 0;
-            return Math.Min(100, (missedRounds - 3) * 2);
+            return Math.Min(100, (missedRounds - 3) * 3);
         }
 
         private decimal GetBaseIncomeCost()
@@ -2151,8 +2151,8 @@ T("NewGameConfirmMsg"))) return;
 : pendingWinner == 2 ? p2Name + " " + T("WinsSuffix")
 : T("Tie");
             P1GoldText.Text = p1Gold.ToString(); P2GoldText.Text = p2Gold.ToString();
-            p1GoldWindow?.UpdateGold(p1Gold, p1Name, GetGoldVisualState(1));
-            p2GoldWindow?.UpdateGold(p2Gold, p2Name, GetGoldVisualState(2));
+            p1GoldWindow?.UpdateGold(p1Gold, p1Name, GetGoldVisualState(1), p1Factions, FactionIconMap);
+            p2GoldWindow?.UpdateGold(p2Gold, p2Name, GetGoldVisualState(2), p2Factions, FactionIconMap);
             if (P1InterestText != null) P1InterestText.Text = "+" + CalcInterest(p1Gold);
             if (P2InterestText != null) P2InterestText.Text = "+" + CalcInterest(p2Gold);
             P1PointsText.Text = p1Points.ToString(); P2PointsText.Text = p2Points.ToString();
@@ -2304,6 +2304,7 @@ T("NewGameConfirmMsg"))) return;
         private void FactionModeToggle_Click(object sender, RoutedEventArgs e)
         {
             if (factionModeLocked) { ShowNotice("Faction mode is locked after round 1."); FactionModeToggle.IsChecked = factionModeEnabled; return; }
+            CloseAllGoldWindows();
             PushUndoState();
             factionModeEnabled = FactionModeToggle.IsChecked == true;
             if (factionModeEnabled)
@@ -2331,6 +2332,7 @@ T("NewGameConfirmMsg"))) return;
         private void Ft20ModeToggle_Click(object sender, RoutedEventArgs e)
         {
             if (ft20ModeLocked) { ShowNotice("FT20 mode is locked after round 1."); Ft20ModeToggle.IsChecked = ft20ModeEnabled; return; }
+            CloseAllGoldWindows();
             PushUndoState();
             ft20ModeEnabled = Ft20ModeToggle.IsChecked == true;
             if (ft20ModeEnabled)
@@ -2797,11 +2799,13 @@ T("NewGameConfirmMsg"))) return;
             }
 
             var window = new GoldPopOutWindow(
-                player == 1 ? p1Name : p2Name,
-                player == 1 ? p1Gold : p2Gold,
-                GetGoldVisualState(player),
-                () =>
-                {
+    player == 1 ? p1Name : p2Name,
+    player == 1 ? p1Gold : p2Gold,
+    GetGoldVisualState(player),
+    player == 1 ? p1Factions : p2Factions,
+    FactionIconMap,
+    () =>
+    {
                     if (player == 1)
                     {
                         p1GoldWindow = null;
@@ -2831,6 +2835,15 @@ T("NewGameConfirmMsg"))) return;
             if (ReferenceEquals(brush, redBrush)) return -1;
             return 0;
         }
+
+        private void CloseAllGoldWindows()
+        {
+            p1GoldWindow?.Close();
+            p1GoldWindow = null;
+
+            p2GoldWindow?.Close();
+            p2GoldWindow = null;
+        }
         private void MainMenuButton_Click(object sender, RoutedEventArgs e)
         {
             if (!ShowConfirm(T("MainMenuConfirmTitle"), T("MainMenuConfirmMsg"))) return;
@@ -2850,6 +2863,7 @@ T("NewGameConfirmMsg"))) return;
                 Height = borderless ? screen.Bounds.Height : Height
             };
 
+            CloseAllGoldWindows();
             menu.Show();
             Close();
         }
