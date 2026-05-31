@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 
 namespace TABS
@@ -19,6 +20,8 @@ namespace TABS
 
         public static SavedWindowMode WindowMode { get; set; } = SavedWindowMode.BorderlessFullscreen;
         public static TwoVTwoGameMode.Loc.Language Language { get; set; } = TwoVTwoGameMode.Loc.Language.English;
+        public static bool SoundsEnabled { get; set; } = true;
+        public static double SoundVolume { get; set; } = 1.0;
 
         public static void Load()
         {
@@ -40,6 +43,14 @@ namespace TABS
                     if (parts[0] == "Language" &&
                         Enum.TryParse(parts[1], out TwoVTwoGameMode.Loc.Language lang))
                         Language = lang;
+
+                    if (parts[0] == "SoundsEnabled" &&
+                        bool.TryParse(parts[1], out bool soundsEnabled))
+                        SoundsEnabled = soundsEnabled;
+
+                    if (parts[0] == "SoundVolume" &&
+                        double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out double soundVolume))
+                        SoundVolume = Clamp(soundVolume, 0.0, 1.0);
                 }
             }
             catch { }
@@ -53,10 +64,23 @@ namespace TABS
                 File.WriteAllLines(FilePath, new[]
                 {
                     "WindowMode=" + WindowMode,
-                    "Language=" + Language
+                    "Language=" + Language,
+                    "SoundsEnabled=" + SoundsEnabled,
+                    "SoundVolume=" + SoundVolume.ToString(CultureInfo.InvariantCulture)
                 });
             }
             catch { }
+        }
+
+        private static double Clamp(double value, double min, double max)
+        {
+            if (value < min)
+                return min;
+
+            if (value > max)
+                return max;
+
+            return value;
         }
     }
 }

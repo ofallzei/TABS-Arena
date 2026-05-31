@@ -4,6 +4,142 @@
              xmlns:local="clr-namespace:TABS"
              StartupUri="StartScreen.xaml">
     <Application.Resources>
-         
+        <Style x:Key="SoundToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="OuterBd"
+                                Background="#10141A"
+                                BorderBrush="#3F5166"
+                                BorderThickness="1.5"
+                                CornerRadius="10"
+                                Padding="12,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border x:Name="CheckBox"
+                                        Width="20"
+                                        Height="20"
+                                        CornerRadius="6"
+                                        Background="#242B34"
+                                        BorderBrush="#5A6C7E"
+                                        BorderThickness="1.5"
+                                        Margin="0,0,10,0">
+                                    <TextBlock x:Name="CheckMark"
+                                               Text="✓"
+                                               FontSize="12"
+                                               FontWeight="Bold"
+                                               Foreground="Transparent"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                                <ContentPresenter VerticalAlignment="Center"
+                                                  HorizontalAlignment="Left"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="OuterBd" Property="Opacity" Value="0.90"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="OuterBd" Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="OuterBd" Property="Background" Value="#1F3E52"/>
+                                <Setter TargetName="OuterBd" Property="BorderBrush" Value="#6EB6DA"/>
+                                <Setter TargetName="CheckBox" Property="Background" Value="#5C88A5"/>
+                                <Setter TargetName="CheckBox" Property="BorderBrush" Value="#7EBEDF"/>
+                                <Setter TargetName="CheckMark" Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SoundSliderRepeatButtonStyle" TargetType="RepeatButton">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border Height="4"
+                                CornerRadius="2"
+                                Background="{TemplateBinding Background}"
+                                VerticalAlignment="Center"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SoundSliderThumbStyle" TargetType="Thumb">
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border x:Name="ThumbCircle"
+                                Width="16"
+                                Height="16"
+                                CornerRadius="8"
+                                Background="#BFE6F7"
+                                BorderBrush="#F2FBFF"
+                                BorderThickness="1.5"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ThumbCircle" Property="Background" Value="#D8F4FF"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="True">
+                                <Setter TargetName="ThumbCircle" Property="Background" Value="#6EB6DA"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ThumbCircle" Property="Background" Value="#56616D"/>
+                                <Setter TargetName="ThumbCircle" Property="BorderBrush" Value="#6C7784"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SoundSliderStyle" TargetType="Slider">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="IsMoveToPointEnabled" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Track x:Name="PART_Track"
+                                   Height="18"
+                                   VerticalAlignment="Center">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.DecreaseLarge}"
+                                                  Background="#6EB6DA"
+                                                  Style="{StaticResource SoundSliderRepeatButtonStyle}"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.IncreaseLarge}"
+                                                  Background="#3A4654"
+                                                  Style="{StaticResource SoundSliderRepeatButtonStyle}"/>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource SoundSliderThumbStyle}"/>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="PART_Track" Property="Opacity" Value="0.38"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Resources>
 </Application>

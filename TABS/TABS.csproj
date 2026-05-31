@@ -94,6 +94,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AppPrefs.cs" />
+    <Compile Include="AudioFeedback.cs" />
     <Compile Include="StartScreen.xaml.cs">
       <DependentUpon>StartScreen.xaml</DependentUpon>
     </Compile>
@@ -178,6 +179,7 @@
     <Resource Include="Assets\tribal.png" />
     <Resource Include="Assets\viking.png" />
     <Resource Include="Assets\wild west.png" />
+    <Resource Include="Assets\mixkit-modern-technology-select-3124.wav" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\new units2.png" />

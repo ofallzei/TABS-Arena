@@ -25,6 +25,7 @@ namespace TABS
 
             UpdateStaticText();
             UpdateLanguageSelectorUI();
+            UpdateSoundSettingsUI();
 
             Loaded += (s, e) =>
                 ApplyWindowMode(AppPrefs.WindowMode == SavedWindowMode.BorderlessFullscreen, false);
@@ -74,6 +75,8 @@ namespace TABS
             SettingsBackButton.Content = TwoVTwoGameMode.Loc.Get("Back");
             SettingsWindowModeLabel.Text = TwoVTwoGameMode.Loc.Get("WindowMode");
             SettingsLanguageLabel.Text = TwoVTwoGameMode.Loc.Get("Language");
+            SettingsSoundsLabel.Text = TwoVTwoGameMode.Loc.Get("Sounds");
+            SettingsSoundVolumeLabel.Text = TwoVTwoGameMode.Loc.Get("Volume");
             SettingsWindowModeText.Text = _isBorderlessFullscreen
                 ? TwoVTwoGameMode.Loc.Get("BorderlessFullscreen")
                 : TwoVTwoGameMode.Loc.Get("Windowed");
@@ -199,6 +202,7 @@ namespace TABS
             UpdateStaticText();
             UpdateLanguageSelectorUI();
             UpdateSettingsButtonStyles(_isBorderlessFullscreen);
+            UpdateSoundSettingsUI();
         }
 
         private void SettingsBackButton_Click(object sender, RoutedEventArgs e)
@@ -300,6 +304,7 @@ namespace TABS
 
             UpdateStaticText();
             UpdateLanguageSelectorUI();
+            UpdateSoundSettingsUI();
         }
 
         private void SaveLanguageForOneVOne()
@@ -329,6 +334,44 @@ namespace TABS
             SettingsLangDot2.Background = isSpanish
                 ? new SolidColorBrush(Color.FromRgb(110, 182, 218))
                 : new SolidColorBrush(Color.FromRgb(58, 74, 88));
+        }
+
+        private void SettingsSoundsToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            AppPrefs.SoundsEnabled = !AppPrefs.SoundsEnabled;
+            AppPrefs.Save();
+            UpdateSoundSettingsUI();
+        }
+
+        private void SettingsSoundVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (SettingsSoundVolumeText == null)
+                return;
+
+            AppPrefs.SoundVolume = Math.Max(0.0, Math.Min(1.0, e.NewValue / 100.0));
+            AppPrefs.Save();
+            AudioFeedback.RefreshVolume();
+            UpdateSoundSettingsUI();
+        }
+
+        private void UpdateSoundSettingsUI()
+        {
+            if (SettingsSoundsToggleButton == null || SettingsSoundVolumeSlider == null || SettingsSoundVolumeText == null)
+                return;
+
+            int volumePercent = (int)Math.Round(AppPrefs.SoundVolume * 100.0);
+            SettingsSoundsToggleButton.IsChecked = AppPrefs.SoundsEnabled;
+            SettingsSoundsToggleButton.Content = TwoVTwoGameMode.Loc.Get("Sounds") + ": " +
+                TwoVTwoGameMode.Loc.Get(AppPrefs.SoundsEnabled ? "On" : "Off");
+            SettingsSoundsToggleButton.Background = AppPrefs.SoundsEnabled
+                ? new SolidColorBrush(Color.FromRgb(49, 95, 125))
+                : new SolidColorBrush(Color.FromRgb(49, 56, 67));
+
+            SettingsSoundVolumeSlider.Value = volumePercent;
+            SettingsSoundVolumeSlider.IsEnabled = AppPrefs.SoundsEnabled;
+            SettingsSoundVolumeText.Text = volumePercent + "%";
+            SettingsSoundVolumeText.Opacity = AppPrefs.SoundsEnabled ? 1.0 : 0.45;
+            SettingsSoundVolumeLabel.Opacity = AppPrefs.SoundsEnabled ? 1.0 : 0.45;
         }
 
         private void OneVOne_Click(object sender, RoutedEventArgs e)

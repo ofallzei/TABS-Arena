@@ -216,6 +216,7 @@ namespace TABS
             RefreshSavesDropdown();
             RefreshAllUI();
             UpdateAllUI();
+            UpdateSoundSettingsUI();
 
             Loaded += (s, e) =>
                 ApplyWindowMode(AppPrefs.WindowMode == SavedWindowMode.BorderlessFullscreen, false);
@@ -349,6 +350,43 @@ namespace TABS
             SettingsLangDot2.Background = isSpanish
                 ? new SolidColorBrush(Color.FromRgb(110, 182, 218))
                 : new SolidColorBrush(Color.FromRgb(58, 74, 88));
+        }
+
+        private void SettingsSoundsToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            AppPrefs.SoundsEnabled = !AppPrefs.SoundsEnabled;
+            AppPrefs.Save();
+            UpdateSoundSettingsUI();
+        }
+
+        private void SettingsSoundVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (SettingsSoundVolumeText == null)
+                return;
+
+            AppPrefs.SoundVolume = Math.Max(0.0, Math.Min(1.0, e.NewValue / 100.0));
+            AppPrefs.Save();
+            AudioFeedback.RefreshVolume();
+            UpdateSoundSettingsUI();
+        }
+
+        private void UpdateSoundSettingsUI()
+        {
+            if (SettingsSoundsToggleButton == null || SettingsSoundVolumeSlider == null || SettingsSoundVolumeText == null)
+                return;
+
+            int volumePercent = (int)Math.Round(AppPrefs.SoundVolume * 100.0);
+            SettingsSoundsToggleButton.IsChecked = AppPrefs.SoundsEnabled;
+            SettingsSoundsToggleButton.Content = Loc.Get("Sounds") + ": " + Loc.Get(AppPrefs.SoundsEnabled ? "On" : "Off");
+            SettingsSoundsToggleButton.Background = AppPrefs.SoundsEnabled
+                ? new SolidColorBrush(Color.FromRgb(49, 95, 125))
+                : new SolidColorBrush(Color.FromRgb(49, 56, 67));
+
+            SettingsSoundVolumeSlider.Value = volumePercent;
+            SettingsSoundVolumeSlider.IsEnabled = AppPrefs.SoundsEnabled;
+            SettingsSoundVolumeText.Text = volumePercent + "%";
+            SettingsSoundVolumeText.Opacity = AppPrefs.SoundsEnabled ? 1.0 : 0.45;
+            SettingsSoundVolumeLabel.Opacity = AppPrefs.SoundsEnabled ? 1.0 : 0.45;
         }
 
         private void ResetNameEditButtonsForNewGame()
@@ -2467,6 +2505,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             SettingsOverlay.Visibility = Visibility.Visible;
             bool isFullscreen = _mainWindowIsFullscreen();
             UpdateSettingsButtonStyles(isFullscreen);
+            UpdateSoundSettingsUI();
         }
 
         private void SettingsBackButton_Click(object sender, RoutedEventArgs e)
@@ -2663,6 +2702,9 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             GuideButton.ToolTip = Loc.Get("Guide");
             SettingsWindowModeLabel.Text = Loc.Get("WindowMode");
             SettingsLanguageLabel.Text = Loc.Get("Language");
+            SettingsSoundsLabel.Text = Loc.Get("Sounds");
+            SettingsSoundVolumeLabel.Text = Loc.Get("Volume");
+            UpdateSoundSettingsUI();
 
             // Overview static labels
             OverviewTitle.Text = Loc.Get("OverviewTitle");
@@ -3334,7 +3376,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             {
                 // Top bar
                 ["MainMenu"] = "← Menú Principal",
-                ["AppTitle"] = "TABS Arena v.1.1.1",
+                ["AppTitle"] = "TABS Arena v.1.1.2",
 
                 // Overview panel
                 ["OverviewTitle"] = "Resumen 2v2",
@@ -3451,6 +3493,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["Windowed"] = "Ventana",
                 ["BorderlessFullscreen"] = "Pantalla Completa Sin Bordes",
                 ["Language"] = "Idioma",
+                ["Sounds"] = "Sonidos",
+                ["Volume"] = "Volumen",
+                ["On"] = "Activado",
+                ["Off"] = "Desactivado",
                 ["RedTeamPoints"] = "🔴  PUNTOS EQUIPO ROJO: ",
                 ["BlueTeamPoints"] = "🔵  PUNTOS EQUIPO AZUL: ",
                 ["StartingGold"] = "Oro inicial",
@@ -3571,7 +3617,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             private static readonly Dictionary<string, string> _defaults = new Dictionary<string, string>
             {
                 ["MainMenu"] = "← Main Menu",
-                ["AppTitle"] = "TABS Arena v.1.1.1",
+                ["AppTitle"] = "TABS Arena v.1.1.2",
                 ["OverviewTitle"] = "2v2 Match Overview",
                 ["OverviewSub"] = "Manage all four players then press Next Round to apply interest, milestones, rewards.",
                 ["CurrentRound"] = "CURRENT ROUND",
@@ -3660,6 +3706,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["Windowed"] = "Windowed",
                 ["BorderlessFullscreen"] = "Borderless Fullscreen",
                 ["Language"] = "Language",
+                ["Sounds"] = "Sounds",
+                ["Volume"] = "Volume",
+                ["On"] = "On",
+                ["Off"] = "Off",
                 ["RedTeamPoints"] = "🔴  RED TEAM POINTS: ",
                 ["BlueTeamPoints"] = "🔵  BLUE TEAM POINTS: ",
                 ["StartingGold"] = "Starting gold",

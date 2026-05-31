@@ -288,7 +288,7 @@ namespace TABS
 
         private static readonly Dictionary<string, string> En = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v.1.1.1",
+            ["AppTitle"] = "TABS Arena v.1.1.2",
             ["Settings"] = "Settings",
             ["Guide"] = "1v1 Guide",
             ["Back"] = "← Back",
@@ -296,6 +296,10 @@ namespace TABS
             ["Windowed"] = "Windowed",
             ["BorderlessFullscreen"] = "Borderless Fullscreen",
             ["Language"] = "Language",
+            ["Sounds"] = "Sounds",
+            ["Volume"] = "Volume",
+            ["On"] = "On",
+            ["Off"] = "Off",
             ["GuideTitle"] = "1v1 Guide",
             ["GuideBasicsTitle"] = "Basics",
             ["GuideBasicsBody"] = "Each player starts with 1200 gold. Choose who goes first at the start of the match. The first player receives bonus gold to compensate for being counterpicked.",
@@ -439,7 +443,7 @@ namespace TABS
 
         private static readonly Dictionary<string, string> Es = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v.1.1.1",
+            ["AppTitle"] = "TABS Arena v.1.1.2",
             ["Settings"] = "Ajustes",
             ["Guide"] = "Guía 1v1",
             ["Back"] = "← Volver",
@@ -447,6 +451,10 @@ namespace TABS
             ["Windowed"] = "Ventana",
             ["BorderlessFullscreen"] = "Pantalla completa sin bordes",
             ["Language"] = "Idioma",
+            ["Sounds"] = "Sonidos",
+            ["Volume"] = "Volumen",
+            ["On"] = "Activado",
+            ["Off"] = "Desactivado",
             ["GuideTitle"] = "Guía 1v1",
             ["GuideBasicsTitle"] = "Conceptos básicos",
             ["GuideBasicsBody"] = "Cada jugador empieza con 1200 de oro. Elige quién va primero al inicio de la partida. El primer jugador recibe oro extra para compensar que puede ser contraelegido.",
@@ -635,6 +643,7 @@ namespace TABS
             UpdateUI();
             UpdateStaticText();
             UpdateLanguageSelectorUI();
+            UpdateSoundSettingsUI();
         }
 
         private void UpdateTurnOrderText()
@@ -2062,6 +2071,8 @@ T("NewGameConfirmMsg"))) return;
 
             if (SettingsWindowModeLabel != null) SettingsWindowModeLabel.Text = T("WindowMode");
             if (SettingsLanguageLabel != null) SettingsLanguageLabel.Text = T("Language");
+            if (SettingsSoundsLabel != null) SettingsSoundsLabel.Text = T("Sounds");
+            if (SettingsSoundVolumeLabel != null) SettingsSoundVolumeLabel.Text = T("Volume");
 
             if (SettingsWindowModeText != null)
                 SettingsWindowModeText.Text = _isBorderlessFullscreen ? T("BorderlessFullscreen") : T("Windowed");
@@ -2767,6 +2778,7 @@ T("NewGameConfirmMsg"))) return;
             UpdateStaticText();
             UpdateLanguageSelectorUI();
             UpdateSettingsButtonStyles(_isBorderlessFullscreen);
+            UpdateSoundSettingsUI();
         }
 
         private void GuideButton_Click(object sender, RoutedEventArgs e)
@@ -3137,6 +3149,7 @@ T("NewGameConfirmMsg"))) return;
             SaveLanguage();
 
             UpdateLanguageSelectorUI();
+            UpdateSoundSettingsUI();
             UpdateStaticText();
             UpdateUI();
 
@@ -3158,6 +3171,43 @@ T("NewGameConfirmMsg"))) return;
             SettingsLangDot2.Background = isSpanish
                 ? new SolidColorBrush(Color.FromRgb(110, 182, 218))
                 : new SolidColorBrush(Color.FromRgb(58, 74, 88));
+        }
+
+        private void SettingsSoundsToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            AppPrefs.SoundsEnabled = !AppPrefs.SoundsEnabled;
+            AppPrefs.Save();
+            UpdateSoundSettingsUI();
+        }
+
+        private void SettingsSoundVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (SettingsSoundVolumeText == null)
+                return;
+
+            AppPrefs.SoundVolume = Math.Max(0.0, Math.Min(1.0, e.NewValue / 100.0));
+            AppPrefs.Save();
+            AudioFeedback.RefreshVolume();
+            UpdateSoundSettingsUI();
+        }
+
+        private void UpdateSoundSettingsUI()
+        {
+            if (SettingsSoundsToggleButton == null || SettingsSoundVolumeSlider == null || SettingsSoundVolumeText == null)
+                return;
+
+            int volumePercent = (int)Math.Round(AppPrefs.SoundVolume * 100.0);
+            SettingsSoundsToggleButton.IsChecked = AppPrefs.SoundsEnabled;
+            SettingsSoundsToggleButton.Content = T("Sounds") + ": " + T(AppPrefs.SoundsEnabled ? "On" : "Off");
+            SettingsSoundsToggleButton.Background = AppPrefs.SoundsEnabled
+                ? new SolidColorBrush(Color.FromRgb(49, 95, 125))
+                : new SolidColorBrush(Color.FromRgb(49, 56, 67));
+
+            SettingsSoundVolumeSlider.Value = volumePercent;
+            SettingsSoundVolumeSlider.IsEnabled = AppPrefs.SoundsEnabled;
+            SettingsSoundVolumeText.Text = volumePercent + "%";
+            SettingsSoundVolumeText.Opacity = AppPrefs.SoundsEnabled ? 1.0 : 0.45;
+            SettingsSoundVolumeLabel.Opacity = AppPrefs.SoundsEnabled ? 1.0 : 0.45;
         }
 
         private void SettingsScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
