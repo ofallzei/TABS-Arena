@@ -253,9 +253,9 @@ Base match rewards are:
 
 -Gold Match Reward Scaling
 
-In FT30, match rewards increase by `10 gold` for both winner and loser every 5 rounds.
+In FT30 mode, match rewards increase by `10 gold` for both winner and loser every 5 rounds.
 
-In FT20, match rewards increase by `15 gold` for both winner and loser every 3 rounds.
+In FT20 mode, match rewards increase by `15 gold` for both winner and loser every 3 rounds.
 
 -Milestones
 
