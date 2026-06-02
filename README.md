@@ -101,6 +101,7 @@ Once `Next Round` has been pressed, normal sellback percentage and unit movement
 If both players or teams are at match point, the win-by-2 rule activates.
 
 Examples:
+- `9/9` in FT10
 - `19/19` in FT20
 - `29/29` in FT30
 
@@ -163,6 +164,8 @@ Income can only be bought once per round, and the price increases by `24%` each 
 
 Since income eventually becomes very expensive, the app includes an income decay mechanic.
 
+(buy income is not allowed in f10 modes)
+
 -Perm Move Upgrade
 
 Allows you to freely move a unit once per round.
@@ -182,6 +185,8 @@ The first faction costs `50 gold`. Each additional faction increases the price b
 Allows you to buy a faction that you desire for the price of 280 gold.
 
 Price scaling is binded to "Buy faction" 
+
+(ft 10 mode) - buy faction 25 gold , 140 for a chosen faction.
 
 -Single Troop Move
 
@@ -247,15 +252,27 @@ It increases by `4%` every round after that.
 -Match Rewards
 
 Base match rewards are:
-
+(ft30)
 - Winner: `55 gold` and 1 point
 - Loser: `85 gold`
+
+(ft20)
+- Winner: `75 gold` and 1 point
+- Loser: `105 gold`
+
+(ft10)
+- Winner: `95 gold` and 1 point
+- Loser: `125 gold`
+
+
 
 -Gold Match Reward Scaling
 
 In FT30 mode, match rewards increase by `10 gold` for both winner and loser every 5 rounds.
 
 In FT20 mode, match rewards increase by `15 gold` for both winner and loser every 3 rounds.
+
+In FT10 mode, match rewards increase by `40 gold` for both winner and loser every 3 rounds.
 
 -Milestones
 
@@ -281,34 +298,46 @@ In FT20, milestone rewards happen every 4 points:
 
 `4, 8, 12, 16, 20`, and so on.
 
+In FT10, milestone rewards happen every 4 points:
+
+`2, 4, 6, 8, 10`, and so on.
+
 ---
 
 ## Game Modes
 
 -1v1
 
-First player to `30 points` wins.
+First player to `20 points` wins.
 
-All factions are allowed unless the win-by-2 rule activates.
+-1v1 FT30 Mode
+
+First player to `30 points` wins unless the win-by-2 rule activates.
+
+-1v1 FT10 Mode
+
+First player to `10 points` wins unless the win-by-2 rule activates.
+
+All factions are allowed.
 
 -1v1 Faction Mode
 
 Only the factions owned in the app are allowed to be used.
 
--1v1 FT20 Mode
-
-First player to `20 points` wins unless the win-by-2 rule activates.
-
 -2v2
 
-First team to `30 points` wins.
+First team to `20 points` wins.
 
-All factions are allowed unless the win-by-2 rule activates.
+-2v2 FT30 Mode
+
+First team to `30 points` wins unless the win-by-2 rule activates.
+
+-2v2 FT10 Mode
+
+First team to `10 points` wins unless the win-by-2 rule activates.
+
+All factions are allowed.
 
 -2v2 Faction Mode
 
 Only the factions owned in the app are allowed to be used.
-
--2v2 FT20 Mode
-
-First team to `20 points` wins unless the win-by-2 rule activates.
