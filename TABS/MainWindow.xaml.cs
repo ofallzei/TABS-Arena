@@ -122,8 +122,11 @@ namespace TABS
         private List<string> p1Factions = new List<string>();
         private List<string> p2Factions = new List<string>();
 
-        private bool ft20ModeEnabled = false;
+        private bool ft20ModeEnabled = true;
+        private bool ft10ModeEnabled = false;
+        private bool ft30ModeEnabled = false;
         private bool ft20ModeLocked = false;
+        private bool matchEndPromptSuppressed = false;
 
         // Legacy ft20 pool fields kept for save compatibility
         private List<string> ft20MilestonePool = new List<string>();
@@ -147,13 +150,22 @@ namespace TABS
         private GoldPopOutWindow p2GoldWindow;
 
         // Full reward pool definition — counts used to display "Nx" in UI
-        private static readonly string[] BaseRewardPool = new string[]
+private static readonly string[] BaseRewardPool = new string[]
 {
     "perm_move_upgrade",
     "perm_move_upgrade",
     "sellback_20",
     "income_discount",
     "income_discount",
+    "full_refund",
+    "full_refund"
+};
+
+        private static readonly string[] BaseRewardPoolNoIncome = new string[]
+{
+    "perm_move_upgrade",
+    "perm_move_upgrade",
+    "sellback_20",
     "full_refund",
     "full_refund"
 };
@@ -169,6 +181,18 @@ namespace TABS
     "sellback_20",
     "income_discount",
     "income_discount",
+    "full_refund"
+};
+
+        private static readonly string[] FactionRewardPoolNoIncome = new string[]
+{
+    "choose_free_faction",
+    "free_faction",
+    "free_faction",
+    "free_faction",
+    "free_faction",
+    "perm_move_upgrade",
+    "sellback_20",
     "full_refund"
 };
 
@@ -228,7 +252,8 @@ namespace TABS
             public int p1FactionPurchases, p2FactionPurchases;
             public int p1ChosenFactionPurchases, p2ChosenFactionPurchases;
             public List<string> p1Factions, p2Factions;
-            public bool ft20ModeEnabled, ft20ModeLocked;
+            public bool ft20ModeEnabled, ft10ModeEnabled, ft30ModeEnabled, ft20ModeLocked;
+            public bool matchEndPromptSuppressed;
             public List<string> ft20MilestonePool;
             public int ft20NextMilestoneRound;
             public List<string> actionLog;
@@ -288,7 +313,7 @@ namespace TABS
 
         private static readonly Dictionary<string, string> En = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v.1.1.2",
+            ["AppTitle"] = "TABS Arena v.1.1.3",
             ["Settings"] = "Settings",
             ["Guide"] = "1v1 Guide",
             ["Back"] = "← Back",
@@ -310,7 +335,7 @@ namespace TABS
             ["GuideSavingTitle"] = "Saving",
             ["GuideSavingBody"] = "If you cannot finish a match, save in the app. Also save the battle inside TABS using Save Battle and enable Save Friendly Units.",
             ["GuideEconomyTitle"] = "Economy",
-            ["GuideEconomyBody"] = "Interest gives +10 gold for every 50 gold a player has, capped at +100. Buying income gives +10 in normal modes and +13 in FT20 modes.",
+            ["GuideEconomyBody"] = "Interest gives +10 gold for every 50 gold a player has, capped at +100. Buying income gives +10 in FT30 and +13 in FT20. FT10 removes income purchases and income decay.",
             ["GuideMoreTitle"] = "More Rules",
             ["GuideMoreBody"] = "To learn more about the rules, visit",
             ["ReplayUsed"] = "Replay used",
@@ -328,6 +353,12 @@ namespace TABS
             ["FT20Mode"] = "FT20 MODE",
             ["FT20ModeOff"] = "FT20 Mode: OFF",
             ["FT20ModeOn"] = "FT20 Mode: ON",
+            ["FT30Mode"] = "FT30 MODE",
+            ["FT30ModeOff"] = "FT30 Mode: OFF",
+            ["FT30ModeOn"] = "FT30 Mode: ON",
+            ["FT10Mode"] = "FT10 MODE",
+            ["FT10ModeOff"] = "FT10 Mode: OFF",
+            ["FT10ModeOn"] = "FT10 Mode: ON",
             ["WhichPlayerFirst"] = "Which player is doing their turn first?",
             ["MatchSaves"] = "MATCH SAVES",
             ["Save"] = "💾 Save",
@@ -356,7 +387,7 @@ namespace TABS
             ["Utility"] = "Utility shop",
             ["Upgrades"] = "Permanent upgrades",
             ["Calculations"] = "Latest calculations",
-            ["SingleTroopMove"] = "Single troop move (25)",
+            ["SingleTroopMove"] = "Single troop move ({0})",
             ["Replay"] = "Replay (10)",
             ["P1FirstTurn"] = "Player 1 Goes First",
             ["P2FirstTurn"] = "Player 2 Goes First",
@@ -412,6 +443,12 @@ namespace TABS
             ["DeleteConfirmMsg"] = "Delete \"{0}\"?\nThis cannot be undone.",
             ["NewGameConfirmTitle"] = "New Game",
             ["NewGameConfirmMsg"] = "Start a new game?\nAll unsaved progress will be lost.",
+            ["MatchEndTitle"] = "Match Complete",
+            ["MatchEndMessage"] = "{0} won the match by reaching {1} points.",
+            ["MatchEndWinByTwoMessage"] = "{0}: {1}   {2}: {3}\n\n{4} wins via win by 2 rule.",
+            ["MatchEndQuestion"] = "Start a new game or continue playing?",
+            ["NewGamePlain"] = "New Game",
+            ["ContinuePlaying"] = "Continue",
             ["MainMenuConfirmTitle"] = "Main Menu",
             ["MainMenuConfirmMsg"] = "Return to the main menu?\nUnsaved progress will be lost.",
             ["CloseGameConfirmTitle"] = "Close Game",
@@ -421,13 +458,17 @@ namespace TABS
             ["RoundReward"] = "Round reward",
             ["PermanentIncome"] = "Permanent income",
             ["FinalGold"] = "Final gold",
-            ["LogFactionModeOn"] = "Faction mode enabled. Both players start with 1200 gold and 3 random factions.",
+            ["LogFactionModeOn"] = "Faction mode enabled. Both players reset to this mode's starting gold and 3 random factions.",
             ["LogFactionModeOff"] = "Faction mode disabled.",
+            ["LogFT30ModeOn"] = "FT30 mode enabled. Player panels reset.",
+            ["LogFT30ModeOff"] = "FT30 mode disabled. FT20 mode selected.",
+            ["LogFT10ModeOn"] = "FT10 mode enabled. Players start with 1200 gold and income is disabled.",
+            ["LogFT10ModeOff"] = "FT10 mode disabled. FT20 mode selected.",
             ["LogGainedFaction"] = "{0} gained faction: {1}.",
             ["NoticeGainedFaction"] = "{0} gained {1}.",
             ["LogBoughtIncome"] = "{0} bought income +{1} for {2} gold.",
             ["LogBoughtPermMove"] = "{0} bought perm move upgrade for {1} gold.",
-            ["LogSingleTroopMove"] = "{0} bought single troop move for 25 gold.",
+            ["LogSingleTroopMove"] = "{0} bought single troop move for {1} gold.",
             ["LogReplay"] = "{0} bought a replay for 10 gold.",
             ["LogSpentTroops"] = "{0} spent {1} gold on troops.",
             ["WinsSuffix"] = "wins",
@@ -443,7 +484,7 @@ namespace TABS
 
         private static readonly Dictionary<string, string> Es = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v.1.1.2",
+            ["AppTitle"] = "TABS Arena v.1.1.3",
             ["Settings"] = "Ajustes",
             ["Guide"] = "Guía 1v1",
             ["Back"] = "← Volver",
@@ -465,7 +506,7 @@ namespace TABS
             ["GuideSavingTitle"] = "Guardado",
             ["GuideSavingBody"] = "Si no pueden terminar la partida, guarda en la app. También guarda la batalla dentro de TABS usando Save Battle y activa Save Friendly Units.",
             ["GuideEconomyTitle"] = "Economía",
-            ["GuideEconomyBody"] = "El interés da +10 de oro por cada 50 de oro que tenga un jugador, con máximo de +100. Comprar ingreso da +10 en modos normales y +13 en FT20.",
+            ["GuideEconomyBody"] = "El interés da +10 de oro por cada 50 de oro que tenga un jugador, con máximo de +100. Comprar ingreso da +10 en FT30 y +13 en FT20. FT10 elimina compras de ingreso y decaimiento de ingreso.",
             ["GuideMoreTitle"] = "Más reglas",
             ["GuideMoreBody"] = "Para aprender más sobre las reglas, visita",
             ["ReplayUsed"] = "Replay usado",
@@ -483,6 +524,12 @@ namespace TABS
             ["FT20Mode"] = "MODO FT20",
             ["FT20ModeOff"] = "Modo FT20: OFF",
             ["FT20ModeOn"] = "Modo FT20: ON",
+            ["FT30Mode"] = "MODO FT30",
+            ["FT30ModeOff"] = "Modo FT30: OFF",
+            ["FT30ModeOn"] = "Modo FT30: ON",
+            ["FT10Mode"] = "MODO FT10",
+            ["FT10ModeOff"] = "Modo FT10: OFF",
+            ["FT10ModeOn"] = "Modo FT10: ON",
             ["WhichPlayerFirst"] = "¿Qué jugador hace su turno primero?",
             ["MatchSaves"] = "GUARDADOS",
             ["Save"] = "💾 Guardar",
@@ -511,7 +558,7 @@ namespace TABS
             ["Utility"] = "Tienda de utilidad",
             ["Upgrades"] = "Mejoras permanentes",
             ["Calculations"] = "Últimos cálculos",
-            ["SingleTroopMove"] = "Mover tropa individual (25)",
+            ["SingleTroopMove"] = "Mover tropa individual ({0})",
             ["Replay"] = "Repetición (10)",
             ["P1FirstTurn"] = "Jugador 1 Va Primero",
             ["P2FirstTurn"] = "Jugador 2 Va Primero",
@@ -567,6 +614,12 @@ namespace TABS
             ["DeleteConfirmMsg"] = "¿Borrar \"{0}\"?\nEsto no se puede deshacer.",
             ["NewGameConfirmTitle"] = "Nueva Partida",
             ["NewGameConfirmMsg"] = "¿Iniciar nueva partida?\nEl progreso no guardado se perderá.",
+            ["MatchEndTitle"] = "Partida Terminada",
+            ["MatchEndMessage"] = "{0} ganó la partida al llegar a {1} puntos.",
+            ["MatchEndWinByTwoMessage"] = "{0}: {1}   {2}: {3}\n\n{4} gana por la regla de ganar por 2.",
+            ["MatchEndQuestion"] = "¿Iniciar una nueva partida o seguir jugando?",
+            ["NewGamePlain"] = "Nueva Partida",
+            ["ContinuePlaying"] = "Continuar",
             ["MainMenuConfirmTitle"] = "Menú Principal",
             ["MainMenuConfirmMsg"] = "¿Volver al menú principal?\nEl progreso no guardado se perderá.",
             ["CloseGameConfirmTitle"] = "Cerrar Juego",
@@ -576,13 +629,17 @@ namespace TABS
             ["RoundReward"] = "Recompensa de ronda",
             ["PermanentIncome"] = "Ingreso permanente",
             ["FinalGold"] = "Oro final",
-            ["LogFactionModeOn"] = "Modo Facción activado. Ambos jugadores empiezan con 1200 de oro y 3 facciones aleatorias.",
+            ["LogFactionModeOn"] = "Modo Facción activado. Ambos jugadores se reinician con el oro inicial del modo y 3 facciones aleatorias.",
             ["LogFactionModeOff"] = "Modo Facción desactivado.",
+            ["LogFT30ModeOn"] = "Modo FT30 activado. Paneles reiniciados.",
+            ["LogFT30ModeOff"] = "Modo FT30 desactivado. Modo FT20 seleccionado.",
+            ["LogFT10ModeOn"] = "Modo FT10 activado. Los jugadores empiezan con 1200 de oro y el ingreso está desactivado.",
+            ["LogFT10ModeOff"] = "Modo FT10 desactivado. Modo FT20 seleccionado.",
             ["LogGainedFaction"] = "{0} obtuvo facción: {1}.",
             ["NoticeGainedFaction"] = "{0} obtuvo {1}.",
             ["LogBoughtIncome"] = "{0} compró ingreso +{1} por {2} de oro.",
             ["LogBoughtPermMove"] = "{0} compró mejora de mv perm por {1} de oro.",
-            ["LogSingleTroopMove"] = "{0} compró mover tropa individual por 25 de oro.",
+            ["LogSingleTroopMove"] = "{0} compró mover tropa individual por {1} de oro.",
             ["LogReplay"] = "{0} compró repetición por 10 de oro.",
             ["LogSpentTroops"] = "{0} gastó {1} de oro en tropas.",
             ["WinsSuffix"] = "gana",
@@ -667,11 +724,123 @@ namespace TABS
         private void Window_Loaded(object sender, RoutedEventArgs e) { RefreshSavesDropdown(); }
         private void PushUndoState() { undoStack.Push(CaptureState()); }
 
+        private void NormalizeMatchModeFlags()
+        {
+            if (ft10ModeEnabled)
+            {
+                ft30ModeEnabled = false;
+                ft20ModeEnabled = false;
+            }
+            else if (ft30ModeEnabled)
+            {
+                ft20ModeEnabled = false;
+            }
+            else
+            {
+                ft20ModeEnabled = true;
+            }
+        }
+
+        private int GetStartingGold()
+        {
+            return 1200;
+        }
+
+        private int GetRoundRewardTier()
+        {
+            if (ft10ModeEnabled) return ((round - 1) / 2) * 40;
+            if (ft20ModeEnabled) return ((round - 1) / 3) * 15;
+            return ((round - 1) / 5) * 10;
+        }
+
+        private int GetWinnerRewardBase()
+        {
+            if (ft10ModeEnabled) return 95;
+            if (ft20ModeEnabled) return 75;
+            return 55;
+        }
+
+        private int GetLoserRewardBase()
+        {
+            if (ft10ModeEnabled) return 125;
+            if (ft20ModeEnabled) return 105;
+            return 85;
+        }
+
+        private int GetTieRewardBase()
+        {
+            return (GetWinnerRewardBase() + GetLoserRewardBase()) / 2;
+        }
+
+        private int GetMilestoneStep()
+        {
+            if (ft10ModeEnabled) return 2;
+            if (ft20ModeEnabled) return 4;
+            return 5;
+        }
+
+        private int GetPermMoveCost()
+        {
+            if (ft10ModeEnabled) return 125;
+            if (ft20ModeEnabled) return 175;
+            return 200;
+        }
+
+        private int GetSingleTroopMoveCost()
+        {
+            return ft10ModeEnabled ? 20 : 25;
+        }
+
+        private bool IsIncomeAvailable()
+        {
+            return !ft10ModeEnabled;
+        }
+
+        private string[] GetRewardPoolForCurrentMode()
+        {
+            if (ft10ModeEnabled)
+                return factionModeEnabled ? FactionRewardPoolNoIncome : BaseRewardPoolNoIncome;
+
+            return factionModeEnabled ? FactionRewardPool : BaseRewardPool;
+        }
+
+        private void ResetEconomyForModeSwitch()
+        {
+            p1Gold = GetStartingGold();
+            p2Gold = GetStartingGold();
+            p1Income = 0; p2Income = 0;
+            p1IncomeUpgrades = 0; p2IncomeUpgrades = 0;
+            p1IncomeLevel = 0; p2IncomeLevel = 0;
+            p1IncomeCost = GetBaseIncomeCost(); p2IncomeCost = GetBaseIncomeCost();
+            p1BoughtIncomeThisRound = false; p2BoughtIncomeThisRound = false;
+            p1HasIncomeDiscount = false; p2HasIncomeDiscount = false;
+            p1MissedIncomeRounds = 0; p2MissedIncomeRounds = 0;
+            p1IncomeDecayPercent = 0; p2IncomeDecayPercent = 0;
+            p1PermMoveUpgrades = 0; p2PermMoveUpgrades = 0;
+            p1MilestonePermMoveUpgrades = 0; p2MilestonePermMoveUpgrades = 0;
+            p1HasFullRefund = false; p2HasFullRefund = false;
+            p1HasFt10PermMove = false; p2HasFt10PermMove = false;
+            p1SellbackPct = 50; p2SellbackPct = 50;
+            p1Sellback70 = false; p2Sellback70 = false;
+            p1FactionPurchases = 0; p2FactionPurchases = 0;
+            p1ChosenFactionPurchases = 0; p2ChosenFactionPurchases = 0;
+            globalClaimedMilestones.Clear();
+            milestone5Claimed = false; milestone10Claimed = false; milestone15Claimed = false;
+            milestone20Claimed = false; milestone25Claimed = false;
+            ft20MilestonePool.Clear();
+            ft20NextMilestoneRound = GetMilestoneStep();
+
+            if (factionModeEnabled) GrantStartingFactions();
+            else { p1Factions.Clear(); p2Factions.Clear(); }
+
+            InitMilestoneRewardQueue();
+        }
+
         // Pre-roll and shuffle the full reward queue
         private void InitMilestoneRewardQueue()
         {
             var rng = new Random(Guid.NewGuid().GetHashCode());
-            var pool = factionModeEnabled ? FactionRewardPool : BaseRewardPool;
+            var pool = GetRewardPoolForCurrentMode();
             milestoneRewardQueue = pool.OrderBy(_ => rng.Next()).ToList();
         }
 
@@ -778,7 +947,10 @@ namespace TABS
                 p1Factions = new List<string>(p1Factions),
                 p2Factions = new List<string>(p2Factions),
                 ft20ModeEnabled = ft20ModeEnabled,
+                ft10ModeEnabled = ft10ModeEnabled,
+                ft30ModeEnabled = ft30ModeEnabled,
                 ft20ModeLocked = ft20ModeLocked,
+                matchEndPromptSuppressed = matchEndPromptSuppressed,
                 ft20MilestonePool = new List<string>(ft20MilestonePool),
                 ft20NextMilestoneRound = ft20NextMilestoneRound,
                 actionLog = new List<string>(actionLog),
@@ -824,9 +996,14 @@ namespace TABS
             p1ChosenFactionPurchases = s.p1ChosenFactionPurchases; p2ChosenFactionPurchases = s.p2ChosenFactionPurchases;
             p1Factions = s.p1Factions ?? new List<string>();
             p2Factions = s.p2Factions ?? new List<string>();
-            ft20ModeEnabled = s.ft20ModeEnabled; ft20ModeLocked = s.ft20ModeLocked;
+            ft20ModeEnabled = s.ft20ModeEnabled;
+            ft10ModeEnabled = s.ft10ModeEnabled;
+            ft30ModeEnabled = s.ft30ModeEnabled;
+            NormalizeMatchModeFlags();
+            ft20ModeLocked = s.ft20ModeLocked;
+            matchEndPromptSuppressed = s.matchEndPromptSuppressed;
             ft20MilestonePool = s.ft20MilestonePool ?? new List<string>();
-            ft20NextMilestoneRound = s.ft20NextMilestoneRound > 0 ? s.ft20NextMilestoneRound : 6;
+            ft20NextMilestoneRound = s.ft20NextMilestoneRound > 0 ? s.ft20NextMilestoneRound : GetMilestoneStep();
             lastRoundWinner = s.lastRoundWinner;
             firstTurnPlayer = s.firstTurnPlayer;
             p1ReplayBoughtThisRound = s.p1ReplayBoughtThisRound;
@@ -1327,7 +1504,7 @@ string.Format(T("AlreadyExistsMsg"), name)))
             if (!Directory.Exists(SaveFolder)) Directory.CreateDirectory(SaveFolder);
             var data = new OneV1SaveData
             {
-                SaveVersion = 5,
+                SaveVersion = 6,
                 SaveName = name,
                 SavedAt = DateTime.Now,
                 Round = round,
@@ -1387,7 +1564,10 @@ string.Format(T("AlreadyExistsMsg"), name)))
                 P1Factions = new List<string>(p1Factions),
                 P2Factions = new List<string>(p2Factions),
                 Ft20ModeEnabled = ft20ModeEnabled,
+                Ft10ModeEnabled = ft10ModeEnabled,
+                Ft30ModeEnabled = ft30ModeEnabled,
                 Ft20ModeLocked = ft20ModeLocked,
+                MatchEndPromptSuppressed = matchEndPromptSuppressed,
                 Ft20MilestonePool = new List<string>(ft20MilestonePool),
                 Ft20NextMilestoneRound = ft20NextMilestoneRound,
                 ActionLog = new List<string>(actionLog),
@@ -1465,9 +1645,14 @@ string.Format(T("AlreadyExistsMsg"), name)))
             p1ChosenFactionPurchases = d.P1ChosenFactionPurchases; p2ChosenFactionPurchases = d.P2ChosenFactionPurchases;
             p1Factions = d.P1Factions ?? new List<string>();
             p2Factions = d.P2Factions ?? new List<string>();
-            ft20ModeEnabled = d.Ft20ModeEnabled; ft20ModeLocked = d.Ft20ModeLocked;
+            ft10ModeEnabled = d.Ft10ModeEnabled;
+            ft30ModeEnabled = d.Ft30ModeEnabled || (d.SaveVersion < 6 && !d.Ft20ModeEnabled);
+            ft20ModeEnabled = !ft10ModeEnabled && !ft30ModeEnabled;
+            NormalizeMatchModeFlags();
+            ft20ModeLocked = d.Ft20ModeLocked;
+            matchEndPromptSuppressed = d.MatchEndPromptSuppressed;
             ft20MilestonePool = d.Ft20MilestonePool ?? new List<string>();
-            ft20NextMilestoneRound = d.Ft20NextMilestoneRound > 0 ? d.Ft20NextMilestoneRound : 6;
+            ft20NextMilestoneRound = d.Ft20NextMilestoneRound > 0 ? d.Ft20NextMilestoneRound : GetMilestoneStep();
             actionLog.Clear();
             if (d.ActionLog != null) foreach (var item in d.ActionLog) actionLog.AddLast(item);
             undoStack.Clear(); _currentSaveName = name;
@@ -1522,7 +1707,9 @@ T("NewGameConfirmMsg"))) return;
         {
             _currentSaveName = null; undoStack.Clear();
             round = 1; pendingWinner = 0; namesLocked = false; resetArmed = false; firstTurnChosen = false;
-            p1Gold = 1200; p2Gold = 1200; p1Points = 0; p2Points = 0;
+            ft20ModeEnabled = true; ft10ModeEnabled = false; ft30ModeEnabled = false; ft20ModeLocked = false;
+            matchEndPromptSuppressed = false;
+            p1Gold = GetStartingGold(); p2Gold = GetStartingGold(); p1Points = 0; p2Points = 0;
             p1Income = 0; p2Income = 0;
             p1PermMoveUpgrades = 0; p2PermMoveUpgrades = 0;
             p1MilestonePermMoveUpgrades = 0; p2MilestonePermMoveUpgrades = 0;
@@ -1546,8 +1733,7 @@ T("NewGameConfirmMsg"))) return;
             p1FactionPurchases = 0; p2FactionPurchases = 0;
             p1ChosenFactionPurchases = 0; p2ChosenFactionPurchases = 0;
             p1Factions.Clear(); p2Factions.Clear();
-            ft20ModeEnabled = false; ft20ModeLocked = false;
-            ft20MilestonePool.Clear(); ft20NextMilestoneRound = 6;
+            ft20MilestonePool.Clear(); ft20NextMilestoneRound = GetMilestoneStep();
             p1Calc = "No round yet."; p2Calc = "No round yet.";
             P1NameBox.IsReadOnly = false; P2NameBox.IsReadOnly = false;
             P1NameEditButton.Visibility = Visibility.Visible; P2NameEditButton.Visibility = Visibility.Visible;
@@ -1808,6 +1994,8 @@ T("NewGameConfirmMsg"))) return;
 
         private int GetIncomeDecayPercent(int missedRounds)
         {
+            if (!IsIncomeAvailable()) return 0;
+
             if (ft20ModeEnabled)
             {
                 if (missedRounds < 3) return 0;
@@ -1832,17 +2020,23 @@ T("NewGameConfirmMsg"))) return;
 
         private int GetFactionCost(int player)
         {
-            return 50 + ((player == 1 ? p1FactionPurchases : p2FactionPurchases) * 20);
+            int purchases = player == 1 ? p1FactionPurchases : p2FactionPurchases;
+            int baseCost = ft10ModeEnabled ? 25 : 50;
+            int scale = ft10ModeEnabled ? 15 : 20;
+            return baseCost + (purchases * scale);
         }
 
         private int GetChosenFactionCost(int player)
         {
-            return 280 + ((player == 1 ? p1FactionPurchases : p2FactionPurchases) * 20);
+            int purchases = player == 1 ? p1FactionPurchases : p2FactionPurchases;
+            int baseCost = ft10ModeEnabled ? 140 : 280;
+            int scale = ft10ModeEnabled ? 15 : 20;
+            return baseCost + (purchases * scale);
         }
 
         private int GetNextMilestone(int currentPoints)
         {
-            int step = ft20ModeEnabled ? 4 : 5;
+            int step = GetMilestoneStep();
             int check = ((currentPoints / step) + 1) * step;
             while (globalClaimedMilestones.Contains(check)) check += step;
             return check;
@@ -2083,7 +2277,8 @@ T("NewGameConfirmMsg"))) return;
             if (LblNextTurnOrder != null) LblNextTurnOrder.Text = T("NextTurnOrder");
             if (LblPendingResult != null) LblPendingResult.Text = T("PendingResult");
             if (LblFactionMode != null) LblFactionMode.Text = T("FactionMode");
-            if (LblFT20Mode != null) LblFT20Mode.Text = T("FT20Mode");
+            if (LblFT20Mode != null) LblFT20Mode.Text = T("FT30Mode");
+            if (LblFT10Mode != null) LblFT10Mode.Text = T("FT10Mode");
             if (LblWhichPlayerFirst != null) LblWhichPlayerFirst.Text = T("WhichPlayerFirst");
             if (LblMatchSaves != null) LblMatchSaves.Text = T("MatchSaves");
             if (P1FirstTurnButton != null) P1FirstTurnButton.Content = T("P1FirstTurn");
@@ -2174,24 +2369,36 @@ T("NewGameConfirmMsg"))) return;
             P1SellPctText.Text = p1HasFullRefund ? "100%" : p1SellbackPct + "%";
             P2SellPctText.Text = p2HasFullRefund ? "100%" : p2SellbackPct + "%";
 
-            int p1DisplayedIncomeCost = GetDisplayedIncomeCost(p1IncomeCost, p1IncomeDecayPercent, p1HasIncomeDiscount);
-            int p2DisplayedIncomeCost = GetDisplayedIncomeCost(p2IncomeCost, p2IncomeDecayPercent, p2HasIncomeDiscount);
-            string incomeLabel = ft20ModeEnabled ? T("BuyIncomeF") : T("BuyIncome");
-            P1BuyIncomeButton.Content = string.Format(incomeLabel, p1DisplayedIncomeCost);
-            P2BuyIncomeButton.Content = string.Format(incomeLabel, p2DisplayedIncomeCost);
-            P1IncomeDecayPctText.Text = p1HasIncomeDiscount
-? string.Format("-{0}%  (+15% off)", p1IncomeDecayPercent)
-: string.Format("-{0}%", p1IncomeDecayPercent);
-            P2IncomeDecayPctText.Text = p2HasIncomeDiscount
-                ? string.Format("-{0}%  (+15% off)", p2IncomeDecayPercent)
-                : string.Format("-{0}%", p2IncomeDecayPercent);
+            if (IsIncomeAvailable())
+            {
+                P1BuyIncomeButton.Visibility = Visibility.Visible;
+                P2BuyIncomeButton.Visibility = Visibility.Visible;
+                int p1DisplayedIncomeCost = GetDisplayedIncomeCost(p1IncomeCost, p1IncomeDecayPercent, p1HasIncomeDiscount);
+                int p2DisplayedIncomeCost = GetDisplayedIncomeCost(p2IncomeCost, p2IncomeDecayPercent, p2HasIncomeDiscount);
+                string incomeLabel = ft20ModeEnabled ? T("BuyIncomeF") : T("BuyIncome");
+                P1BuyIncomeButton.Content = string.Format(incomeLabel, p1DisplayedIncomeCost);
+                P2BuyIncomeButton.Content = string.Format(incomeLabel, p2DisplayedIncomeCost);
+                P1IncomeDecayPctText.Text = p1HasIncomeDiscount
+                    ? string.Format("-{0}%  (+15% off)", p1IncomeDecayPercent)
+                    : string.Format("-{0}%", p1IncomeDecayPercent);
+                P2IncomeDecayPctText.Text = p2HasIncomeDiscount
+                    ? string.Format("-{0}%  (+15% off)", p2IncomeDecayPercent)
+                    : string.Format("-{0}%", p2IncomeDecayPercent);
 
-            P1IncomeDecayPctBorder.Visibility = (p1IncomeDecayPercent > 0 || p1HasIncomeDiscount) ? Visibility.Visible : Visibility.Collapsed;
-            P2IncomeDecayPctBorder.Visibility = (p2IncomeDecayPercent > 0 || p2HasIncomeDiscount) ? Visibility.Visible : Visibility.Collapsed;
-            P1BuyIncomeButton.Background = (!p1BoughtIncomeThisRound && p1Gold >= p1DisplayedIncomeCost) ? cyanBrush : disabledBrush;
-            P2BuyIncomeButton.Background = (!p2BoughtIncomeThisRound && p2Gold >= p2DisplayedIncomeCost) ? cyanBrush : disabledBrush;
+                P1IncomeDecayPctBorder.Visibility = (p1IncomeDecayPercent > 0 || p1HasIncomeDiscount) ? Visibility.Visible : Visibility.Collapsed;
+                P2IncomeDecayPctBorder.Visibility = (p2IncomeDecayPercent > 0 || p2HasIncomeDiscount) ? Visibility.Visible : Visibility.Collapsed;
+                P1BuyIncomeButton.Background = (!p1BoughtIncomeThisRound && p1Gold >= p1DisplayedIncomeCost) ? cyanBrush : disabledBrush;
+                P2BuyIncomeButton.Background = (!p2BoughtIncomeThisRound && p2Gold >= p2DisplayedIncomeCost) ? cyanBrush : disabledBrush;
+            }
+            else
+            {
+                P1BuyIncomeButton.Visibility = Visibility.Collapsed;
+                P2BuyIncomeButton.Visibility = Visibility.Collapsed;
+                P1IncomeDecayPctBorder.Visibility = Visibility.Collapsed;
+                P2IncomeDecayPctBorder.Visibility = Visibility.Collapsed;
+            }
 
-            int permMoveCost = ft20ModeEnabled ? 175 : 200;
+            int permMoveCost = GetPermMoveCost();
             P1BuyPermMoveButton.Content = string.Format(T("BuyPermMove"), permMoveCost);
             P2BuyPermMoveButton.Content = string.Format(T("BuyPermMove"), permMoveCost);
             P1BuyPermMoveButton.IsEnabled = true;
@@ -2207,9 +2414,15 @@ T("NewGameConfirmMsg"))) return;
             }
             if (Ft20ModeToggle != null)
             {
-                Ft20ModeToggle.IsChecked = ft20ModeEnabled;
-                Ft20ModeToggle.Content = ft20ModeEnabled ? T("FT20ModeOn") : T("FT20ModeOff");
+                Ft20ModeToggle.IsChecked = ft30ModeEnabled;
+                Ft20ModeToggle.Content = ft30ModeEnabled ? T("FT30ModeOn") : T("FT30ModeOff");
                 Ft20ModeToggle.IsEnabled = !ft20ModeLocked;
+            }
+            if (Ft10ModeToggle != null)
+            {
+                Ft10ModeToggle.IsChecked = ft10ModeEnabled;
+                Ft10ModeToggle.Content = ft10ModeEnabled ? T("FT10ModeOn") : T("FT10ModeOff");
+                Ft10ModeToggle.IsEnabled = !ft20ModeLocked;
             }
 
             if (P1BuyFactionButton != null)
@@ -2271,8 +2484,11 @@ T("NewGameConfirmMsg"))) return;
 
             RefreshFactionIcons();
 
-            P1SingleTroopMoveButton.Background = p1Gold >= 25 ? cyanBrush : disabledBrush;
-            P2SingleTroopMoveButton.Background = p2Gold >= 25 ? cyanBrush : disabledBrush;
+            int singleTroopMoveCost = GetSingleTroopMoveCost();
+            P1SingleTroopMoveButton.Content = string.Format(T("SingleTroopMove"), singleTroopMoveCost);
+            P2SingleTroopMoveButton.Content = string.Format(T("SingleTroopMove"), singleTroopMoveCost);
+            P1SingleTroopMoveButton.Background = p1Gold >= singleTroopMoveCost ? cyanBrush : disabledBrush;
+            P2SingleTroopMoveButton.Background = p2Gold >= singleTroopMoveCost ? cyanBrush : disabledBrush;
             P1ReplayButton.Content = p1ReplayBoughtThisRound ? T("ReplayUsed") : T("Replay");
             P2ReplayButton.Content = p2ReplayBoughtThisRound ? T("ReplayUsed") : T("Replay");
             P1ReplayButton.IsEnabled = !p1ReplayBoughtThisRound;
@@ -2318,54 +2534,34 @@ T("NewGameConfirmMsg"))) return;
             CloseAllGoldWindows();
             PushUndoState();
             factionModeEnabled = FactionModeToggle.IsChecked == true;
-            if (factionModeEnabled)
-            {
-                p1Gold = 1200; p2Gold = 1200;
-                globalClaimedMilestones.Clear();
-                GrantStartingFactions();
-                InitMilestoneRewardQueue();
-                AddActionLog(T("LogFactionModeOn"));
-            }
-            else
-            {
-                ft20MilestonePool.Clear(); ft20NextMilestoneRound = 6;
-                p1Factions.Clear(); p2Factions.Clear();
-                p1FactionPurchases = 0; p2FactionPurchases = 0;
-                p1IncomeCost = GetBaseIncomeCost(); p2IncomeCost = GetBaseIncomeCost();
-                p1Gold = 1200; p2Gold = 1200;
-                globalClaimedMilestones.Clear();
-                InitMilestoneRewardQueue();
-                AddActionLog(T("LogFactionModeOff"));
-            }
+            ResetEconomyForModeSwitch();
+            AddActionLog(factionModeEnabled ? T("LogFactionModeOn") : T("LogFactionModeOff"));
             UpdateUI();
         }
 
         private void Ft20ModeToggle_Click(object sender, RoutedEventArgs e)
         {
-            if (ft20ModeLocked) { ShowNotice("FT20 mode is locked after round 1."); Ft20ModeToggle.IsChecked = ft20ModeEnabled; return; }
+            if (ft20ModeLocked) { ShowNotice("Match mode is locked after round 1."); Ft20ModeToggle.IsChecked = ft30ModeEnabled; return; }
             CloseAllGoldWindows();
             PushUndoState();
-            ft20ModeEnabled = Ft20ModeToggle.IsChecked == true;
-            if (ft20ModeEnabled)
-            {
-                p1Gold = 1200; p2Gold = 1200;
-                p1IncomeCost = GetBaseIncomeCost(); p2IncomeCost = GetBaseIncomeCost();
-                globalClaimedMilestones.Clear();
-                milestone5Claimed = false; milestone10Claimed = false; milestone15Claimed = false;
-                milestone20Claimed = false; milestone25Claimed = false;
-                if (factionModeEnabled) GrantStartingFactions();
-                InitMilestoneRewardQueue();
-                AddActionLog("FT20 mode enabled. Starting gold set to 1200.");
-            }
-            else
-            {
-                p1IncomeCost = GetBaseIncomeCost(); p2IncomeCost = GetBaseIncomeCost();
-                ft20MilestonePool.Clear(); ft20NextMilestoneRound = 6;
-                globalClaimedMilestones.Clear();
-                if (factionModeEnabled) GrantStartingFactions();
-                InitMilestoneRewardQueue();
-                AddActionLog("FT20 mode disabled.");
-            }
+            ft30ModeEnabled = Ft20ModeToggle.IsChecked == true;
+            if (ft30ModeEnabled) ft10ModeEnabled = false;
+            NormalizeMatchModeFlags();
+            ResetEconomyForModeSwitch();
+            AddActionLog(ft30ModeEnabled ? T("LogFT30ModeOn") : T("LogFT30ModeOff"));
+            UpdateUI();
+        }
+
+        private void Ft10ModeToggle_Click(object sender, RoutedEventArgs e)
+        {
+            if (ft20ModeLocked) { ShowNotice("Match mode is locked after round 1."); Ft10ModeToggle.IsChecked = ft10ModeEnabled; return; }
+            CloseAllGoldWindows();
+            PushUndoState();
+            ft10ModeEnabled = Ft10ModeToggle.IsChecked == true;
+            if (ft10ModeEnabled) ft30ModeEnabled = false;
+            NormalizeMatchModeFlags();
+            ResetEconomyForModeSwitch();
+            AddActionLog(ft10ModeEnabled ? T("LogFT10ModeOn") : T("LogFT10ModeOff"));
             UpdateUI();
         }
 
@@ -2457,14 +2653,7 @@ T("NewGameConfirmMsg"))) return;
 
         private int GetTieReward()
         {
-            if (ft20ModeEnabled)
-            {
-                int tier = ((round - 1) / 3) * 15;
-                return 70 + tier;
-            }
-
-            int normalTier = ((round - 1) / 5) * 10;
-            return 70 + normalTier;
+            return GetTieRewardBase() + GetRoundRewardTier();
         }
 
         private string BuildCalcText(int startGold, int interest, int roundReward, int income, int milestoneBonus, int finalGold)
@@ -2500,6 +2689,75 @@ T("NewGameConfirmMsg"))) return;
         private void SetGoldRed(int player) { if (player == 1) P1GoldBorder.Background = redBrush; else P2GoldBorder.Background = redBrush; }
         private void SetPointsGreen(int player) { if (player == 1) P1PointsBorder.Background = greenBrush; else P2PointsBorder.Background = greenBrush; }
 
+        private int GetMatchGoalPoints()
+        {
+            if (ft10ModeEnabled) return 10;
+            if (ft30ModeEnabled) return 30;
+            return 20;
+        }
+
+        private bool IsWinByTwoRuleActive(int previousWinnerPoints, int winnerPoints, int loserPoints)
+        {
+            int matchPoint = GetMatchGoalPoints() - 1;
+            return (previousWinnerPoints >= matchPoint && loserPoints >= matchPoint)
+                || (winnerPoints >= matchPoint && loserPoints >= matchPoint);
+        }
+
+        private bool ShouldShowMatchEndPrompt(int previousWinnerPoints, int winnerPoints, int loserPoints)
+        {
+            int goal = GetMatchGoalPoints();
+
+            if (IsWinByTwoRuleActive(previousWinnerPoints, winnerPoints, loserPoints))
+            {
+                bool hadAlreadyWon = previousWinnerPoints >= goal && previousWinnerPoints - loserPoints >= 2;
+                bool hasWonNow = winnerPoints >= goal && winnerPoints - loserPoints >= 2;
+                return hasWonNow && !hadAlreadyWon;
+            }
+
+            return previousWinnerPoints < goal && winnerPoints >= goal && winnerPoints > loserPoints;
+        }
+
+        private void ShowMatchEndPromptIfNeeded(int previousP1Points, int previousP2Points)
+        {
+            if (matchEndPromptSuppressed) return;
+
+            int winner = 0;
+            bool wonByTwoRule = false;
+
+            if (ShouldShowMatchEndPrompt(previousP1Points, p1Points, p2Points))
+            {
+                winner = 1;
+                wonByTwoRule = IsWinByTwoRuleActive(previousP1Points, p1Points, p2Points);
+            }
+            else if (ShouldShowMatchEndPrompt(previousP2Points, p2Points, p1Points))
+            {
+                winner = 2;
+                wonByTwoRule = IsWinByTwoRuleActive(previousP2Points, p2Points, p1Points);
+            }
+
+            if (winner == 0) return;
+
+            int goal = GetMatchGoalPoints();
+            string winnerName = winner == 1 ? p1Name : p2Name;
+            string message = wonByTwoRule
+                ? string.Format(T("MatchEndWinByTwoMessage"), p1Name, p1Points, p2Name, p2Points, winnerName)
+                : string.Format(T("MatchEndMessage"), winnerName, goal);
+
+            var dialog = new MatchEndDialog(
+                T("MatchEndTitle"),
+                message,
+                T("MatchEndQuestion"),
+                T("NewGamePlain"),
+                T("ContinuePlaying"))
+            { Owner = this };
+
+            bool? result = dialog.ShowDialog();
+            if (result == true && dialog.StartNewGame)
+                DoFullReset();
+            else if (dialog.ContinueSelected)
+                matchEndPromptSuppressed = true;
+        }
+
         private void NextRound_Click(object sender, RoutedEventArgs e)
         {
             if (pendingWinner == 0) { ShowNotice(T("ChooseWinnerFirst")); return; }
@@ -2515,15 +2773,16 @@ T("NewGameConfirmMsg"))) return;
                 factionModeLocked = true; ft20ModeLocked = true;
                 if (FactionModeToggle != null) FactionModeToggle.IsEnabled = false;
                 if (Ft20ModeToggle != null) Ft20ModeToggle.IsEnabled = false;
+                if (Ft10ModeToggle != null) Ft10ModeToggle.IsEnabled = false;
             }
 
             int p1Start = p1Gold; int p2Start = p2Gold;
             int prevP1Points = p1Points; int prevP2Points = p2Points;
             P1PointsBorder.Background = normalPanelBrush; P2PointsBorder.Background = normalPanelBrush;
 
-            int tier = ft20ModeEnabled ? ((round - 1) / 3) * 15 : ((round - 1) / 5) * 10;
-            int winningReward = 55 + tier;
-            int losingReward = 85 + tier;
+            int tier = GetRoundRewardTier();
+            int winningReward = GetWinnerRewardBase() + tier;
+            int losingReward = GetLoserRewardBase() + tier;
             int tieReward = GetTieReward();
 
             int p1Reward;
@@ -2567,7 +2826,7 @@ T("NewGameConfirmMsg"))) return;
 
             if (pendingWinner == 1 || pendingWinner == 2)
             {
-                int step = ft20ModeEnabled ? 4 : 5;
+                int step = GetMilestoneStep();
 
                 int firstCheck = pendingWinner;
                 int secondCheck = pendingWinner == 1 ? 2 : 1;
@@ -2593,17 +2852,27 @@ T("NewGameConfirmMsg"))) return;
             }
 
             p1Gold += p1Reward; p2Gold += p2Reward; SetGoldGreen(1); SetGoldGreen(2);
-            p1Gold += p1Income; p2Gold += p2Income;
-            if (p1Income > 0) SetGoldGreen(1);
-            if (p2Income > 0) SetGoldGreen(2);
+            int p1AppliedIncome = IsIncomeAvailable() ? p1Income : 0;
+            int p2AppliedIncome = IsIncomeAvailable() ? p2Income : 0;
+            p1Gold += p1AppliedIncome; p2Gold += p2AppliedIncome;
+            if (p1AppliedIncome > 0) SetGoldGreen(1);
+            if (p2AppliedIncome > 0) SetGoldGreen(2);
 
-            p1Calc = BuildCalcText(p1Start, p1Interest, p1Reward, p1Income, p1MilestoneBonus, p1Gold);
-            p2Calc = BuildCalcText(p2Start, p2Interest, p2Reward, p2Income, p2MilestoneBonus, p2Gold);
+            p1Calc = BuildCalcText(p1Start, p1Interest, p1Reward, p1AppliedIncome, p1MilestoneBonus, p1Gold);
+            p2Calc = BuildCalcText(p2Start, p2Interest, p2Reward, p2AppliedIncome, p2MilestoneBonus, p2Gold);
 
-            if (!p1BoughtIncomeThisRound) p1MissedIncomeRounds++; else p1MissedIncomeRounds = 0;
-            if (!p2BoughtIncomeThisRound) p2MissedIncomeRounds++; else p2MissedIncomeRounds = 0;
-            p1IncomeDecayPercent = GetIncomeDecayPercent(p1MissedIncomeRounds);
-            p2IncomeDecayPercent = GetIncomeDecayPercent(p2MissedIncomeRounds);
+            if (IsIncomeAvailable())
+            {
+                if (!p1BoughtIncomeThisRound) p1MissedIncomeRounds++; else p1MissedIncomeRounds = 0;
+                if (!p2BoughtIncomeThisRound) p2MissedIncomeRounds++; else p2MissedIncomeRounds = 0;
+                p1IncomeDecayPercent = GetIncomeDecayPercent(p1MissedIncomeRounds);
+                p2IncomeDecayPercent = GetIncomeDecayPercent(p2MissedIncomeRounds);
+            }
+            else
+            {
+                p1MissedIncomeRounds = 0; p2MissedIncomeRounds = 0;
+                p1IncomeDecayPercent = 0; p2IncomeDecayPercent = 0;
+            }
 
             p1BoughtIncomeThisRound = false; p2BoughtIncomeThisRound = false;
             p1ReplayBoughtThisRound = false; p2ReplayBoughtThisRound = false;
@@ -2614,10 +2883,12 @@ T("NewGameConfirmMsg"))) return;
             round++;
             pendingWinner = 0;
             UpdateUI();
+            ShowMatchEndPromptIfNeeded(prevP1Points, prevP2Points);
         }
 
         private void P1BuyIncome_Click(object sender, RoutedEventArgs e)
         {
+            if (!IsIncomeAvailable()) return;
             int cost = GetDisplayedIncomeCost(p1IncomeCost, p1IncomeDecayPercent, p1HasIncomeDiscount);
             if (p1BoughtIncomeThisRound) { ShowNotice(string.Format("{0} already bought income this round.", p1Name)); return; }
             if (p1Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold.", p1Name)); return; }
@@ -2636,6 +2907,7 @@ T("NewGameConfirmMsg"))) return;
 
         private void P2BuyIncome_Click(object sender, RoutedEventArgs e)
         {
+            if (!IsIncomeAvailable()) return;
             int cost = GetDisplayedIncomeCost(p2IncomeCost, p2IncomeDecayPercent, p2HasIncomeDiscount);
             if (p2BoughtIncomeThisRound) { ShowNotice(string.Format("{0} already bought income this round.", p2Name)); return; }
             if (p2Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold.", p2Name)); return; }
@@ -2654,7 +2926,7 @@ T("NewGameConfirmMsg"))) return;
 
         private void P1BuyPermMove_Click(object sender, RoutedEventArgs e)
         {
-            int cost = ft20ModeEnabled ? 175 : 200;
+            int cost = GetPermMoveCost();
             if (p1PermMoveUpgrades >= 2) { ShowNotice(string.Format("{0} has reached the perm move cap (2).", p1Name)); return; }
             if (p1Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold.", p1Name)); return; }
             PushUndoState();
@@ -2666,7 +2938,7 @@ T("NewGameConfirmMsg"))) return;
 
         private void P2BuyPermMove_Click(object sender, RoutedEventArgs e)
         {
-            int cost = ft20ModeEnabled ? 175 : 200;
+            int cost = GetPermMoveCost();
             if (p2PermMoveUpgrades >= 2) { ShowNotice(string.Format("{0} has reached the perm move cap (2).", p2Name)); return; }
             if (p2Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold.", p2Name)); return; }
             PushUndoState();
@@ -2678,17 +2950,19 @@ T("NewGameConfirmMsg"))) return;
 
         private void P1SingleTroopMove_Click(object sender, RoutedEventArgs e)
         {
-            if (p1Gold < 25) { ShowNotice(string.Format("{0} does not have enough gold (25).", p1Name)); return; }
-            PushUndoState(); ApplyGoldSpend(1, 25); SetGoldRed(1);
-            AddActionLog(string.Format(T("LogSingleTroopMove"), p1Name));
+            int cost = GetSingleTroopMoveCost();
+            if (p1Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold ({1}).", p1Name, cost)); return; }
+            PushUndoState(); ApplyGoldSpend(1, cost); SetGoldRed(1);
+            AddActionLog(string.Format(T("LogSingleTroopMove"), p1Name, cost));
             UpdateUI();
         }
 
         private void P2SingleTroopMove_Click(object sender, RoutedEventArgs e)
         {
-            if (p2Gold < 25) { ShowNotice(string.Format("{0} does not have enough gold (25).", p2Name)); return; }
-            PushUndoState(); ApplyGoldSpend(2, 25); SetGoldRed(2);
-            AddActionLog(string.Format(T("LogSingleTroopMove"), p2Name));
+            int cost = GetSingleTroopMoveCost();
+            if (p2Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold ({1}).", p2Name, cost)); return; }
+            PushUndoState(); ApplyGoldSpend(2, cost); SetGoldRed(2);
+            AddActionLog(string.Format(T("LogSingleTroopMove"), p2Name, cost));
             UpdateUI();
         }
 
@@ -3370,7 +3644,10 @@ T("NewGameConfirmMsg"))) return;
         public List<string> P1Factions { get; set; }
         public List<string> P2Factions { get; set; }
         public bool Ft20ModeEnabled { get; set; }
+        public bool Ft10ModeEnabled { get; set; }
+        public bool Ft30ModeEnabled { get; set; }
         public bool Ft20ModeLocked { get; set; }
+        public bool MatchEndPromptSuppressed { get; set; }
         public List<string> Ft20MilestonePool { get; set; }
         public int Ft20NextMilestoneRound { get; set; }
         public List<string> ActionLog { get; set; }

@@ -440,7 +440,7 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                     </Button>
 
                     <TextBlock x:Name="AppTitleText"
-                               Text="TABS Arena v.1.1.2"
+                               Text="TABS Arena v.1.1.3"
                                FontSize="26"
                                FontWeight="SemiBold"
                                Foreground="White"
@@ -454,29 +454,37 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                     <TextBlock x:Name="OverviewTitle" Text="Match Overview" FontSize="24" FontWeight="Bold"/>
                     <TextBlock x:Name="OverviewSub" Text="Use the controls below, then press Next Round to apply interest, upgrades, and spending."
                                Foreground="{StaticResource TextMuted}" Margin="0,6,0,14" TextWrapping="Wrap"/>
-                    <UniformGrid Columns="5" Margin="0,0,0,8">
-                            <Border Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.9*" MinWidth="150"/>
+                            <ColumnDefinition Width="1*" MinWidth="180"/>
+                            <ColumnDefinition Width="1*" MinWidth="180"/>
+                            <ColumnDefinition Width="1.12*" MinWidth="200"/>
+                            <ColumnDefinition Width="1*" MinWidth="180"/>
+                            <ColumnDefinition Width="1*" MinWidth="180"/>
+                        </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
                                 <StackPanel>
                                     <TextBlock x:Name="LblCurrentRound" Text="CURRENT ROUND" Foreground="{StaticResource TextMuted}" FontSize="12"/>
                                     <TextBlock x:Name="RoundText" Text="1" FontSize="30" FontWeight="Bold"/>
                                 </StackPanel>
                             </Border>
 
-                            <Border Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
+                            <Border Grid.Column="1" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
                                 <StackPanel>
                                     <TextBlock x:Name="LblNextTurnOrder" Text="NEXT TURN ORDER" Foreground="{StaticResource TextMuted}" FontSize="12"/>
                                     <TextBlock x:Name="TurnOrderText" Text="Not available yet" FontSize="18" FontWeight="Bold" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </Border>
 
-                            <Border Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
+                            <Border Grid.Column="2" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
                                 <StackPanel>
                                     <TextBlock x:Name="LblPendingResult" Text="PENDING RESULT" Foreground="{StaticResource TextMuted}" FontSize="12"/>
                                     <TextBlock x:Name="PendingResultText" Text="Not set" FontSize="18" FontWeight="Bold"/>
                                 </StackPanel>
                             </Border>
 
-                            <Border Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,10,10">
+                            <Border Grid.Column="3" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,10,10">
                                 <StackPanel>
                                     <TextBlock x:Name="LblFactionMode" Text="FACTION MODE" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
                                     <CheckBox x:Name="FactionModeToggle"
@@ -485,15 +493,23 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                                 </StackPanel>
                             </Border>
 
-                            <Border Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,0,10">
+                            <Border Grid.Column="4" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,10,10">
                                 <StackPanel>
-                                    <TextBlock x:Name="LblFT20Mode" Text="FT20 MODE" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="LblFT20Mode" Text="FT30 MODE" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
                                     <CheckBox x:Name="Ft20ModeToggle"
-                      Content="FT20 Mode: OFF"
+                      Content="FT30 Mode: OFF"
                       Click="Ft20ModeToggle_Click"/>
                                 </StackPanel>
                             </Border>
-                    </UniformGrid>
+                            <Border Grid.Column="5" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <TextBlock x:Name="LblFT10Mode" Text="FT10 MODE" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
+                                    <CheckBox x:Name="Ft10ModeToggle"
+                      Content="FT10 Mode: OFF"
+                      Click="Ft10ModeToggle_Click"/>
+                                </StackPanel>
+                            </Border>
+                    </Grid>
 
                     <Border x:Name="FirstTurnPromptBorder" Background="#1A1C1F" CornerRadius="16"
                             Padding="14" Margin="0,6,0,10" Visibility="Visible">

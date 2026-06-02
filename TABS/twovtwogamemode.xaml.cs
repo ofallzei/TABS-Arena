@@ -83,6 +83,7 @@ namespace TABS
                     _p3PermMovePurchases, _p4PermMovePurchases;
 
         // ── Faction mode ──────────────────────────────────────────────────
+        private const int StartingFactionCount = 3;
         private bool _factionModeEnabled = false;
         private bool _factionModeLocked = false;
 
@@ -136,9 +137,12 @@ namespace TABS
             { "Spooky",      "spooky.png"      }
 };
 
-        // ── FT20 mode ─────────────────────────────────────────────────────
-        private bool _ft20ModeEnabled = false;
+        // ── Match length modes ─────────────────────────────────────────────
+        private bool _ft20ModeEnabled = true;
+        private bool _ft10ModeEnabled = false;
+        private bool _ft30ModeEnabled = false;
         private bool _ft20ModeLocked = false;
+        private bool _matchEndPromptSuppressed = false;
         private List<string> _ft20RewardsRemaining = new List<string>();
         private int _ft20NextMilestone = 4;
 
@@ -296,7 +300,7 @@ namespace TABS
 
             var button = new Button
             {
-                Content = Loc.Get("BuyChosenFaction", 280),
+                Content = Loc.Get("BuyChosenFaction", GetChosenFactionCost(player)),
                 Background = new SolidColorBrush(Color.FromRgb(110, 169, 200)),
                 FontSize = 11,
                 Margin = new Thickness(0)
@@ -448,19 +452,18 @@ namespace TABS
             _lastRoundWinner = 0;
             _namesLocked = false; _firstTurnChosen = false;
             _redPoints = 0; _bluePoints = 0;
-            // Normal mode starts with the shared milestone system active
-            BuildSharedMilestonePool();
+            _factionModeEnabled = false; _factionModeLocked = false;
+            _ft20ModeEnabled = true; _ft10ModeEnabled = false; _ft30ModeEnabled = false; _ft20ModeLocked = false;
+            _matchEndPromptSuppressed = false;
             _p1GoldState = _p2GoldState = _p3GoldState = _p4GoldState = 0;
             _p1PointsState = _p2PointsState = _p3PointsState = _p4PointsState = 0;
             _p1InterestState = _p2InterestState = _p3InterestState = _p4InterestState = 0;
 
-            _factionModeEnabled = false; _factionModeLocked = false;
-            _ft20ModeEnabled = false; _ft20ModeLocked = false;
             _milestoneRewardsRemaining = new List<string>();
             _milestoneNextThreshold = 5;
             _milestoneSystemActive = false;
 
-            int start = 1200;
+            int start = GetStartingGold();
             _p1Gold = _p2Gold = _p3Gold = _p4Gold = start;
 
             _p1BoughtIncomeThisRound = _p2BoughtIncomeThisRound =
@@ -544,7 +547,7 @@ _p3NextFactionDiscountPct = _p4NextFactionDiscountPct = 0;
             _p3LastCalcText = Loc.Get("NoRoundYet");
             _p4LastCalcText = Loc.Get("NoRoundYet");
 
-            BuildSharedMilestonePool();
+            BuildFT20RewardPool();
         }
 
         private void BuildFT20RewardPool()
@@ -558,10 +561,14 @@ _p3NextFactionDiscountPct = _p4NextFactionDiscountPct = 0;
             "80% Off Next Chosen Faction",
             "80% Off Next Perm Move",
             "Sellback +15%",
-            "10% Off Next Income","10% Off Next Income",
             "+30% Next Sell",
             "-5% BFT Surcharge"
         };
+                if (!_ft10ModeEnabled)
+                {
+                    pool.Add("10% Off Next Income");
+                    pool.Add("10% Off Next Income");
+                }
             }
             else
             {
@@ -569,14 +576,19 @@ _p3NextFactionDiscountPct = _p4NextFactionDiscountPct = 0;
         {
             "80% Off Next Perm Move","80% Off Next Perm Move",
             "Sellback +15%",
-            "10% Off Next Income","10% Off Next Income","10% Off Next Income",
             "+30% Next Sell","+30% Next Sell",
             "-5% BFT Surcharge"
         };
+                if (!_ft10ModeEnabled)
+                {
+                    pool.Add("10% Off Next Income");
+                    pool.Add("10% Off Next Income");
+                    pool.Add("10% Off Next Income");
+                }
             }
             Shuffle(pool);
             _ft20RewardsRemaining = pool;
-            _ft20NextMilestone = 4;
+            _ft20NextMilestone = GetTimedMilestoneStep();
         }
 
         // Builds the shared milestone reward pool for Normal and Faction modes (every 5 pts)
@@ -671,10 +683,13 @@ _p3NextFactionDiscountPct = _p4NextFactionDiscountPct = 0;
             FactionModeToggleButton.Tag = _factionModeEnabled ? "True" : "False";
             FactionModeToggleButton.IsEnabled = !matchStarted;
 
-            // FT20 toggle
-            FT20ModeToggleButton.Content = _ft20ModeEnabled ? Loc.Get("FT20ModeOn") : Loc.Get("FT20ModeOff");
-            FT20ModeToggleButton.Tag = _ft20ModeEnabled ? "True" : "False";
+            // Match length toggles
+            FT20ModeToggleButton.Content = _ft30ModeEnabled ? Loc.Get("FT30ModeOn") : Loc.Get("FT30ModeOff");
+            FT20ModeToggleButton.Tag = _ft30ModeEnabled ? "True" : "False";
             FT20ModeToggleButton.IsEnabled = !matchStarted;
+            FT10ModeToggleButton.Content = _ft10ModeEnabled ? Loc.Get("FT10ModeOn") : Loc.Get("FT10ModeOff");
+            FT10ModeToggleButton.Tag = _ft10ModeEnabled ? "True" : "False";
+            FT10ModeToggleButton.IsEnabled = !matchStarted;
 
             NextRoundButton.IsEnabled = _pendingWinner != 0;
             NextRoundButton.Background = _pendingWinner != 0
@@ -686,7 +701,7 @@ _p3NextFactionDiscountPct = _p4NextFactionDiscountPct = 0;
                 ? new SolidColorBrush(Color.FromRgb(142, 108, 245))
                 : new SolidColorBrush(Color.FromRgb(55, 64, 76));
 
-            if (_ft20ModeEnabled) RefreshFT20InfoPanel();
+            if (IsTimedMilestoneMode()) RefreshFT20InfoPanel();
             else RefreshSharedMilestonePanel();
 
             bool showFaction = _factionModeEnabled;
@@ -788,7 +803,7 @@ _p3NextFactionDiscountPct = _p4NextFactionDiscountPct = 0;
 
         private void ResetAllPlayerPanelsForModeSwap()
         {
-            _p1Gold = _p2Gold = _p3Gold = _p4Gold = 1200;
+            _p1Gold = _p2Gold = _p3Gold = _p4Gold = GetStartingGold();
 
             _p1GoldState = _p2GoldState = _p3GoldState = _p4GoldState = 0;
             _p1PointsState = _p2PointsState = _p3PointsState = _p4PointsState = 0;
@@ -910,6 +925,89 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         private int CalcInterest(int gold)
     => Math.Min((gold / 50) * 10, 100);
 
+        private void NormalizeMatchModeFlags()
+        {
+            if (_ft10ModeEnabled)
+            {
+                _ft30ModeEnabled = false;
+                _ft20ModeEnabled = false;
+            }
+            else if (_ft30ModeEnabled)
+            {
+                _ft20ModeEnabled = false;
+            }
+            else
+            {
+                _ft20ModeEnabled = true;
+            }
+        }
+
+        private bool IsTimedMilestoneMode()
+        {
+            return _ft20ModeEnabled || _ft10ModeEnabled;
+        }
+
+        private bool IsIncomeAvailable()
+        {
+            return !_ft10ModeEnabled;
+        }
+
+        private int GetStartingGold()
+        {
+            return 1200;
+        }
+
+        private int GetRoundRewardTier()
+        {
+            if (_ft10ModeEnabled) return ((_round - 1) / 2) * 40;
+            if (_ft20ModeEnabled) return ((_round - 1) / 3) * 15;
+            return ((_round - 1) / 5) * 10;
+        }
+
+        private int GetWinnerRewardBase()
+        {
+            if (_ft10ModeEnabled) return 95;
+            if (_ft20ModeEnabled) return 75;
+            return 55;
+        }
+
+        private int GetLoserRewardBase()
+        {
+            if (_ft10ModeEnabled) return 125;
+            if (_ft20ModeEnabled) return 105;
+            return 85;
+        }
+
+        private int GetTieRewardBase()
+        {
+            return (GetWinnerRewardBase() + GetLoserRewardBase()) / 2;
+        }
+
+        private int GetTimedMilestoneStep()
+        {
+            return _ft10ModeEnabled ? 2 : 4;
+        }
+
+        private int GetPermMoveBaseCost()
+        {
+            if (_ft10ModeEnabled) return 125;
+            if (_ft20ModeEnabled) return 175;
+            return 200;
+        }
+
+        private int GetFactionCost(int player)
+        {
+            int purchases = GetFactionPurchases(player);
+            int baseCost = _ft10ModeEnabled ? 25 : 50;
+            int scale = _ft10ModeEnabled ? 15 : 20;
+            return baseCost + (purchases * scale);
+        }
+
+        private int GetSingleTroopMoveCost()
+        {
+            return _ft10ModeEnabled ? 20 : 25;
+        }
+
         private int GetBaseIncomeCost()
         {
             return _ft20ModeEnabled ? 130 : 100;
@@ -982,6 +1080,79 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         // ─────────────────────────────────────────────────────────────────
         //  Next Round — FIX: capture pendingWinner FIRST, then reset it
         // ─────────────────────────────────────────────────────────────────
+        private int GetMatchGoalPoints()
+        {
+            if (_ft10ModeEnabled) return 10;
+            if (_ft30ModeEnabled) return 30;
+            return 20;
+        }
+
+        private bool IsWinByTwoRuleActive(int previousWinnerPoints, int winnerPoints, int loserPoints)
+        {
+            int matchPoint = GetMatchGoalPoints() - 1;
+            return (previousWinnerPoints >= matchPoint && loserPoints >= matchPoint)
+                || (winnerPoints >= matchPoint && loserPoints >= matchPoint);
+        }
+
+        private bool ShouldShowMatchEndPrompt(int previousWinnerPoints, int winnerPoints, int loserPoints)
+        {
+            int goal = GetMatchGoalPoints();
+
+            if (IsWinByTwoRuleActive(previousWinnerPoints, winnerPoints, loserPoints))
+            {
+                bool hadAlreadyWon = previousWinnerPoints >= goal && previousWinnerPoints - loserPoints >= 2;
+                bool hasWonNow = winnerPoints >= goal && winnerPoints - loserPoints >= 2;
+                return hasWonNow && !hadAlreadyWon;
+            }
+
+            return previousWinnerPoints < goal && winnerPoints >= goal && winnerPoints > loserPoints;
+        }
+
+        private void ShowMatchEndPromptIfNeeded(int previousRedPoints, int previousBluePoints)
+        {
+            if (_matchEndPromptSuppressed) return;
+
+            int winner = 0;
+            bool wonByTwoRule = false;
+
+            if (ShouldShowMatchEndPrompt(previousRedPoints, _redPoints, _bluePoints))
+            {
+                winner = 1;
+                wonByTwoRule = IsWinByTwoRuleActive(previousRedPoints, _redPoints, _bluePoints);
+            }
+            else if (ShouldShowMatchEndPrompt(previousBluePoints, _bluePoints, _redPoints))
+            {
+                winner = 2;
+                wonByTwoRule = IsWinByTwoRuleActive(previousBluePoints, _bluePoints, _redPoints);
+            }
+
+            if (winner == 0) return;
+
+            int goal = GetMatchGoalPoints();
+            string winnerName = winner == 1 ? Loc.Get("RedTeam") : Loc.Get("BlueTeam");
+            string redTeamName = Loc.Get("RedTeam");
+            string blueTeamName = Loc.Get("BlueTeam");
+            string message = wonByTwoRule
+                ? Loc.Get("MatchEndWinByTwoMessage", redTeamName, _redPoints, blueTeamName, _bluePoints, winnerName)
+                : Loc.Get("MatchEndMessage", winnerName, goal);
+
+            var dialog = new MatchEndDialog(
+                Loc.Get("MatchEndTitle"),
+                message,
+                Loc.Get("MatchEndQuestion"),
+                Loc.Get("NewGamePlain"),
+                Loc.Get("ContinuePlaying"));
+
+            Window owner = Window.GetWindow(this);
+            if (owner != null) dialog.Owner = owner;
+
+            bool? result = dialog.ShowDialog();
+            if (result == true && dialog.StartNewGame)
+                StartNewGamePreservingModes();
+            else if (dialog.ContinueSelected)
+                _matchEndPromptSuppressed = true;
+        }
+
         private void NextRound_Click(object s, RoutedEventArgs e)
         {
             if (_pendingWinner == 0)
@@ -995,6 +1166,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
             // Capture winner NOW — do not use _pendingWinner after resetting it
             int winner = _pendingWinner;
+            int previousRedPoints = _redPoints;
+            int previousBluePoints = _bluePoints;
 
             // Lock mode toggles after first round advance
             _factionModeLocked = true;
@@ -1040,14 +1213,28 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             }
 
             // ── 3. Permanent income ────────────────────────────────────────
-            for (int p = 1; p <= 4; p++)
+            if (IsIncomeAvailable())
             {
-                int inc = GetIncome(p);
-                if (inc > 0) AddGold(p, inc);
+                for (int p = 1; p <= 4; p++)
+                {
+                    int inc = GetIncome(p);
+                    if (inc > 0) AddGold(p, inc);
+                }
             }
 
             // ── 4. Income decay tracking ───────────────────────────────────
-            for (int p = 1; p <= 4; p++) UpdateIncomeDecay(p);
+            if (IsIncomeAvailable())
+            {
+                for (int p = 1; p <= 4; p++) UpdateIncomeDecay(p);
+            }
+            else
+            {
+                for (int p = 1; p <= 4; p++)
+                {
+                    SetIncomeMissedRounds(p, 0);
+                    SetIncomeDecayPct(p, 0);
+                }
+            }
             _p1BoughtIncome = _p2BoughtIncome =
             _p3BoughtIncome = _p4BoughtIncome = false;
             _p1BoughtIncomeThisRound = _p2BoughtIncomeThisRound =
@@ -1058,7 +1245,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             ApplyRoundReward(winner);
 
             // ── 6. Milestones ──────────────────────────────────────────────
-            if (_ft20ModeEnabled)
+            if (IsTimedMilestoneMode())
                 CheckFT20Milestones();
             else
                 CheckSharedMilestones();
@@ -1073,6 +1260,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             _round++;
 
             RefreshAllUI();
+            ShowMatchEndPromptIfNeeded(previousRedPoints, previousBluePoints);
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -1111,32 +1299,14 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private void GetRoundRewardValues(out int winnerGold, out int loserGold)
         {
-            if (_ft20ModeEnabled)
-            {
-                int tier = (_round - 1) / 3;
-                winnerGold = 55 + (tier * 15);
-                loserGold = 85 + (tier * 15);
-            }
-            else
-            {
-                int tier = (_round - 1) / 5;
-                winnerGold = 55 + (tier * 10);
-                loserGold = 85 + (tier * 10);
-            }
+            int tier = GetRoundRewardTier();
+            winnerGold = GetWinnerRewardBase() + tier;
+            loserGold = GetLoserRewardBase() + tier;
         }
 
         private int GetTieRewardValue()
         {
-            if (_ft20ModeEnabled)
-            {
-                int tier = (_round - 1) / 3;
-                return 70 + (tier * 15);
-            }
-            else
-            {
-                int tier = (_round - 1) / 5;
-                return 70 + (tier * 10);
-            }
+            return GetTieRewardBase() + GetRoundRewardTier();
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -1287,7 +1457,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             string team = isRed ? "Red" : "Blue";
             LogAction($"🏆 {Loc.Get("LogFT20Milestone", _ft20NextMilestone, team, reward)}");
             ShowNotice(Loc.Get("NoticeFT20Milestone", _ft20NextMilestone, Loc.Get(isRed ? "RedTeamShort" : "BlueTeamShort"), LocalizeReward(reward)), NoticeType.Milestone);
-            _ft20NextMilestone += 4;
+            _ft20NextMilestone += GetTimedMilestoneStep();
         }
 
         private string LocalizeReward(string reward)
@@ -1371,6 +1541,14 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                  // ─────────────────────────────────────────────────────────────────
         private void UpdateIncomeDecay(int player)
         {
+            if (!IsIncomeAvailable())
+            {
+                SetIncomeMissedRounds(player, 0);
+                SetIncomeDecayPct(player, 0);
+                SetIncomeCost(player, Math.Round(GetBaseIncomeCost() * (decimal)Math.Pow(1.24, GetIncomeUpgrades(player))));
+                return;
+            }
+
             bool bought = GetBoughtIncome(player);
             int missed = GetIncomeMissedRounds(player);
             int decay = GetIncomeDecayPct(player);
@@ -1425,6 +1603,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private void BuyIncome(int player)
         {
+            if (!IsIncomeAvailable()) return;
+
             if (GetBoughtIncomeThisRound(player))
             {
                 ShowNotice(Loc.Get("IncomeAlreadyBought", player), NoticeType.Warning);
@@ -1478,7 +1658,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private void BuyPermMove(int player)
         {
-            int baseCost = _ft20ModeEnabled ? 175 : 200;
+            int baseCost = GetPermMoveBaseCost();
             int discountPct = GetNextPermMoveDiscountPct(player);
             int max = GetPermMoveMaxPurchases(player);
             int purchases = GetPermMovePurchases(player);
@@ -1527,7 +1707,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 return;
             }
 
-            int baseCost = 50 + purchases * 20;
+            int baseCost = GetFactionCost(player);
             int discountPct = GetNextFactionDiscountPct(player);
             int cost = (int)Math.Ceiling(Math.Max(1m, baseCost * (1m - discountPct / 100m)));
 
@@ -1555,7 +1735,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             if (discountPct > 0)
                 SetNextFactionDiscountPct(player, 0);
 
-            int nextCost = 50 + (purchases + 1) * 20;
+            int nextCost = GetFactionCost(player);
             LogAction($"⚔️ {Loc.Get("LogBoughtFaction", player, newFaction, cost, discountPct > 0 ? $" ({discountPct}% off)" : "", nextCost)}");
             ShowNotice(Loc.Get("NoticeBoughtFaction", player, newFaction, nextCost), NoticeType.Success);
             RefreshAllUI();
@@ -1611,10 +1791,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         // ─────────────────────────────────────────────────────────────────
         //  Fixed-amount spending
         // ─────────────────────────────────────────────────────────────────
-        private void P1SingleTroopMove_Click(object s, RoutedEventArgs e) => SpendFixed(1, 25, "troop move");
-        private void P2SingleTroopMove_Click(object s, RoutedEventArgs e) => SpendFixed(2, 25, "troop move");
-        private void P3SingleTroopMove_Click(object s, RoutedEventArgs e) => SpendFixed(3, 25, "troop move");
-        private void P4SingleTroopMove_Click(object s, RoutedEventArgs e) => SpendFixed(4, 25, "troop move");
+        private void P1SingleTroopMove_Click(object s, RoutedEventArgs e) => SpendFixed(1, GetSingleTroopMoveCost(), "troop move");
+        private void P2SingleTroopMove_Click(object s, RoutedEventArgs e) => SpendFixed(2, GetSingleTroopMoveCost(), "troop move");
+        private void P3SingleTroopMove_Click(object s, RoutedEventArgs e) => SpendFixed(3, GetSingleTroopMoveCost(), "troop move");
+        private void P4SingleTroopMove_Click(object s, RoutedEventArgs e) => SpendFixed(4, GetSingleTroopMoveCost(), "troop move");
 
         private void P1Replay_Click(object s, RoutedEventArgs e) => BuyReplay(1);
         private void P2Replay_Click(object s, RoutedEventArgs e) => BuyReplay(2);
@@ -1672,10 +1852,15 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private void UpdateFixedSpendButtons()
         {
-            SetCostButtonVisual(P1SingleTroopMoveButton, 1, 25);
-            SetCostButtonVisual(P2SingleTroopMoveButton, 2, 25);
-            SetCostButtonVisual(P3SingleTroopMoveButton, 3, 25);
-            SetCostButtonVisual(P4SingleTroopMoveButton, 4, 25);
+            int cost = GetSingleTroopMoveCost();
+            P1SingleTroopMoveButton.Content = Loc.Get("SingleTroopMove", cost);
+            P2SingleTroopMoveButton.Content = Loc.Get("SingleTroopMove", cost);
+            P3SingleTroopMoveButton.Content = Loc.Get("SingleTroopMove", cost);
+            P4SingleTroopMoveButton.Content = Loc.Get("SingleTroopMove", cost);
+            SetCostButtonVisual(P1SingleTroopMoveButton, 1, cost);
+            SetCostButtonVisual(P2SingleTroopMoveButton, 2, cost);
+            SetCostButtonVisual(P3SingleTroopMoveButton, 3, cost);
+            SetCostButtonVisual(P4SingleTroopMoveButton, 4, cost);
         }
 
         private void SetCostButtonVisual(Button button, int player, int cost)
@@ -1869,7 +2054,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         {
             int startGold = GetGold(player);
             int interest = CalcInterest(startGold);
-            int income = GetIncome(player);
+            int income = IsIncomeAvailable() ? GetIncome(player) : 0;
             int roundReward = tied ? tieReward : (won ? winnerReward : loserReward);
             int milestoneBonus = 0;
             int finalGold = startGold + interest + income + roundReward + milestoneBonus;
@@ -1890,8 +2075,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         // ─────────────────────────────────────────────────────────────────
         private void AssignRandomFactions()
         {
-            _p1Factions = DrawRandomFactions(2); _p2Factions = DrawRandomFactions(2);
-            _p3Factions = DrawRandomFactions(2); _p4Factions = DrawRandomFactions(2);
+            _p1Factions = DrawRandomFactions(StartingFactionCount); _p2Factions = DrawRandomFactions(StartingFactionCount);
+            _p3Factions = DrawRandomFactions(StartingFactionCount); _p4Factions = DrawRandomFactions(StartingFactionCount);
         }
 
         private List<string> DrawRandomFactions(int count)
@@ -1914,6 +2099,19 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         // ─────────────────────────────────────────────────────────────────
         private void UpdateIncomeButtons()
         {
+            if (!IsIncomeAvailable())
+            {
+                foreach (int p in new[] { 1, 2, 3, 4 })
+                {
+                    GetBuyIncomeButton(p).Visibility = Visibility.Collapsed;
+                }
+                P1IncomeBadgeBorder.Visibility = Visibility.Collapsed;
+                P2IncomeBadgeBorder.Visibility = Visibility.Collapsed;
+                P3IncomeBadgeBorder.Visibility = Visibility.Collapsed;
+                P4IncomeBadgeBorder.Visibility = Visibility.Collapsed;
+                return;
+            }
+
             int incomeGain = _ft20ModeEnabled ? 13 : 10;
 
             UpdateIncomeDiscountBadge(1, P1BuyIncomeButton, P1IncomeDecayPctText, P1IncomeBadgeBorder, incomeGain);
@@ -1924,6 +2122,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private void UpdateIncomeDiscountBadge(int player, Button button, TextBlock badgeText, Border badgeBorder, int incomeGain)
         {
+            button.Visibility = Visibility.Visible;
             int shownCost = GetDisplayedIncomeCost(player);
             int totalDiscountPct = GetIncomeDecayPct(player) + GetNextIncomeDiscountPct(player);
 
@@ -1961,7 +2160,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         {
             int max = GetPermMoveMaxPurchases(player);
             int purchases = GetPermMovePurchases(player);
-            int baseCost = _ft20ModeEnabled ? 175 : 200;
+            int baseCost = GetPermMoveBaseCost();
             int discountPct = GetNextPermMoveDiscountPct(player);
             int shownCost = (int)Math.Ceiling(Math.Max(1m, baseCost * (1m - discountPct / 100m)));
 
@@ -1989,7 +2188,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         {
             int max = GetPermMoveMaxPurchases(player);
             int purchases = GetPermMovePurchases(player);
-            int baseCost = _ft20ModeEnabled ? 175 : 200;
+            int baseCost = GetPermMoveBaseCost();
             int discountPct = GetNextPermMoveDiscountPct(player);
             int shownCost = (int)Math.Ceiling(Math.Max(1m, baseCost * (1m - discountPct / 100m)));
 
@@ -2049,7 +2248,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 return;
             }
 
-            int baseCost = 50 + purchases * 20;
+            int baseCost = GetFactionCost(player);
             int discountPct = GetNextFactionDiscountPct(player);
             int shownCost = (int)Math.Ceiling(Math.Max(1m, baseCost * (1m - discountPct / 100m)));
 
@@ -2285,30 +2484,18 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             {
                 ResetAllPlayerPanelsForModeSwap();
                 AssignRandomFactions();
-                if (!_ft20ModeEnabled) BuildSharedMilestonePool();
+                if (IsTimedMilestoneMode()) BuildFT20RewardPool();
+                else BuildSharedMilestonePool();
                 LogAction($"⚙️ {Loc.Get("LogFactionModeOn")}");
                 ShowNotice(Loc.Get("NoticeFactionModeOn"), NoticeType.Info);
             }
             else
             {
-                if (_ft20ModeEnabled)
-                {
-                    _ft20ModeEnabled = false;
-                    _ft20RewardsRemaining = new List<string>();
-                    _ft20NextMilestone = 4;
-                }
-                // Do NOT wipe the milestone pool — normal mode resumes with whatever is left
-                // Only rebuild if the pool was faction-specific (has faction rewards in it)
-                bool poolHasFactionRewards = _milestoneRewardsRemaining
-                    .Any(r => r == "80% Off Next Faction");
-                if (poolHasFactionRewards || !_milestoneSystemActive)
-                {
-                    // Rebuild as normal mode pool (no faction rewards)
-                    BuildSharedMilestonePool();
-                }
                 ResetAllPlayerPanelsForModeSwap();
                 _p1Factions.Clear(); _p2Factions.Clear();
                 _p3Factions.Clear(); _p4Factions.Clear();
+                if (IsTimedMilestoneMode()) BuildFT20RewardPool();
+                else BuildSharedMilestonePool();
                 LogAction($"⚙️ {Loc.Get("LogFactionModeOff")}");
                 ShowNotice(Loc.Get("NoticeFactionModeOff"), NoticeType.Info);
             }
@@ -2324,33 +2511,35 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         {
             if (_round > 1 || _ft20ModeLocked) return;
             CloseAllGoldWindows();
-            _ft20ModeEnabled = !_ft20ModeEnabled;
+            _ft30ModeEnabled = !_ft30ModeEnabled;
+            if (_ft30ModeEnabled) _ft10ModeEnabled = false;
+            NormalizeMatchModeFlags();
             _firstTurnChosen = false;
             TurnOrderText.Text = Loc.Get("NotAvailableYet");
-            if (_ft20ModeEnabled)
-            {
-                ResetAllPlayerPanelsForModeSwap();
-                _milestoneRewardsRemaining = new List<string>();
-                _milestoneNextThreshold = 5;
-                _milestoneSystemActive = false;
-                BuildFT20RewardPool();
-                if (_factionModeEnabled) AssignRandomFactions();
-                LogAction(Loc.Get("LogFT20ModeOn"));
-                ShowNotice(Loc.Get("NoticeFT20ModeOn"), NoticeType.Info);
-            }
-            else
-            {
-                _ft20RewardsRemaining = new List<string>();
-                _ft20NextMilestone = 4;
-                ResetAllPlayerPanelsForModeSwap();
-                if (_factionModeEnabled) AssignRandomFactions();
-                if (_milestoneRewardsRemaining.Count == 0)
-                    BuildSharedMilestonePool();
-                else
-                    _milestoneSystemActive = true;
-                LogAction($"⚙️ {Loc.Get("LogFT20ModeOff")}");
-                ShowNotice(Loc.Get("NoticeFT20ModeOff"), NoticeType.Info);
-            }
+            ResetAllPlayerPanelsForModeSwap();
+            if (_factionModeEnabled) AssignRandomFactions();
+            if (IsTimedMilestoneMode()) BuildFT20RewardPool();
+            else BuildSharedMilestonePool();
+            LogAction(_ft30ModeEnabled ? Loc.Get("LogFT30ModeOn") : Loc.Get("LogFT30ModeOff"));
+            ShowNotice(Loc.Get(_ft30ModeEnabled ? "NoticeFT30ModeOn" : "NoticeFT30ModeOff"), NoticeType.Info);
+            RefreshAllUI();
+        }
+
+        private void FT10ModeToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_round > 1 || _ft20ModeLocked) return;
+            CloseAllGoldWindows();
+            _ft10ModeEnabled = !_ft10ModeEnabled;
+            if (_ft10ModeEnabled) _ft30ModeEnabled = false;
+            NormalizeMatchModeFlags();
+            _firstTurnChosen = false;
+            TurnOrderText.Text = Loc.Get("NotAvailableYet");
+            ResetAllPlayerPanelsForModeSwap();
+            if (_factionModeEnabled) AssignRandomFactions();
+            if (IsTimedMilestoneMode()) BuildFT20RewardPool();
+            else BuildSharedMilestonePool();
+            LogAction(_ft10ModeEnabled ? Loc.Get("LogFT10ModeOn") : Loc.Get("LogFT10ModeOff"));
+            ShowNotice(Loc.Get(_ft10ModeEnabled ? "NoticeFT10ModeOn" : "NoticeFT10ModeOff"), NoticeType.Info);
             RefreshAllUI();
         }
 
@@ -2713,7 +2902,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             LblNextTurnOrder.Text = Loc.Get("NextTurnOrder");
             LblPendingResult.Text = Loc.Get("PendingResult");
             LblFactionMode.Text = Loc.Get("FactionMode");
-            LblFT20Mode.Text = Loc.Get("FT20Mode");
+            LblFT20Mode.Text = Loc.Get("FT30Mode");
+            LblFT10Mode.Text = Loc.Get("FT10Mode");
             LblWhichTeamFirst.Text = Loc.Get("WhichTeamFirst");
             LblMatchSaves.Text = Loc.Get("MatchSaves");
             SaveButton.Content = Loc.Get("Save");
@@ -2736,19 +2926,21 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
             // Faction/FT20 toggles
             bool factionOn = FactionModeToggleButton.Tag?.ToString() == "True";
-            bool ft20On = FT20ModeToggleButton.Tag?.ToString() == "True";
+            bool ft30On = FT20ModeToggleButton.Tag?.ToString() == "True";
+            bool ft10On = FT10ModeToggleButton.Tag?.ToString() == "True";
             FactionModeToggleButton.Content = factionOn ? Loc.Get("FactionModeOn") : Loc.Get("FactionModeOff");
-            FT20ModeToggleButton.Content = ft20On ? Loc.Get("FT20ModeOn") : Loc.Get("FT20ModeOff");
+            FT20ModeToggleButton.Content = ft30On ? Loc.Get("FT30ModeOn") : Loc.Get("FT30ModeOff");
+            FT10ModeToggleButton.Content = ft10On ? Loc.Get("FT10ModeOn") : Loc.Get("FT10ModeOff");
 
             // Per-player buttons (all 4 players)
             foreach (int p in new[] { 1, 2, 3, 4 })
             {
-                bool isFT20 = ft20On;
+                bool isFT20 = _ft20ModeEnabled;
                 GetBuyIncomeButton(p).Content = Loc.Get(isFT20 ? "BuyIncomeF" : "BuyIncome");
                 GetBuyPermMoveButton(p).Content = Loc.Get(isFT20 ? "BuyPermMoveF" : "BuyPermMove")
                                                     + $" [{GetPermMovePurchases(p)}/{GetPermMoveMaxPurchases(p)}]";
                 GetBuyFactionButton(p).Content = Loc.Get("BuyFaction");
-                GetSingleTroopMoveButton(p).Content = Loc.Get("SingleTroopMove");
+                GetSingleTroopMoveButton(p).Content = Loc.Get("SingleTroopMove", GetSingleTroopMoveCost());
                 GetReplayButton(p).Content = Loc.Get("Replay");
                 GetSpendButton(p).Content = Loc.Get("Spend");
                 GetBuyTeamButton(p).Content = Loc.Get("BFT");
@@ -2795,7 +2987,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 : _pendingWinner == 3 ? Loc.Get("Tie")
                 : Loc.Get("NotSet");
 
-            if (_ft20ModeEnabled) RefreshFT20InfoPanel();
+            if (IsTimedMilestoneMode()) RefreshFT20InfoPanel();
             else RefreshSharedMilestonePanel();
 
             UpdateReplayButtons();
@@ -3175,16 +3367,25 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             { Owner = Window.GetWindow(this) };
             if (confirmNew.ShowDialog() != true) return;
 
+            StartNewGamePreservingModes();
+        }
+
+        private void StartNewGamePreservingModes()
+        {
             bool wasFaction = _factionModeEnabled;
-            bool wasFT20 = _ft20ModeEnabled;
+            bool wasFT10 = _ft10ModeEnabled;
+            bool wasFT30 = _ft30ModeEnabled;
 
             InitNewGame();
 
             // Restore mode states so new game stays in the same mode
             _factionModeEnabled = wasFaction;
-            _ft20ModeEnabled = wasFT20;
+            _ft10ModeEnabled = wasFT10;
+            _ft30ModeEnabled = wasFT30;
+            NormalizeMatchModeFlags();
+            ResetAllPlayerPanelsForModeSwap();
 
-            if (_ft20ModeEnabled)
+            if (IsTimedMilestoneMode())
             {
                 _milestoneRewardsRemaining = new List<string>();
                 _milestoneNextThreshold = 5;
@@ -3192,13 +3393,9 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 BuildFT20RewardPool();
                 if (_factionModeEnabled) AssignRandomFactions();
             }
-            else if (_factionModeEnabled)
-            {
-                AssignRandomFactions();
-                BuildSharedMilestonePool();
-            }
             else
             {
+                if (_factionModeEnabled) AssignRandomFactions();
                 BuildSharedMilestonePool();
             }
 
@@ -3376,7 +3573,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             {
                 // Top bar
                 ["MainMenu"] = "← Menú Principal",
-                ["AppTitle"] = "TABS Arena v.1.1.2",
+                ["AppTitle"] = "TABS Arena v.1.1.3",
 
                 // Overview panel
                 ["OverviewTitle"] = "Resumen 2v2",
@@ -3397,6 +3594,12 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["FT20Mode"] = "MODO FT20",
                 ["FT20ModeOff"] = "Modo FT20: OFF",
                 ["FT20ModeOn"] = "Modo FT20: ON",
+                ["FT30Mode"] = "MODO FT30",
+                ["FT30ModeOff"] = "Modo FT30: OFF",
+                ["FT30ModeOn"] = "Modo FT30: ON",
+                ["FT10Mode"] = "MODO FT10",
+                ["FT10ModeOff"] = "Modo FT10: OFF",
+                ["FT10ModeOn"] = "Modo FT10: ON",
                 ["WhichTeamFirst"] = "¿Qué equipo va primero esta partida?",
                 ["RedTeamFirst"] = "Equipo Rojo Va Primero",
                 ["BlueTeamFirst"] = "Equipo Azul Va Primero",
@@ -3456,7 +3659,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
                 // Utility
                 ["Utility"] = "Utilidad",
-                ["SingleTroopMove"] = "Mover tropa individual (25)",
+                ["SingleTroopMove"] = "Mover tropa individual ({0})",
                 ["Replay"] = "Repetición (10)",
                 ["CustomSpend"] = "Gasto personalizado de tropas",
                 ["Spend"] = "Gastar",
@@ -3483,7 +3686,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["GuideRoundTitle"] = "Rondas, empates y replay",
                 ["GuideRoundBody"] = "Cuando termine una batalla, elige el ganador y presiona Siguiente Ronda. Si ambos equipos están de acuerdo en que fue empate, usa Empate. Si no hay acuerdo, usa un temporizador de 3 minutos y fuerza empate si nadie gana. Replay cuesta 10 de oro y solo puede comprarse una vez por ronda por equipo. Replay es solo para propósitos informativos y no cambia el resultado ni el ganador de la ronda.",
                 ["GuideEconomyTitle"] = "Economía",
-                ["GuideEconomyBody"] = "El interés da +10 de oro por cada 50 de oro que tenga un jugador, con máximo de +100. Comprar ingreso aumenta el ingreso permanente: +10 en modos normales y +13 en modos FT20. Solo puede comprarse una vez por ronda. Si no compras ingreso por varias rondas, aparece descuento por decaimiento de ingreso.",
+                ["GuideEconomyBody"] = "El interés da +10 de oro por cada 50 de oro que tenga un jugador, con máximo de +100. Comprar ingreso aumenta el ingreso permanente: +10 en FT30 y +13 en FT20. FT10 elimina compras de ingreso y decaimiento de ingreso.",
                 ["GuideRulesTitle"] = "Reglas 2v2",
                 ["GuideRulesBody"] = "No se permite controlar unidades durante la batalla. En mapas 2v2, no coloques unidades en highground, en el círculo central, en grietas, ni en sus entradas. Deben ser 2 ejércitos por lado, 1 ejército por jugador, 4 ejércitos total. Unidades prohibidas actualmente: Present Elf y Dragon.",
                 ["GuideSavingTitle"] = "Guardado",
@@ -3518,6 +3721,12 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["NewGameConfirmTitle"] = "Nueva Partida",
                 ["NewGameConfirmMsg"] = "¿Iniciar nueva partida? El progreso no guardado se perderá.",
                 ["NewGameStarted"] = "¡Nueva partida iniciada!",
+                ["MatchEndTitle"] = "Partida Terminada",
+                ["MatchEndMessage"] = "{0} ganó la partida al llegar a {1} puntos.",
+                ["MatchEndWinByTwoMessage"] = "{0}: {1}   {2}: {3}\n\n{4} gana por la regla de ganar por 2.",
+                ["MatchEndQuestion"] = "¿Iniciar una nueva partida o seguir jugando?",
+                ["NewGamePlain"] = "Nueva Partida",
+                ["ContinuePlaying"] = "Continuar",
                 ["MainMenuConfirmTitle"] = "Menú Principal",
                 ["MainMenuConfirmMsg"] = "¿Seguro que quieres volver al menú principal?",
                 ["CloseGameConfirmTitle"] = "Cerrar Juego",
@@ -3545,10 +3754,14 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["LogSpent"] = "J{0} gastó {1}g.",
                 ["LogBFT"] = "J{0} BFT unidad ({1}g) → pagó {2}g (+{3}% recargo).",
                 ["LogSoldUnit"] = "J{0} vendió unidad ({1}g) → {2}g ({3}%).",
-                ["LogFactionModeOn"] = "Modo Facción ON — paneles reiniciados, 1200g inicio, 2 facciones aleatorias.",
+                ["LogFactionModeOn"] = "Modo Facción ON — paneles reiniciados, oro inicial del modo, 3 facciones aleatorias.",
                 ["LogFactionModeOff"] = "Modo Facción OFF.",
                 ["LogFT20ModeOn"] = "Modo FT20 ON — paneles reiniciados.",
                 ["LogFT20ModeOff"] = "Modo FT20 OFF — paneles reiniciados.",
+                ["LogFT30ModeOn"] = "Modo FT30 ON — paneles reiniciados.",
+                ["LogFT30ModeOff"] = "Modo FT30 OFF — modo FT20 seleccionado.",
+                ["LogFT10ModeOn"] = "Modo FT10 ON — 1200g inicial e ingreso desactivado.",
+                ["LogFT10ModeOff"] = "Modo FT10 OFF — modo FT20 seleccionado.",
                 ["LogMilestone"] = "Hito {0}pts — {1}: {2}",
                 ["LogFT20Milestone"] = "Hito FT20 {0}pts — {1}: {2}",
                 ["LogLoaded"] = "Cargado {0}.",
@@ -3571,6 +3784,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["NoticeFactionModeOff"] = "Modo Facción DESACTIVADO.",
                 ["NoticeFT20ModeOn"] = "¡Modo FT20 ACTIVADO! Paneles reiniciados.",
                 ["NoticeFT20ModeOff"] = "¡Modo FT20 DESACTIVADO! Paneles reiniciados.",
+                ["NoticeFT30ModeOn"] = "¡Modo FT30 ACTIVADO! Paneles reiniciados.",
+                ["NoticeFT30ModeOff"] = "Modo FT30 DESACTIVADO. Modo FT20 seleccionado.",
+                ["NoticeFT10ModeOn"] = "¡Modo FT10 ACTIVADO! 1200g inicial e ingreso desactivado.",
+                ["NoticeFT10ModeOff"] = "Modo FT10 DESACTIVADO. Modo FT20 seleccionado.",
                 ["Reward80OffFaction"] = "80% Desc. Próxima Facción",
                 ["Reward80OffChosenFaction"] = "80% Desc. Próxima Facción Elegida",
                 ["Reward80OffPermMove"] = "80% Desc. Próximo Mv Perm",
@@ -3617,7 +3834,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             private static readonly Dictionary<string, string> _defaults = new Dictionary<string, string>
             {
                 ["MainMenu"] = "← Main Menu",
-                ["AppTitle"] = "TABS Arena v.1.1.2",
+                ["AppTitle"] = "TABS Arena v.1.1.3",
                 ["OverviewTitle"] = "2v2 Match Overview",
                 ["OverviewSub"] = "Manage all four players then press Next Round to apply interest, milestones, rewards.",
                 ["CurrentRound"] = "CURRENT ROUND",
@@ -3631,6 +3848,12 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["FT20Mode"] = "FT20 MODE",
                 ["FT20ModeOff"] = "FT20 Mode: OFF",
                 ["FT20ModeOn"] = "FT20 Mode: ON",
+                ["FT30Mode"] = "FT30 MODE",
+                ["FT30ModeOff"] = "FT30 Mode: OFF",
+                ["FT30ModeOn"] = "FT30 Mode: ON",
+                ["FT10Mode"] = "FT10 MODE",
+                ["FT10ModeOff"] = "FT10 Mode: OFF",
+                ["FT10ModeOn"] = "FT10 Mode: ON",
                 ["WhichTeamFirst"] = "Which team is going first this match?",
                 ["RedTeamFirst"] = "Red Team Goes First",
                 ["BlueTeamFirst"] = "Blue Team Goes First",
@@ -3673,7 +3896,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["Upgrades"] = "Upgrades",
                 ["FactionsOwned"] = "FACTIONS OWNED",
                 ["Utility"] = "Utility",
-                ["SingleTroopMove"] = "Single troop move (25)",
+                ["SingleTroopMove"] = "Single troop move ({0})",
                 ["Replay"] = "Replay (10)",
                 ["CustomSpend"] = "Custom troop spend",
                 ["Spend"] = "Spend",
@@ -3696,7 +3919,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["GuideRoundTitle"] = "Rounds, Ties, And Replay",
                 ["GuideRoundBody"] = "When a battle ends, choose the winner and press Next Round. If both teams agree it was a tie, use Tie. If there is no agreement, use a 3-minute timer and force a tie if nobody wins. Replay costs 10 gold and can only be bought once per round per team. Replay is for informational purposes only and does not change the outcome or winner of the round.",
                 ["GuideEconomyTitle"] = "Economy",
-                ["GuideEconomyBody"] = "Interest gives +10 gold for every 50 gold a player has, capped at +100. Buying income increases permanent income: +10 in normal modes and +13 in FT20 modes. It can only be bought once per round. If income is not bought for several rounds, income decay gives a growing discount.",
+                ["GuideEconomyBody"] = "Interest gives +10 gold for every 50 gold a player has, capped at +100. Buying income increases permanent income: +10 in FT30 and +13 in FT20. FT10 removes income purchases and income decay.",
                 ["GuideRulesTitle"] = "2v2 Rules",
                 ["GuideRulesBody"] = "Players may not control units during battle. On 2v2 maps, do not place units on high ground, in the middle circle, in crevices, or at entrances to the circle or crevices. There should be 2 armies per side, 1 army per player, 4 armies total. Currently banned units: Present Elf and Dragon.",
                 ["GuideSavingTitle"] = "Saving",
@@ -3731,6 +3954,12 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["NewGameConfirmTitle"] = "New Game",
                 ["NewGameConfirmMsg"] = "Start a new game? Unsaved progress will be lost.",
                 ["NewGameStarted"] = "New game started.",
+                ["MatchEndTitle"] = "Match Complete",
+                ["MatchEndMessage"] = "{0} won the match by reaching {1} points.",
+                ["MatchEndWinByTwoMessage"] = "{0}: {1}   {2}: {3}\n\n{4} wins via win by 2 rule.",
+                ["MatchEndQuestion"] = "Start a new game or continue playing?",
+                ["NewGamePlain"] = "New Game",
+                ["ContinuePlaying"] = "Continue",
                 ["MainMenuConfirmTitle"] = "Main Menu",
                 ["MainMenuConfirmMsg"] = "Are you sure you want to go back to the main menu?",
                 ["CloseGameConfirmTitle"] = "Close Game",
@@ -3756,10 +3985,14 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["LogSpent"] = "P{0} spent {1}g.",
                 ["LogBFT"] = "P{0} BFT unit ({1}g) → paid {2}g (+{3}% surcharge).",
                 ["LogSoldUnit"] = "P{0} sold unit ({1}g) → {2}g ({3}%).",
-                ["LogFactionModeOn"] = "Faction Mode ON — panels reset, 1200g start, 2 random factions.",
+                ["LogFactionModeOn"] = "Faction Mode ON — panels reset, mode starting gold, 3 random factions.",
                 ["LogFactionModeOff"] = "Faction Mode OFF.",
                 ["LogFT20ModeOn"] = "FT20 Mode ON — panels reset.",
                 ["LogFT20ModeOff"] = "FT20 Mode OFF — panels reset.",
+                ["LogFT30ModeOn"] = "FT30 Mode ON — panels reset.",
+                ["LogFT30ModeOff"] = "FT30 Mode OFF — FT20 mode selected.",
+                ["LogFT10ModeOn"] = "FT10 Mode ON — 1200g start and income disabled.",
+                ["LogFT10ModeOff"] = "FT10 Mode OFF — FT20 mode selected.",
                 ["LogMilestone"] = "Milestone {0}pts — {1}: {2}",
                 ["LogFT20Milestone"] = "FT20 Milestone {0}pts — {1}: {2}",
                 ["LogLoaded"] = "Loaded {0}.",
@@ -3778,6 +4011,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["NoticeFactionModeOff"] = "Faction Mode OFF.",
                 ["NoticeFT20ModeOn"] = "FT20 Mode ON! Player panels reset.",
                 ["NoticeFT20ModeOff"] = "FT20 Mode OFF! Player panels reset.",
+                ["NoticeFT30ModeOn"] = "FT30 Mode ON! Player panels reset.",
+                ["NoticeFT30ModeOff"] = "FT30 Mode OFF. FT20 mode selected.",
+                ["NoticeFT10ModeOn"] = "FT10 Mode ON! 1200g start and income disabled.",
+                ["NoticeFT10ModeOff"] = "FT10 Mode OFF. FT20 mode selected.",
                 ["NothingToUndo"] = "Nothing to undo.",
                 ["RedTeamShort"] = "Red",
                 ["BlueTeamShort"] = "Blue",
@@ -3816,7 +4053,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         }
         private TwoV2SaveData BuildSaveData(string name) => new TwoV2SaveData
         {
-            SaveVersion = 6,
+            SaveVersion = 7,
             SaveName = name,
             Round = _round,
             PendingWinner = _pendingWinner,
@@ -3887,7 +4124,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             FactionModeEnabled = _factionModeEnabled,
             FactionModeLocked = _factionModeLocked,
             FT20ModeEnabled = _ft20ModeEnabled,
+            FT10ModeEnabled = _ft10ModeEnabled,
+            FT30ModeEnabled = _ft30ModeEnabled,
             FT20ModeLocked = _ft20ModeLocked,
+            MatchEndPromptSuppressed = _matchEndPromptSuppressed,
             FT20NextMilestone = _ft20NextMilestone,
             FT20RewardsRemaining = new List<string>(_ft20RewardsRemaining),
             MilestoneRewardsRemaining = new List<string>(_milestoneRewardsRemaining),
@@ -4010,9 +4250,13 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
             _factionModeEnabled = d.FactionModeEnabled;
             _factionModeLocked = d.FactionModeLocked;
-            _ft20ModeEnabled = d.FT20ModeEnabled;
+            _ft10ModeEnabled = d.FT10ModeEnabled;
+            _ft30ModeEnabled = d.FT30ModeEnabled || (d.SaveVersion < 7 && !d.FT20ModeEnabled);
+            _ft20ModeEnabled = !_ft10ModeEnabled && !_ft30ModeEnabled;
+            NormalizeMatchModeFlags();
             _ft20ModeLocked = d.FT20ModeLocked;
-            _ft20NextMilestone = d.FT20NextMilestone;
+            _matchEndPromptSuppressed = d.MatchEndPromptSuppressed;
+            _ft20NextMilestone = d.FT20NextMilestone > 0 ? d.FT20NextMilestone : GetTimedMilestoneStep();
             _ft20RewardsRemaining = new List<string>(d.FT20RewardsRemaining ?? new List<string>());
             _milestoneRewardsRemaining = new List<string>(d.MilestoneRewardsRemaining ?? new List<string>());
             _milestoneNextThreshold = d.MilestoneNextThreshold > 0 ? d.MilestoneNextThreshold : 5;
@@ -4176,7 +4420,9 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private int GetChosenFactionCost(int p)
         {
-            return 280 + (GetFactionPurchases(p) * 20);
+            int baseCost = _ft10ModeEnabled ? 140 : 280;
+            int scale = _ft10ModeEnabled ? 15 : 20;
+            return baseCost + (GetFactionPurchases(p) * scale);
         }
 
         private int GetDisplayedChosenFactionCost(int p)
@@ -4264,7 +4510,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         public bool FactionModeEnabled { get; set; }
         public bool FactionModeLocked { get; set; }
         public bool FT20ModeEnabled { get; set; }
+        public bool FT10ModeEnabled { get; set; }
+        public bool FT30ModeEnabled { get; set; }
         public bool FT20ModeLocked { get; set; }
+        public bool MatchEndPromptSuppressed { get; set; }
         public int FT20NextMilestone { get; set; }
         public List<string> FT20RewardsRemaining { get; set; }
         public List<string> MilestoneRewardsRemaining { get; set; }
