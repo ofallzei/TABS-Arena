@@ -21,7 +21,7 @@
 ### Updating To The Latest Version
 
 
-1. Delete the old app folder and use the new extracted folder. ( deleting appdata folder will delete your saves ). 
+1. Download the lateset version folder, extract it and then you can delete the older folder. ( deleting appdata folder will delete your saves ). 
 
 Important: Read the latest release notes before updating. Some larger updates may delete, break, or corrupt older saved games.
 
