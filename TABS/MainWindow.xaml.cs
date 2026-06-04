@@ -363,7 +363,7 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private static readonly Dictionary<string, string> En = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v.1.1.3",
+            ["AppTitle"] = "TABS Arena v1.1.4",
             ["Settings"] = "Settings",
             ["Guide"] = "1v1 Guide",
             ["Back"] = "← Back",
@@ -568,7 +568,7 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private static readonly Dictionary<string, string> Es = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v.1.1.3",
+            ["AppTitle"] = "TABS Arena v1.1.4",
             ["Settings"] = "Ajustes",
             ["Guide"] = "Guía 1v1",
             ["Back"] = "← Volver",
@@ -773,7 +773,7 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private static readonly Dictionary<string, string> Ru = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v.1.1.3",
+            ["AppTitle"] = "TABS Arena v1.1.4",
             ["Settings"] = "Настройки",
             ["Guide"] = "Руководство 1v1",
             ["Back"] = "← Назад",
@@ -978,7 +978,7 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private static readonly Dictionary<string, string> Zh = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v.1.1.3",
+            ["AppTitle"] = "TABS Arena v1.1.4",
             ["Settings"] = "设置",
             ["Guide"] = "1v1 指南",
             ["Back"] = "← 返回",

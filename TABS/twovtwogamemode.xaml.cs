@@ -3750,7 +3750,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             {
                 // Top bar
                 ["MainMenu"] = "← Menú Principal",
-                ["AppTitle"] = "TABS Arena v.1.1.3",
+                ["AppTitle"] = "TABS Arena v1.1.4",
 
                 // Overview panel
                 ["OverviewTitle"] = "Resumen 2v2",
@@ -4007,7 +4007,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             private static readonly Dictionary<string, string> _ru = new Dictionary<string, string>
             {
                 ["MainMenu"] = "← Главное меню",
-                ["AppTitle"] = "TABS Arena v.1.1.3",
+                ["AppTitle"] = "TABS Arena v1.1.4",
                 ["OverviewTitle"] = "Обзор матча 2v2",
                 ["OverviewSub"] = "Настройте всех четырех игроков, затем нажмите Следующий раунд, чтобы применить проценты, этапы и награды.",
                 ["CurrentRound"] = "ТЕКУЩИЙ РАУНД",
@@ -4234,7 +4234,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             private static readonly Dictionary<string, string> _zh = new Dictionary<string, string>
             {
                 ["MainMenu"] = "← 主菜单",
-                ["AppTitle"] = "TABS Arena v.1.1.3",
+                ["AppTitle"] = "TABS Arena v1.1.4",
                 ["OverviewTitle"] = "2v2 比赛总览",
                 ["OverviewSub"] = "管理四名玩家，然后点击下一回合以应用利息、里程碑和奖励。",
                 ["CurrentRound"] = "当前回合",
@@ -4474,7 +4474,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             private static readonly Dictionary<string, string> _defaults = new Dictionary<string, string>
             {
                 ["MainMenu"] = "← Main Menu",
-                ["AppTitle"] = "TABS Arena v.1.1.3",
+                ["AppTitle"] = "TABS Arena v1.1.4",
                 ["OverviewTitle"] = "2v2 Match Overview",
                 ["OverviewSub"] = "Manage all four players then press Next Round to apply interest, milestones, rewards.",
                 ["CurrentRound"] = "CURRENT ROUND",
