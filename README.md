@@ -1,6 +1,6 @@
 # TABS Arena Guide
 
-(Available languages in app - English, Spanish ,Russian and Chinese.
+(Available languages in app - English, Spanish ,Russian and Chinese.)
 
 ## How To Install
 
