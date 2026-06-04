@@ -381,17 +381,26 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                                 <StackPanel Grid.Column="2"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center">
-                                    <TextBlock x:Name="SettingsLanguageText"
-                                               Text="English"
-                                               FontSize="13"
-                                               FontWeight="SemiBold"
-                                               Foreground="#6EB6DA"
-                                               HorizontalAlignment="Center"
-                                               TextAlignment="Center"
-                                               Margin="0,0,0,5"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,5">
+                                        <Grid x:Name="SettingsLanguageFlag"
+                                              Width="24" Height="16"
+                                              ClipToBounds="True"
+                                              Margin="0,0,7,0"
+                                              VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="SettingsLanguageText"
+                                                   Text="English"
+                                                   FontSize="13"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#6EB6DA"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <Border x:Name="SettingsLangDot1" Width="28" Height="3" CornerRadius="2" Background="#6EB6DA" Margin="3,0"/>
                                         <Border x:Name="SettingsLangDot2" Width="28" Height="3" CornerRadius="2" Background="#3A4A58" Margin="3,0"/>
+                                        <Border x:Name="SettingsLangDot3" Width="28" Height="3" CornerRadius="2" Background="#3A4A58" Margin="3,0"/>
+                                        <Border x:Name="SettingsLangDot4" Width="28" Height="3" CornerRadius="2" Background="#3A4A58" Margin="3,0"/>
                                     </StackPanel>
                                 </StackPanel>
 

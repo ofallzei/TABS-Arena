@@ -83,8 +83,17 @@ namespace TABS
         private string p1Name = "Player 1";
         private string p2Name = "Player 2";
 
-        private bool IsDefaultP1Name(string value) => value == "Player 1" || value == "Jugador 1";
-        private bool IsDefaultP2Name(string value) => value == "Player 2" || value == "Jugador 2";
+        private bool IsDefaultP1Name(string value) =>
+            value == En["DefaultP1Name"] || value == Es["DefaultP1Name"] ||
+            value == Ru["DefaultP1Name"] || value == Zh["DefaultP1Name"];
+
+        private bool IsDefaultP2Name(string value) =>
+            value == En["DefaultP2Name"] || value == Es["DefaultP2Name"] ||
+            value == Ru["DefaultP2Name"] || value == Zh["DefaultP2Name"];
+
+        private bool IsNoRoundYetText(string value) =>
+            value == En["NoRoundYet"] || value == Es["NoRoundYet"] ||
+            value == Ru["NoRoundYet"] || value == Zh["NoRoundYet"];
 
         private bool p1HasFt10PermMove = false;
         private bool p2HasFt10PermMove = false;
@@ -261,7 +270,7 @@ private static readonly string[] BaseRewardPool = new string[]
             public bool p1ReplayBoughtThisRound, p2ReplayBoughtThisRound;
         }
 
-        private enum AppLanguage { English, Spanish }
+        private enum AppLanguage { English, Spanish, Russian, Chinese }
         private AppLanguage currentLanguage = AppLanguage.English;
 
         private static readonly string LanguageFilePath = Path.Combine(
@@ -273,9 +282,10 @@ private static readonly string[] BaseRewardPool = new string[]
             try
             {
                 if (!File.Exists(LanguageFilePath)) return;
-                currentLanguage = File.ReadAllText(LanguageFilePath).Trim() == "Spanish"
-                                        ? AppLanguage.Spanish
-                    : AppLanguage.English;
+
+                AppLanguage loadedLanguage;
+                if (Enum.TryParse(File.ReadAllText(LanguageFilePath).Trim(), out loadedLanguage))
+                    currentLanguage = loadedLanguage;
             }
             catch { }
         }
@@ -295,9 +305,7 @@ private static readonly string[] BaseRewardPool = new string[]
                 Directory.CreateDirectory(Path.GetDirectoryName(twoVTwoLanguageFilePath));
                 File.WriteAllText(twoVTwoLanguageFilePath, currentLanguage.ToString());
 
-                AppPrefs.Language = currentLanguage == AppLanguage.Spanish
-                    ? TwoVTwoGameMode.Loc.Language.Spanish
-                    : TwoVTwoGameMode.Loc.Language.English;
+                AppPrefs.Language = ToSharedLanguage(currentLanguage);
 
                 TwoVTwoGameMode.Loc.Current = AppPrefs.Language;
                 AppPrefs.Save();
@@ -307,8 +315,50 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private string T(string key)
         {
+            if (currentLanguage == AppLanguage.Chinese && Zh.TryGetValue(key, out var zh)) return zh;
+            if (currentLanguage == AppLanguage.Russian && Ru.TryGetValue(key, out var ru)) return ru;
             if (currentLanguage == AppLanguage.Spanish && Es.TryGetValue(key, out var es)) return es;
             return En.TryGetValue(key, out var en) ? en : key;
+        }
+
+        private static AppLanguage FromSharedLanguage(TwoVTwoGameMode.Loc.Language language)
+        {
+            if (language == TwoVTwoGameMode.Loc.Language.Spanish) return AppLanguage.Spanish;
+            if (language == TwoVTwoGameMode.Loc.Language.Russian) return AppLanguage.Russian;
+            if (language == TwoVTwoGameMode.Loc.Language.Chinese) return AppLanguage.Chinese;
+            return AppLanguage.English;
+        }
+
+        private static TwoVTwoGameMode.Loc.Language ToSharedLanguage(AppLanguage language)
+        {
+            if (language == AppLanguage.Spanish) return TwoVTwoGameMode.Loc.Language.Spanish;
+            if (language == AppLanguage.Russian) return TwoVTwoGameMode.Loc.Language.Russian;
+            if (language == AppLanguage.Chinese) return TwoVTwoGameMode.Loc.Language.Chinese;
+            return TwoVTwoGameMode.Loc.Language.English;
+        }
+
+        private static AppLanguage PreviousLanguage(AppLanguage language)
+        {
+            if (language == AppLanguage.English) return AppLanguage.Chinese;
+            if (language == AppLanguage.Spanish) return AppLanguage.English;
+            if (language == AppLanguage.Russian) return AppLanguage.Spanish;
+            return AppLanguage.Russian;
+        }
+
+        private static AppLanguage NextLanguage(AppLanguage language)
+        {
+            if (language == AppLanguage.English) return AppLanguage.Spanish;
+            if (language == AppLanguage.Spanish) return AppLanguage.Russian;
+            if (language == AppLanguage.Russian) return AppLanguage.Chinese;
+            return AppLanguage.English;
+        }
+
+        private static string GetLanguageDisplayName(AppLanguage language)
+        {
+            if (language == AppLanguage.Spanish) return "Español";
+            if (language == AppLanguage.Russian) return "Русский";
+            if (language == AppLanguage.Chinese) return "中文";
+            return "English";
         }
 
         private static readonly Dictionary<string, string> En = new Dictionary<string, string>
@@ -480,6 +530,40 @@ private static readonly string[] BaseRewardPool = new string[]
             ["MilestoneSellbackNotice"] = "Milestone! {0} sellback is now {1}%!",
             ["MilestoneIncomeDiscountNotice"] = "Milestone! {0} gets 15% off their next income purchase!",
             ["MilestoneFullRefundNotice"] = "Milestone! {0}'s next unit sell will be a full refund!",
+            ["NoRoundYet"] = "No round yet.",
+            ["LogUndo"] = "Undid the last action.",
+            ["LogSavedMatch"] = "Match saved as \"{0}\".",
+            ["NoticeSavedAs"] = "Saved as \"{0}\".",
+            ["LoadPreviewTitle"] = "Load \"{0}\"?",
+            ["LoadPreviewMsg"] = "Saved:   {0}\n\n⚔  {1}  vs  {2}\n\nRound:   {3}\nScore:   {4}  {5}  -  {6}  {7}",
+            ["LogLoadedMatch"] = "Loaded match \"{0}\".",
+            ["NoticeLoadedSave"] = "Loaded \"{0}\".",
+            ["NoticeDeletedSave"] = "Deleted save \"{0}\".",
+            ["LogNewGameStarted"] = "New game started.",
+            ["LogMilestonePoolEmpty"] = "Milestone reached but reward pool is empty - no reward given.",
+            ["LogMilestoneChooseFreeFactionAllOwned"] = "Milestone: {0} rolled Choose Free Faction but owns all factions.",
+            ["NoticeMilestoneAllFactionsOwned"] = "Milestone! {0} owns all factions - no reward this time.",
+            ["LogMilestoneFreeFaction"] = "Milestone: {0} receives free faction - {1}.",
+            ["NoticeMilestoneFreeFaction"] = "Milestone! {0} receives free faction - {1}!",
+            ["LogMilestoneFreeFactionAllOwned"] = "Milestone: {0} rolled Free Faction but owns all factions.",
+            ["LogMilestonePermMove"] = "Milestone: {0} receives a free perm move upgrade!",
+            ["LogMilestoneSellback"] = "Milestone: {0} sellback increased by 20% -> {1}%.",
+            ["LogMilestoneIncomeDiscount"] = "Milestone: {0} receives a one-time 15% income discount!",
+            ["LogMilestoneFullRefund"] = "Milestone: {0} receives a one-time full troop refund!",
+            ["FactionModeLocked"] = "Faction mode is locked after round 1.",
+            ["MatchModeLocked"] = "Match mode is locked after round 1.",
+            ["NotEnoughGoldFaction"] = "{0} does not have enough gold for a faction ({1}).",
+            ["NotEnoughGold"] = "{0} does not have enough gold.",
+            ["NotEnoughGoldAmount"] = "{0} does not have enough gold ({1}).",
+            ["IncomeAlreadyBought"] = "{0} already bought income this round.",
+            ["MaxedPermMove"] = "{0} has reached the perm move cap ({1}).",
+            ["ReplayAlreadyBought"] = "{0} already bought replay this round.",
+            ["EnterValidSpendAmount"] = "Enter a valid amount to spend.",
+            ["EnterValidUnitValue"] = "Enter the unit's value first.",
+            ["LogPlayerGoesFirst"] = "{0} goes first and receives 50 gold.",
+            ["LogFullRefundSell"] = "{0} used Full Refund - sold unit for full {1} gold.",
+            ["NoticeFullRefundSell"] = "Full refund used! {0} got {1} gold back.",
+            ["LogSoldUnit"] = "{0} sold unit worth {1} gold for {2} gold ({3}%).",
         };
 
         private static readonly Dictionary<string, string> Es = new Dictionary<string, string>
@@ -651,16 +735,460 @@ private static readonly string[] BaseRewardPool = new string[]
             ["MilestoneSellbackNotice"] = "¡Hito! La reventa de {0} ahora es {1}%.",
             ["MilestoneIncomeDiscountNotice"] = "¡Hito! {0} obtiene 15% de descuento en su próxima compra de ingreso.",
             ["MilestoneFullRefundNotice"] = "¡Hito! La próxima venta de unidad de {0} será un reembolso completo.",
+            ["NoRoundYet"] = "Sin ronda aún.",
+            ["LogUndo"] = "Se deshizo la última acción.",
+            ["LogSavedMatch"] = "Partida guardada como \"{0}\".",
+            ["NoticeSavedAs"] = "Guardado como \"{0}\".",
+            ["LoadPreviewTitle"] = "¿Cargar \"{0}\"?",
+            ["LoadPreviewMsg"] = "Guardado:   {0}\n\n⚔  {1}  vs  {2}\n\nRonda:   {3}\nPuntuación:   {4}  {5}  -  {6}  {7}",
+            ["LogLoadedMatch"] = "Partida cargada \"{0}\".",
+            ["NoticeLoadedSave"] = "Cargado \"{0}\".",
+            ["NoticeDeletedSave"] = "Guardado \"{0}\" borrado.",
+            ["LogNewGameStarted"] = "Nueva partida iniciada.",
+            ["LogMilestonePoolEmpty"] = "Hito alcanzado, pero el grupo de recompensas está vacío - no se otorgó recompensa.",
+            ["LogMilestoneChooseFreeFactionAllOwned"] = "Hito: {0} sacó Elegir facción gratis, pero ya tiene todas las facciones.",
+            ["NoticeMilestoneAllFactionsOwned"] = "¡Hito! {0} ya tiene todas las facciones - no hay recompensa esta vez.",
+            ["LogMilestoneFreeFaction"] = "Hito: {0} recibe facción gratis - {1}.",
+            ["NoticeMilestoneFreeFaction"] = "¡Hito! {0} recibe facción gratis - {1}!",
+            ["LogMilestoneFreeFactionAllOwned"] = "Hito: {0} sacó Facción gratis, pero ya tiene todas las facciones.",
+            ["LogMilestonePermMove"] = "Hito: {0} recibe una mejora gratis de movimiento permanente.",
+            ["LogMilestoneSellback"] = "Hito: la reventa de {0} aumentó 20% -> {1}%.",
+            ["LogMilestoneIncomeDiscount"] = "Hito: {0} recibe un descuento único de 15% en ingreso.",
+            ["LogMilestoneFullRefund"] = "Hito: {0} recibe un reembolso completo único de tropas.",
+            ["FactionModeLocked"] = "El modo Facción queda bloqueado después de la ronda 1.",
+            ["MatchModeLocked"] = "El modo de partida queda bloqueado después de la ronda 1.",
+            ["NotEnoughGoldFaction"] = "{0} no tiene suficiente oro para una facción ({1}).",
+            ["NotEnoughGold"] = "{0} no tiene suficiente oro.",
+            ["NotEnoughGoldAmount"] = "{0} no tiene suficiente oro ({1}).",
+            ["IncomeAlreadyBought"] = "{0} ya compró ingreso esta ronda.",
+            ["MaxedPermMove"] = "{0} alcanzó el límite de movimiento permanente ({1}).",
+            ["ReplayAlreadyBought"] = "{0} ya compró replay esta ronda.",
+            ["EnterValidSpendAmount"] = "Ingresa una cantidad válida para gastar.",
+            ["EnterValidUnitValue"] = "Ingresa primero el valor de la unidad.",
+            ["LogPlayerGoesFirst"] = "{0} va primero y recibe 50 de oro.",
+            ["LogFullRefundSell"] = "{0} usó Reembolso Completo - vendió una unidad por el total de {1} oro.",
+            ["NoticeFullRefundSell"] = "¡Reembolso completo usado! {0} recuperó {1} de oro.",
+            ["LogSoldUnit"] = "{0} vendió una unidad de valor {1} por {2} oro ({3}%).",
+        };
+
+        private static readonly Dictionary<string, string> Ru = new Dictionary<string, string>
+        {
+            ["AppTitle"] = "TABS Arena v.1.1.3",
+            ["Settings"] = "Настройки",
+            ["Guide"] = "Руководство 1v1",
+            ["Back"] = "← Назад",
+            ["WindowMode"] = "Режим окна",
+            ["Windowed"] = "Оконный",
+            ["BorderlessFullscreen"] = "Полный экран без рамки",
+            ["Language"] = "Язык",
+            ["Sounds"] = "Звуки",
+            ["Volume"] = "Громкость",
+            ["On"] = "Вкл",
+            ["Off"] = "Выкл",
+            ["GuideTitle"] = "Руководство 1v1",
+            ["GuideBasicsTitle"] = "Основы",
+            ["GuideBasicsBody"] = "Каждый игрок начинает с 1200 золота. В начале матча выберите, кто ходит первым. Первый игрок получает бонусное золото, чтобы компенсировать контрвыбор.",
+            ["GuideTurnOrderTitle"] = "Порядок хода",
+            ["GuideTurnOrderBody"] = "В раунде 1 ходит выбранный первый игрок. После этого первым ходит игрок с большим количеством очков. Если очки равны, первым ходит игрок, выигравший последний раунд.",
+            ["GuideRoundReplayTitle"] = "Раунды, ничьи и повтор",
+            ["GuideRoundReplayBody"] = "Когда битва закончится, выберите победителя и нажмите Следующий раунд. Если оба игрока согласны, что была ничья, используйте Ничья. Если согласия нет, используйте таймер на 3 минуты и принудительно ставьте ничью, если никто не победил. Повтор стоит 10 золота и может быть куплен только один раз за раунд каждым игроком. Повтор нужен только для информации и не меняет результат или победителя раунда.",
+            ["GuideSavingTitle"] = "Сохранение",
+            ["GuideSavingBody"] = "Если вы не можете закончить матч, сохраните его в приложении. Также сохраните битву внутри TABS через Save Battle и включите Save Friendly Units.",
+            ["GuideEconomyTitle"] = "Экономика",
+            ["GuideEconomyBody"] = "Проценты дают +10 золота за каждые 50 золота у игрока, максимум +100. Покупка дохода дает +10 в FT30 и +13 в FT20. FT10 убирает покупки дохода и спад дохода.",
+            ["GuideMoreTitle"] = "Больше правил",
+            ["GuideMoreBody"] = "Чтобы узнать больше о правилах, посетите",
+            ["ReplayUsed"] = "Повтор использован",
+            ["MainMenu"] = "← Главное меню",
+            ["OverviewTitle"] = "Обзор матча 1v1",
+            ["OverviewSub"] = "Используйте элементы ниже, затем нажмите Следующий раунд, чтобы применить проценты, улучшения и траты.",
+            ["CurrentRound"] = "ТЕКУЩИЙ РАУНД",
+            ["NextTurnOrder"] = "СЛЕДУЮЩИЙ ХОД",
+            ["PendingResult"] = "ОЖИДАЕМЫЙ РЕЗУЛЬТАТ",
+            ["NotAvailableYet"] = "Пока недоступно",
+            ["NotSet"] = "Не задано",
+            ["FactionMode"] = "РЕЖИМ ФРАКЦИЙ",
+            ["FactionModeOff"] = "Фракции: ВЫКЛ",
+            ["FactionModeOn"] = "Фракции: ВКЛ",
+            ["FT20Mode"] = "РЕЖИМ FT20",
+            ["FT20ModeOff"] = "FT20: ВЫКЛ",
+            ["FT20ModeOn"] = "FT20: ВКЛ",
+            ["FT30Mode"] = "РЕЖИМ FT30",
+            ["FT30ModeOff"] = "FT30: ВЫКЛ",
+            ["FT30ModeOn"] = "FT30: ВКЛ",
+            ["FT10Mode"] = "РЕЖИМ FT10",
+            ["FT10ModeOff"] = "FT10: ВЫКЛ",
+            ["FT10ModeOn"] = "FT10: ВКЛ",
+            ["WhichPlayerFirst"] = "Какой игрок ходит первым?",
+            ["MatchSaves"] = "СОХРАНЕНИЯ",
+            ["Save"] = "💾 Сохранить",
+            ["Load"] = "📂 Загрузить",
+            ["Delete"] = "🗑 Удалить",
+            ["NewGame"] = "🆕 Новая игра",
+            ["ActionLog"] = "Журнал действий",
+            ["ActionLogSub"] = "Покупки и результаты раундов появляются здесь по порядку.",
+            ["RoundControl"] = "Управление раундом",
+            ["Player1Wins"] = "Победа Игрока 1",
+            ["Player2Wins"] = "Победа Игрока 2",
+            ["Tie"] = "Ничья",
+            ["NextRound"] = "Следующий раунд",
+            ["Undo"] = "Отменить",
+            ["Gold"] = "ЗОЛОТО",
+            ["Points"] = "ОЧКИ",
+            ["PermMv"] = "ПОСТ. ХОД",
+            ["Income"] = "ДОХОД",
+            ["InterestStat"] = "ПРОЦЕНТЫ",
+            ["Set"] = "Готово",
+            ["Unset"] = "Изменить",
+            ["CustomTroopSpend"] = "Своя трата на войска",
+            ["UnitValue"] = "Цена юнита",
+            ["Spend"] = "Потратить",
+            ["Sell"] = "Продать",
+            ["Utility"] = "Магазин утилит",
+            ["Upgrades"] = "Постоянные улучшения",
+            ["Calculations"] = "Последние расчеты",
+            ["SingleTroopMove"] = "Переместить одного юнита ({0})",
+            ["Replay"] = "Повтор (10)",
+            ["P1FirstTurn"] = "Игрок 1 ходит первым",
+            ["P2FirstTurn"] = "Игрок 2 ходит первым",
+            ["DefaultP1Name"] = "Игрок 1",
+            ["DefaultP2Name"] = "Игрок 2",
+            ["MilestoneProgress"] = "ПРОГРЕСС ЭТАПА",
+            ["NextReward"] = "СЛЕДУЮЩАЯ НАГРАДА",
+            ["RewardsLeft"] = "ВОЗМОЖНЫЕ НАГРАДЫ",
+            ["PointsAway"] = "очк. до награды",
+            ["NextAt"] = "следующая на",
+            ["PanelSub"] = "Золото, очки, улучшения и управление тратами.",
+            ["BuyIncome"] = "Купить доход +10 ({0})",
+            ["BuyIncomeF"] = "Купить доход +13 ({0})",
+            ["BuyPermMove"] = "Купить пост. ход +1 ({0})",
+            ["BuyFaction"] = "Купить фракцию ({0})",
+            ["BuyChosenFaction"] = "Купить выбранную фракцию ({0})",
+            ["LogBoughtChosenFaction"] = "{0} купил выбранную фракцию: {1} за {2} золота.",
+            ["NoticeBoughtChosenFaction"] = "{0} купил {1} за {2} золота.",
+            ["NotEnoughGoldChosenFaction"] = "{0} не хватает золота для выбранной фракции ({1}).",
+            ["AllFactionsOwned"] = "{0} уже владеет всеми фракциями.",
+            ["FactionDisabled"] = "Режим фракций выключен",
+            ["SellUnit"] = "Продать",
+            ["PoolEmpty"] = "Пул пуст",
+            ["NoneLeft"] = "Ничего нет",
+            ["RewardChooseFreeFaction"] = "Выбрать бесплатную фракцию",
+            ["RewardFreeFaction"] = "Бесплатная фракция",
+            ["ChooseFactionTitle"] = "Выбрать бесплатную фракцию",
+            ["ChooseFactionSub"] = "{0}, выберите одну фракцию для бесплатной разблокировки.",
+            ["LogChoseFreeFaction"] = "Этап: {0} выбрал бесплатную фракцию - {1}.",
+            ["NoticeChoseFreeFaction"] = "Этап! {0} выбрал {1} бесплатно.",
+            ["RewardPermMove"] = "Улучшение пост. хода",
+            ["RewardSellback20"] = "Продажа +20%",
+            ["RewardIncomeDiscount"] = "Скидка на доход (15%)",
+            ["RewardFullRefund"] = "Полный возврат за юнита",
+            ["LogWinnerMarked"] = "Победитель выбран: {0}.",
+            ["LogRoundWon"] = "Раунд {0} завершен. {1} победил.",
+            ["LogRoundTie"] = "Раунд {0} завершился ничьей.",
+            ["SaveDialogTitle"] = "Сохранить игру",
+            ["EnterSaveName"] = "Введите имя сохранения:",
+            ["SaveBtn"] = "Сохранить",
+            ["Cancel"] = "Отмена",
+            ["Yes"] = "Да",
+            ["No"] = "Нет",
+            ["OverwriteSaveTitle"] = "Перезаписать сохранение",
+            ["OverwriteSaveMsg"] = "Перезаписать сохранение \"{0}\" текущим состоянием матча?",
+            ["AlreadyExistsTitle"] = "Уже существует",
+            ["AlreadyExistsMsg"] = "Сохранение с именем \"{0}\" уже существует. Перезаписать?",
+            ["SelectSaveFirst"] = "Сначала выберите сохранение из списка.",
+            ["SelectSaveDeleteFirst"] = "Выберите сохранение для удаления.",
+            ["SaveFileNotFound"] = "Файл сохранения не найден.",
+            ["CouldNotReadSave"] = "Не удалось прочитать сохранение.",
+            ["DeleteConfirmTitle"] = "Удалить сохранение",
+            ["DeleteConfirmMsg"] = "Удалить \"{0}\"?\nЭто нельзя отменить.",
+            ["NewGameConfirmTitle"] = "Новая игра",
+            ["NewGameConfirmMsg"] = "Начать новую игру?\nВесь несохраненный прогресс будет потерян.",
+            ["MatchEndTitle"] = "Матч завершен",
+            ["MatchEndMessage"] = "{0} выиграл матч, набрав {1} очков.",
+            ["MatchEndWinByTwoMessage"] = "{0}: {1}   {2}: {3}\n\n{4} побеждает по правилу победы с разницей 2.",
+            ["MatchEndQuestion"] = "Начать новую игру или продолжить?",
+            ["NewGamePlain"] = "Новая игра",
+            ["ContinuePlaying"] = "Продолжить",
+            ["MainMenuConfirmTitle"] = "Главное меню",
+            ["MainMenuConfirmMsg"] = "Вернуться в главное меню?\nНесохраненный прогресс будет потерян.",
+            ["CloseGameConfirmTitle"] = "Закрыть игру",
+            ["CloseGameConfirmMsg"] = "Вы уверены, что хотите закрыть игру?",
+            ["StartingGold"] = "Начальное золото",
+            ["MilestoneReward"] = "Награда этапа",
+            ["RoundReward"] = "Награда раунда",
+            ["PermanentIncome"] = "Постоянный доход",
+            ["FinalGold"] = "Итоговое золото",
+            ["LogFactionModeOn"] = "Режим фракций включен. Оба игрока сброшены на стартовое золото этого режима и 3 случайные фракции.",
+            ["LogFactionModeOff"] = "Режим фракций выключен.",
+            ["LogFT30ModeOn"] = "Режим FT30 включен. Панели игроков сброшены.",
+            ["LogFT30ModeOff"] = "Режим FT30 выключен. Выбран режим FT20.",
+            ["LogFT10ModeOn"] = "Режим FT10 включен. Игроки начинают с 1200 золота, доход выключен.",
+            ["LogFT10ModeOff"] = "Режим FT10 выключен. Выбран режим FT20.",
+            ["LogGainedFaction"] = "{0} получил фракцию: {1}.",
+            ["NoticeGainedFaction"] = "{0} получил {1}.",
+            ["LogBoughtIncome"] = "{0} купил доход +{1} за {2} золота.",
+            ["LogBoughtPermMove"] = "{0} купил улучшение пост. хода за {1} золота.",
+            ["LogSingleTroopMove"] = "{0} купил перемещение одного юнита за {1} золота.",
+            ["LogReplay"] = "{0} купил повтор за 10 золота.",
+            ["LogSpentTroops"] = "{0} потратил {1} золота на войска.",
+            ["WinsSuffix"] = "побеждает",
+            ["NothingToUndo"] = "Нечего отменять.",
+            ["ChooseWinnerFirst"] = "Выберите победителя перед переходом к следующему раунду.",
+            ["RoundWinNotice"] = "{0} выигрывает раунд {1}! Победитель +{2}g, проигравший +{3}g.",
+            ["RoundTieNotice"] = "Раунд {0} завершился ничьей. Оба игрока +{1}g.",
+            ["MilestonePermMoveNotice"] = "Этап! {0} получает бесплатное улучшение пост. хода.",
+            ["MilestoneSellbackNotice"] = "Этап! Продажа юнитов {0} теперь {1}%.",
+            ["MilestoneIncomeDiscountNotice"] = "Этап! {0} получает скидку 15% на следующую покупку дохода.",
+            ["MilestoneFullRefundNotice"] = "Этап! Следующая продажа юнита у {0} даст полный возврат.",
+            ["NoRoundYet"] = "Раунда еще нет.",
+            ["LogUndo"] = "Последнее действие отменено.",
+            ["LogSavedMatch"] = "Матч сохранен как \"{0}\".",
+            ["NoticeSavedAs"] = "Сохранено как \"{0}\".",
+            ["LoadPreviewTitle"] = "Загрузить \"{0}\"?",
+            ["LoadPreviewMsg"] = "Сохранено:   {0}\n\n⚔  {1}  против  {2}\n\nРаунд:   {3}\nСчет:   {4}  {5}  -  {6}  {7}",
+            ["LogLoadedMatch"] = "Матч \"{0}\" загружен.",
+            ["NoticeLoadedSave"] = "Загружено \"{0}\".",
+            ["NoticeDeletedSave"] = "Сохранение \"{0}\" удалено.",
+            ["LogNewGameStarted"] = "Новая игра начата.",
+            ["LogMilestonePoolEmpty"] = "Этап достигнут, но пул наград пуст - награда не выдана.",
+            ["LogMilestoneChooseFreeFactionAllOwned"] = "Этап: {0} получил Выбор бесплатной фракции, но уже владеет всеми фракциями.",
+            ["NoticeMilestoneAllFactionsOwned"] = "Этап! {0} уже владеет всеми фракциями - награды в этот раз нет.",
+            ["LogMilestoneFreeFaction"] = "Этап: {0} получает бесплатную фракцию - {1}.",
+            ["NoticeMilestoneFreeFaction"] = "Этап! {0} получает бесплатную фракцию - {1}!",
+            ["LogMilestoneFreeFactionAllOwned"] = "Этап: {0} получил Бесплатную фракцию, но уже владеет всеми фракциями.",
+            ["LogMilestonePermMove"] = "Этап: {0} получает бесплатное улучшение пост. хода!",
+            ["LogMilestoneSellback"] = "Этап: продажа юнитов {0} увеличена на 20% -> {1}%.",
+            ["LogMilestoneIncomeDiscount"] = "Этап: {0} получает одноразовую скидку 15% на доход!",
+            ["LogMilestoneFullRefund"] = "Этап: {0} получает одноразовый полный возврат за войска!",
+            ["FactionModeLocked"] = "Режим фракций блокируется после раунда 1.",
+            ["MatchModeLocked"] = "Режим матча блокируется после раунда 1.",
+            ["NotEnoughGoldFaction"] = "{0} не хватает золота для фракции ({1}).",
+            ["NotEnoughGold"] = "{0} не хватает золота.",
+            ["NotEnoughGoldAmount"] = "{0} не хватает золота ({1}).",
+            ["IncomeAlreadyBought"] = "{0} уже купил доход в этом раунде.",
+            ["MaxedPermMove"] = "{0} достиг лимита пост. хода ({1}).",
+            ["ReplayAlreadyBought"] = "{0} уже купил повтор в этом раунде.",
+            ["EnterValidSpendAmount"] = "Введите допустимую сумму для траты.",
+            ["EnterValidUnitValue"] = "Сначала введите цену юнита.",
+            ["LogPlayerGoesFirst"] = "{0} ходит первым и получает 50 золота.",
+            ["LogFullRefundSell"] = "{0} использовал Полный возврат - продал юнита за полные {1} золота.",
+            ["NoticeFullRefundSell"] = "Полный возврат использован! {0} вернул {1} золота.",
+            ["LogSoldUnit"] = "{0} продал юнита стоимостью {1} золота за {2} золота ({3}%).",
+        };
+
+        private static readonly Dictionary<string, string> Zh = new Dictionary<string, string>
+        {
+            ["AppTitle"] = "TABS Arena v.1.1.3",
+            ["Settings"] = "设置",
+            ["Guide"] = "1v1 指南",
+            ["Back"] = "← 返回",
+            ["WindowMode"] = "窗口模式",
+            ["Windowed"] = "窗口化",
+            ["BorderlessFullscreen"] = "无边框全屏",
+            ["Language"] = "语言",
+            ["Sounds"] = "音效",
+            ["Volume"] = "音量",
+            ["On"] = "开",
+            ["Off"] = "关",
+            ["GuideTitle"] = "1v1 指南",
+            ["GuideBasicsTitle"] = "基础",
+            ["GuideBasicsBody"] = "每名玩家以 1200 金币开始。比赛开始时选择谁先行动。先手玩家会获得额外金币，用来补偿被针对选兵的劣势。",
+            ["GuideTurnOrderTitle"] = "行动顺序",
+            ["GuideTurnOrderBody"] = "第 1 回合按选择的先手玩家行动。之后，分数更高的玩家先行动。如果分数相同，则上一回合获胜的玩家先行动。",
+            ["GuideRoundReplayTitle"] = "回合、平局和重赛查看",
+            ["GuideRoundReplayBody"] = "战斗结束后，选择胜者并点击下一回合。如果双方都同意是平局，使用平局。若无法达成一致，使用 3 分钟计时器；没人获胜则强制平局。重赛查看花费 10 金币，每名玩家每回合只能购买一次。重赛查看仅用于信息参考，不会改变回合结果或胜者。",
+            ["GuideSavingTitle"] = "保存",
+            ["GuideSavingBody"] = "如果无法打完比赛，请在应用中保存。也要在 TABS 内使用 Save Battle 保存战斗，并启用 Save Friendly Units。",
+            ["GuideEconomyTitle"] = "经济",
+            ["GuideEconomyBody"] = "利息按玩家每 50 金币给予 +10 金币，最高 +100。购买收入在 FT30 中给予 +10，在 FT20 中给予 +13。FT10 移除收入购买和收入衰减。",
+            ["GuideMoreTitle"] = "更多规则",
+            ["GuideMoreBody"] = "想了解更多规则，请访问",
+            ["ReplayUsed"] = "重赛已用",
+            ["MainMenu"] = "← 主菜单",
+            ["OverviewTitle"] = "1v1 比赛总览",
+            ["OverviewSub"] = "使用下方控件，然后点击下一回合以应用利息、升级和支出。",
+            ["CurrentRound"] = "当前回合",
+            ["NextTurnOrder"] = "下回合顺序",
+            ["PendingResult"] = "待定结果",
+            ["NotAvailableYet"] = "暂不可用",
+            ["NotSet"] = "未设置",
+            ["FactionMode"] = "阵营模式",
+            ["FactionModeOff"] = "阵营：关",
+            ["FactionModeOn"] = "阵营：开",
+            ["FT20Mode"] = "FT20 模式",
+            ["FT20ModeOff"] = "FT20：关",
+            ["FT20ModeOn"] = "FT20：开",
+            ["FT30Mode"] = "FT30 模式",
+            ["FT30ModeOff"] = "FT30：关",
+            ["FT30ModeOn"] = "FT30：开",
+            ["FT10Mode"] = "FT10 模式",
+            ["FT10ModeOff"] = "FT10：关",
+            ["FT10ModeOn"] = "FT10：开",
+            ["WhichPlayerFirst"] = "哪名玩家先行动？",
+            ["MatchSaves"] = "比赛存档",
+            ["Save"] = "💾 保存",
+            ["Load"] = "📂 读取",
+            ["Delete"] = "🗑 删除",
+            ["NewGame"] = "🆕 新游戏",
+            ["ActionLog"] = "行动日志",
+            ["ActionLogSub"] = "商店点击和回合结果会按顺序显示在这里。",
+            ["RoundControl"] = "回合控制",
+            ["Player1Wins"] = "玩家 1 获胜",
+            ["Player2Wins"] = "玩家 2 获胜",
+            ["Tie"] = "平局",
+            ["NextRound"] = "下一回合",
+            ["Undo"] = "撤销",
+            ["Gold"] = "金币",
+            ["Points"] = "分数",
+            ["PermMv"] = "永久移动",
+            ["Income"] = "收入",
+            ["InterestStat"] = "利息",
+            ["Set"] = "设定",
+            ["Unset"] = "编辑",
+            ["CustomTroopSpend"] = "自定义部队支出",
+            ["UnitValue"] = "单位价值",
+            ["Spend"] = "支出",
+            ["Sell"] = "出售",
+            ["Utility"] = "实用商店",
+            ["Upgrades"] = "永久升级",
+            ["Calculations"] = "最新计算",
+            ["SingleTroopMove"] = "单个部队移动 ({0})",
+            ["Replay"] = "重赛查看 (10)",
+            ["P1FirstTurn"] = "玩家 1 先行动",
+            ["P2FirstTurn"] = "玩家 2 先行动",
+            ["DefaultP1Name"] = "玩家 1",
+            ["DefaultP2Name"] = "玩家 2",
+            ["MilestoneProgress"] = "里程碑进度",
+            ["NextReward"] = "下一奖励",
+            ["RewardsLeft"] = "剩余可得奖励",
+            ["PointsAway"] = "分后获得",
+            ["NextAt"] = "下一次在",
+            ["PanelSub"] = "金币、分数、升级和支出控制。",
+            ["BuyIncome"] = "购买收入 +10 ({0})",
+            ["BuyIncomeF"] = "购买收入 +13 ({0})",
+            ["BuyPermMove"] = "购买永久移动 +1 ({0})",
+            ["BuyFaction"] = "购买阵营 ({0})",
+            ["BuyChosenFaction"] = "购买指定阵营 ({0})",
+            ["LogBoughtChosenFaction"] = "{0} 购买了指定阵营：{1}，花费 {2} 金币。",
+            ["NoticeBoughtChosenFaction"] = "{0} 购买了 {1}，花费 {2} 金币。",
+            ["NotEnoughGoldChosenFaction"] = "{0} 没有足够金币购买指定阵营 ({1})。",
+            ["AllFactionsOwned"] = "{0} 已拥有所有阵营。",
+            ["FactionDisabled"] = "阵营模式已关闭",
+            ["SellUnit"] = "出售",
+            ["PoolEmpty"] = "池为空",
+            ["NoneLeft"] = "没有剩余",
+            ["RewardChooseFreeFaction"] = "选择免费阵营",
+            ["RewardFreeFaction"] = "免费阵营",
+            ["ChooseFactionTitle"] = "选择免费阵营",
+            ["ChooseFactionSub"] = "{0}，选择一个阵营免费解锁。",
+            ["LogChoseFreeFaction"] = "里程碑：{0} 选择了免费阵营 - {1}。",
+            ["NoticeChoseFreeFaction"] = "里程碑！{0} 免费选择了 {1}。",
+            ["RewardPermMove"] = "永久移动升级",
+            ["RewardSellback20"] = "出售返还 +20%",
+            ["RewardIncomeDiscount"] = "收入折扣 (15%)",
+            ["RewardFullRefund"] = "单位全额退款",
+            ["LogWinnerMarked"] = "已标记胜者：{0}。",
+            ["LogRoundWon"] = "第 {0} 回合结束。{1} 获胜。",
+            ["LogRoundTie"] = "第 {0} 回合以平局结束。",
+            ["SaveDialogTitle"] = "保存游戏",
+            ["EnterSaveName"] = "输入存档名称：",
+            ["SaveBtn"] = "保存",
+            ["Cancel"] = "取消",
+            ["Yes"] = "是",
+            ["No"] = "否",
+            ["OverwriteSaveTitle"] = "覆盖存档",
+            ["OverwriteSaveMsg"] = "用当前比赛状态覆盖存档 \"{0}\"？",
+            ["AlreadyExistsTitle"] = "已存在",
+            ["AlreadyExistsMsg"] = "名为 \"{0}\" 的存档已存在。要覆盖吗？",
+            ["SelectSaveFirst"] = "请先从下拉列表中选择一个存档。",
+            ["SelectSaveDeleteFirst"] = "请选择要删除的存档。",
+            ["SaveFileNotFound"] = "找不到存档文件。",
+            ["CouldNotReadSave"] = "无法读取存档。",
+            ["DeleteConfirmTitle"] = "删除存档",
+            ["DeleteConfirmMsg"] = "删除 \"{0}\"？\n此操作无法撤销。",
+            ["NewGameConfirmTitle"] = "新游戏",
+            ["NewGameConfirmMsg"] = "开始新游戏？\n所有未保存进度都会丢失。",
+            ["MatchEndTitle"] = "比赛完成",
+            ["MatchEndMessage"] = "{0} 达到 {1} 分并赢得比赛。",
+            ["MatchEndWinByTwoMessage"] = "{0}: {1}   {2}: {3}\n\n{4} 通过领先 2 分规则获胜。",
+            ["MatchEndQuestion"] = "开始新游戏还是继续游玩？",
+            ["NewGamePlain"] = "新游戏",
+            ["ContinuePlaying"] = "继续",
+            ["MainMenuConfirmTitle"] = "主菜单",
+            ["MainMenuConfirmMsg"] = "返回主菜单？\n未保存进度会丢失。",
+            ["CloseGameConfirmTitle"] = "关闭游戏",
+            ["CloseGameConfirmMsg"] = "确定要关闭游戏吗？",
+            ["StartingGold"] = "初始金币",
+            ["MilestoneReward"] = "里程碑奖励",
+            ["RoundReward"] = "回合奖励",
+            ["PermanentIncome"] = "永久收入",
+            ["FinalGold"] = "最终金币",
+            ["LogFactionModeOn"] = "阵营模式已开启。两名玩家重置为该模式的初始金币，并获得 3 个随机阵营。",
+            ["LogFactionModeOff"] = "阵营模式已关闭。",
+            ["LogFT30ModeOn"] = "FT30 模式已开启。玩家面板已重置。",
+            ["LogFT30ModeOff"] = "FT30 模式已关闭。已选择 FT20 模式。",
+            ["LogFT10ModeOn"] = "FT10 模式已开启。玩家以 1200 金币开始，收入已禁用。",
+            ["LogFT10ModeOff"] = "FT10 模式已关闭。已选择 FT20 模式。",
+            ["LogGainedFaction"] = "{0} 获得阵营：{1}。",
+            ["NoticeGainedFaction"] = "{0} 获得了 {1}。",
+            ["LogBoughtIncome"] = "{0} 以 {2} 金币购买收入 +{1}。",
+            ["LogBoughtPermMove"] = "{0} 以 {1} 金币购买了永久移动升级。",
+            ["LogSingleTroopMove"] = "{0} 以 {1} 金币购买了单个部队移动。",
+            ["LogReplay"] = "{0} 以 10 金币购买了重赛查看。",
+            ["LogSpentTroops"] = "{0} 在部队上花费 {1} 金币。",
+            ["WinsSuffix"] = "获胜",
+            ["NothingToUndo"] = "没有可撤销的内容。",
+            ["ChooseWinnerFirst"] = "进入下一回合前请选择胜者。",
+            ["RoundWinNotice"] = "{0} 赢得第 {1} 回合！胜者 +{2}g，败者 +{3}g。",
+            ["RoundTieNotice"] = "第 {0} 回合以平局结束。双方玩家 +{1}g。",
+            ["MilestonePermMoveNotice"] = "里程碑！{0} 获得一次免费永久移动升级。",
+            ["MilestoneSellbackNotice"] = "里程碑！{0} 的出售返还现在是 {1}%。",
+            ["MilestoneIncomeDiscountNotice"] = "里程碑！{0} 下一次购买收入享受 15% 折扣。",
+            ["MilestoneFullRefundNotice"] = "里程碑！{0} 下一次出售单位将获得全额退款。",
+            ["NoRoundYet"] = "还没有回合。",
+            ["LogUndo"] = "已撤销上一个动作。",
+            ["LogSavedMatch"] = "比赛已保存为 \"{0}\"。",
+            ["NoticeSavedAs"] = "已保存为 \"{0}\"。",
+            ["LoadPreviewTitle"] = "读取 \"{0}\"？",
+            ["LoadPreviewMsg"] = "已保存：   {0}\n\n⚔  {1}  对战  {2}\n\n回合：   {3}\n分数：   {4}  {5}  -  {6}  {7}",
+            ["LogLoadedMatch"] = "已读取比赛 \"{0}\"。",
+            ["NoticeLoadedSave"] = "已读取 \"{0}\"。",
+            ["NoticeDeletedSave"] = "已删除存档 \"{0}\"。",
+            ["LogNewGameStarted"] = "新游戏已开始。",
+            ["LogMilestonePoolEmpty"] = "已达到里程碑，但奖励池为空 - 未发放奖励。",
+            ["LogMilestoneChooseFreeFactionAllOwned"] = "里程碑：{0} 抽到选择免费阵营，但已拥有所有阵营。",
+            ["NoticeMilestoneAllFactionsOwned"] = "里程碑！{0} 已拥有所有阵营 - 本次没有奖励。",
+            ["LogMilestoneFreeFaction"] = "里程碑：{0} 获得免费阵营 - {1}。",
+            ["NoticeMilestoneFreeFaction"] = "里程碑！{0} 获得免费阵营 - {1}！",
+            ["LogMilestoneFreeFactionAllOwned"] = "里程碑：{0} 抽到免费阵营，但已拥有所有阵营。",
+            ["LogMilestonePermMove"] = "里程碑：{0} 获得一次免费永久移动升级！",
+            ["LogMilestoneSellback"] = "里程碑：{0} 的出售返还提高 20% -> {1}%。",
+            ["LogMilestoneIncomeDiscount"] = "里程碑：{0} 获得一次性 15% 收入折扣！",
+            ["LogMilestoneFullRefund"] = "里程碑：{0} 获得一次性部队全额退款！",
+            ["FactionModeLocked"] = "阵营模式在第 1 回合后锁定。",
+            ["MatchModeLocked"] = "比赛模式在第 1 回合后锁定。",
+            ["NotEnoughGoldFaction"] = "{0} 没有足够金币购买阵营 ({1})。",
+            ["NotEnoughGold"] = "{0} 没有足够金币。",
+            ["NotEnoughGoldAmount"] = "{0} 没有足够金币 ({1})。",
+            ["IncomeAlreadyBought"] = "{0} 本回合已经购买过收入。",
+            ["MaxedPermMove"] = "{0} 已达到永久移动上限 ({1})。",
+            ["ReplayAlreadyBought"] = "{0} 本回合已经购买过重赛查看。",
+            ["EnterValidSpendAmount"] = "请输入有效的支出金额。",
+            ["EnterValidUnitValue"] = "请先输入单位价值。",
+            ["LogPlayerGoesFirst"] = "{0} 先行动并获得 50 金币。",
+            ["LogFullRefundSell"] = "{0} 使用了全额退款 - 以完整 {1} 金币出售单位。",
+            ["NoticeFullRefundSell"] = "已使用全额退款！{0} 返还 {1} 金币。",
+            ["LogSoldUnit"] = "{0} 出售价值 {1} 金币的单位，获得 {2} 金币 ({3}%)。",
         };
         public MainWindow()
         {
             AppPrefs.Load();
-            currentLanguage = AppPrefs.Language == TwoVTwoGameMode.Loc.Language.Spanish
-                ? AppLanguage.Spanish
-                : AppLanguage.English;
+            currentLanguage = FromSharedLanguage(AppPrefs.Language);
             TwoVTwoGameMode.Loc.Current = AppPrefs.Language;
 
             InitializeComponent();
+            if (IsNoRoundYetText(p1Calc)) p1Calc = T("NoRoundYet");
+            if (IsNoRoundYetText(p2Calc)) p2Calc = T("NoRoundYet");
             RootScaleHost.LayoutTransform = new ScaleTransform(1.0, 1.0);
             SetupPlaceholders();
             SetupNumericInputBoxes();
@@ -690,9 +1218,7 @@ private static readonly string[] BaseRewardPool = new string[]
                     ? SavedWindowMode.BorderlessFullscreen
                     : SavedWindowMode.Windowed;
 
-                AppPrefs.Language = currentLanguage == AppLanguage.Spanish
-                    ? TwoVTwoGameMode.Loc.Language.Spanish
-                    : TwoVTwoGameMode.Loc.Language.English;
+                AppPrefs.Language = ToSharedLanguage(currentLanguage);
 
                 AppPrefs.Save();
             };
@@ -1017,7 +1543,7 @@ private static readonly string[] BaseRewardPool = new string[]
         {
             if (undoStack.Count == 0) { ShowNotice(T("NothingToUndo")); return; }
             RestoreState(undoStack.Pop());
-            AddActionLog("Undid the last action.");
+            AddActionLog(T("LogUndo"));
         }
 
         private void RefreshSavesDropdown()
@@ -1581,8 +2107,8 @@ string.Format(T("AlreadyExistsMsg"), name)))
                 JsonConvert.SerializeObject(data, Formatting.Indented));
             _currentSaveName = name;
             RefreshSavesDropdown();
-            AddActionLog(string.Format("Match saved as \"{0}\".", name));
-            ShowNotice(string.Format("Saved as \"{0}\".", name));
+            AddActionLog(string.Format(T("LogSavedMatch"), name));
+            ShowNotice(string.Format(T("NoticeSavedAs"), name));
         }
 
         private void LoadButton_Click(object sender, RoutedEventArgs e)
@@ -1600,11 +2126,11 @@ string.Format(T("AlreadyExistsMsg"), name)))
             try { data = JsonConvert.DeserializeObject<OneV1SaveData>(File.ReadAllText(path)); }
             catch { ShowNotice(T("CouldNotReadSave")); return; }
             var msg = string.Format(
-                "Saved:   {0}\n\n⚔  {1}  vs  {2}\n\nRound:   {3}\nScore:   {4}  {5}  —  {6}  {7}",
+                T("LoadPreviewMsg"),
                 data.SavedAt.ToString("MM/dd/yyyy  h:mm tt"),
                 data.P1Name, data.P2Name, data.Round,
                 data.P1Name, data.P1Points, data.P2Name, data.P2Points);
-            if (ShowConfirm(string.Format("Load \"{0}\"?", data.SaveName), msg))
+            if (ShowConfirm(string.Format(T("LoadPreviewTitle"), data.SaveName), msg))
                 ApplyLoad(data, name);
         }
 
@@ -1624,8 +2150,8 @@ string.Format(T("AlreadyExistsMsg"), name)))
             p2BoughtIncomeThisRound = d.P2BoughtIncomeThisRound;
             p1HasIncomeDiscount = d.P1HasIncomeDiscount; p2HasIncomeDiscount = d.P2HasIncomeDiscount;
             p1HasFullRefund = d.P1HasFullRefund; p2HasFullRefund = d.P2HasFullRefund;
-            p1Name = d.P1Name ?? "Player 1"; p2Name = d.P2Name ?? "Player 2";
-            p1Calc = d.P1Calc ?? "No round yet."; p2Calc = d.P2Calc ?? "No round yet.";
+            p1Name = d.P1Name ?? T("DefaultP1Name"); p2Name = d.P2Name ?? T("DefaultP2Name");
+            p1Calc = d.P1Calc ?? T("NoRoundYet"); p2Calc = d.P2Calc ?? T("NoRoundYet");
             p1HasFt10PermMove = d.P1HasFt10PermMove; p2HasFt10PermMove = d.P2HasFt10PermMove;
             milestone5Claimed = d.Milestone5Claimed; milestone10Claimed = d.Milestone10Claimed;
             milestone15Claimed = d.Milestone15Claimed; milestone20Claimed = d.Milestone20Claimed;
@@ -1676,8 +2202,8 @@ string.Format(T("AlreadyExistsMsg"), name)))
             p2ReplayBoughtThisRound = d.P2ReplayBoughtThisRound;
 
             UpdateUI(); RefreshSavesDropdown();
-            AddActionLog(string.Format("Loaded match \"{0}\".", name));
-            ShowNotice(string.Format("Loaded \"{0}\".", name));
+            AddActionLog(string.Format(T("LogLoadedMatch"), name));
+            ShowNotice(string.Format(T("NoticeLoadedSave"), name));
 
         }
 
@@ -1692,7 +2218,7 @@ string.Format(T("DeleteConfirmMsg"), selected))) return;
             if (File.Exists(path)) File.Delete(path);
             if (_currentSaveName == selected) _currentSaveName = null;
             RefreshSavesDropdown();
-            ShowNotice(string.Format("Deleted save \"{0}\".", selected));
+            ShowNotice(string.Format(T("NoticeDeletedSave"), selected));
         }
 
         private void NewGameButton_Click(object sender, RoutedEventArgs e)
@@ -1734,7 +2260,7 @@ T("NewGameConfirmMsg"))) return;
             p1ChosenFactionPurchases = 0; p2ChosenFactionPurchases = 0;
             p1Factions.Clear(); p2Factions.Clear();
             ft20MilestonePool.Clear(); ft20NextMilestoneRound = GetMilestoneStep();
-            p1Calc = "No round yet."; p2Calc = "No round yet.";
+            p1Calc = T("NoRoundYet"); p2Calc = T("NoRoundYet");
             P1NameBox.IsReadOnly = false; P2NameBox.IsReadOnly = false;
             P1NameEditButton.Visibility = Visibility.Visible; P2NameEditButton.Visibility = Visibility.Visible;
             P1NameBox.Text = p1Name; P2NameBox.Text = p2Name;
@@ -1751,7 +2277,7 @@ T("NewGameConfirmMsg"))) return;
             p1ReplayBoughtThisRound = false;
             p2ReplayBoughtThisRound = false;
             SetupPlaceholders(); UpdateUI();
-            AddActionLog("New game started.");
+            AddActionLog(T("LogNewGameStarted"));
         }
 
         private void ShowNotice(string message)
@@ -2101,7 +2627,7 @@ T("NewGameConfirmMsg"))) return;
         {
             if (milestoneRewardQueue == null || milestoneRewardQueue.Count == 0)
             {
-                AddActionLog(string.Format("Milestone reached but reward pool is empty — no reward given."));
+                AddActionLog(T("LogMilestonePoolEmpty"));
                 return;
             }
             string reward = milestoneRewardQueue[0];
@@ -2121,8 +2647,8 @@ T("NewGameConfirmMsg"))) return;
                     }
                     else
                     {
-                        AddActionLog(string.Format("Milestone: {0} rolled Choose Free Faction but owns all factions.", pName));
-                        ShowNotice(string.Format("Milestone! {0} owns all factions — no reward this time.", pName));
+                        AddActionLog(string.Format(T("LogMilestoneChooseFreeFactionAllOwned"), pName));
+                        ShowNotice(string.Format(T("NoticeMilestoneAllFactionsOwned"), pName));
                     }
                     break;
 
@@ -2132,35 +2658,35 @@ T("NewGameConfirmMsg"))) return;
                     {
                         AddFactionToPlayer(player, faction);
                         if (player == 1) p1FactionPurchases++; else p2FactionPurchases++;
-                        AddActionLog(string.Format("Milestone: {0} receives free faction — {1}.", pName, faction));
-                        ShowNotice(string.Format("Milestone! {0} receives free faction — {1}!", pName, faction));
+                        AddActionLog(string.Format(T("LogMilestoneFreeFaction"), pName, faction));
+                        ShowNotice(string.Format(T("NoticeMilestoneFreeFaction"), pName, faction));
                     }
                     else
                     {
-                        AddActionLog(string.Format("Milestone: {0} rolled Free Faction but owns all factions.", pName));
-                        ShowNotice(string.Format("Milestone! {0} owns all factions — no reward this time.", pName));
+                        AddActionLog(string.Format(T("LogMilestoneFreeFactionAllOwned"), pName));
+                        ShowNotice(string.Format(T("NoticeMilestoneAllFactionsOwned"), pName));
                     }
                     break;
                 case "perm_move_upgrade":
                     if (player == 1) p1MilestonePermMoveUpgrades++; else p2MilestonePermMoveUpgrades++;
-                    AddActionLog(string.Format("Milestone: {0} receives a free perm move upgrade!", pName));
+                    AddActionLog(string.Format(T("LogMilestonePermMove"), pName));
                     ShowNotice(string.Format(T("MilestonePermMoveNotice"), pName));
                     break;
                 case "sellback_20":
                     if (player == 1) { p1SellbackPct = Math.Min(100, p1SellbackPct + 20); p1Sellback70 = p1SellbackPct >= 70; }
                     else { p2SellbackPct = Math.Min(100, p2SellbackPct + 20); p2Sellback70 = p2SellbackPct >= 70; }
                     int newPct = player == 1 ? p1SellbackPct : p2SellbackPct;
-                    AddActionLog(string.Format("Milestone: {0} sellback increased by 20% → {1}%.", pName, newPct));
+                    AddActionLog(string.Format(T("LogMilestoneSellback"), pName, newPct));
                     ShowNotice(string.Format(T("MilestoneSellbackNotice"), pName, newPct));
                     break;
                 case "income_discount":
                     if (player == 1) p1HasIncomeDiscount = true; else p2HasIncomeDiscount = true;
-                    AddActionLog(string.Format("Milestone: {0} receives a one-time 15% income discount!", pName));
+                    AddActionLog(string.Format(T("LogMilestoneIncomeDiscount"), pName));
                     ShowNotice(string.Format(T("MilestoneIncomeDiscountNotice"), pName));
                     break;
                 case "full_refund":
                     if (player == 1) p1HasFullRefund = true; else p2HasFullRefund = true;
-                    AddActionLog(string.Format("Milestone: {0} receives a one-time full troop refund!", pName));
+                    AddActionLog(string.Format(T("LogMilestoneFullRefund"), pName));
                     ShowNotice(string.Format(T("MilestoneFullRefundNotice"), pName));
                     break;
             }
@@ -2530,7 +3056,7 @@ T("NewGameConfirmMsg"))) return;
 
         private void FactionModeToggle_Click(object sender, RoutedEventArgs e)
         {
-            if (factionModeLocked) { ShowNotice("Faction mode is locked after round 1."); FactionModeToggle.IsChecked = factionModeEnabled; return; }
+            if (factionModeLocked) { ShowNotice(T("FactionModeLocked")); FactionModeToggle.IsChecked = factionModeEnabled; return; }
             CloseAllGoldWindows();
             PushUndoState();
             factionModeEnabled = FactionModeToggle.IsChecked == true;
@@ -2541,7 +3067,7 @@ T("NewGameConfirmMsg"))) return;
 
         private void Ft20ModeToggle_Click(object sender, RoutedEventArgs e)
         {
-            if (ft20ModeLocked) { ShowNotice("Match mode is locked after round 1."); Ft20ModeToggle.IsChecked = ft30ModeEnabled; return; }
+            if (ft20ModeLocked) { ShowNotice(T("MatchModeLocked")); Ft20ModeToggle.IsChecked = ft30ModeEnabled; return; }
             CloseAllGoldWindows();
             PushUndoState();
             ft30ModeEnabled = Ft20ModeToggle.IsChecked == true;
@@ -2554,7 +3080,7 @@ T("NewGameConfirmMsg"))) return;
 
         private void Ft10ModeToggle_Click(object sender, RoutedEventArgs e)
         {
-            if (ft20ModeLocked) { ShowNotice("Match mode is locked after round 1."); Ft10ModeToggle.IsChecked = ft10ModeEnabled; return; }
+            if (ft20ModeLocked) { ShowNotice(T("MatchModeLocked")); Ft10ModeToggle.IsChecked = ft10ModeEnabled; return; }
             CloseAllGoldWindows();
             PushUndoState();
             ft10ModeEnabled = Ft10ModeToggle.IsChecked == true;
@@ -2605,11 +3131,11 @@ T("NewGameConfirmMsg"))) return;
 
         private void P1BuyFactionButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!factionModeEnabled) { ShowNotice("Faction mode is disabled."); return; }
+            if (!factionModeEnabled) { ShowNotice(T("FactionDisabled")); return; }
             int cost = GetFactionCost(1);
-            if (p1Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold for a faction.", p1Name)); return; }
+            if (p1Gold < cost) { ShowNotice(string.Format(T("NotEnoughGoldFaction"), p1Name, cost)); return; }
             string faction = GetRandomFactionForPlayer(1);
-            if (faction == null) { ShowNotice(string.Format("{0} already owns all factions.", p1Name)); return; }
+            if (faction == null) { ShowNotice(string.Format(T("AllFactionsOwned"), p1Name)); return; }
             PushUndoState();
             ApplyGoldSpend(1, cost); AddFactionToPlayer(1, faction); p1FactionPurchases++;
             AddActionLog(string.Format(T("LogGainedFaction"), p1Name, faction));
@@ -2619,11 +3145,11 @@ T("NewGameConfirmMsg"))) return;
 
         private void P2BuyFactionButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!factionModeEnabled) { ShowNotice("Faction mode is disabled."); return; }
+            if (!factionModeEnabled) { ShowNotice(T("FactionDisabled")); return; }
             int cost = GetFactionCost(2);
-            if (p2Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold for a faction.", p2Name)); return; }
+            if (p2Gold < cost) { ShowNotice(string.Format(T("NotEnoughGoldFaction"), p2Name, cost)); return; }
             string faction = GetRandomFactionForPlayer(2);
-            if (faction == null) { ShowNotice(string.Format("{0} already owns all factions.", p2Name)); return; }
+            if (faction == null) { ShowNotice(string.Format(T("AllFactionsOwned"), p2Name)); return; }
             PushUndoState();
             ApplyGoldSpend(2, cost); AddFactionToPlayer(2, faction); p2FactionPurchases++;
             AddActionLog(string.Format(T("LogGainedFaction"), p2Name, faction));
@@ -2639,14 +3165,14 @@ T("NewGameConfirmMsg"))) return;
         {
             if (round != 1 || firstTurnChosen) return;
             PushUndoState(); firstTurnChosen = true; firstTurnPlayer = 1; p1Gold += 50; SetGoldGreen(1);
-            AddActionLog(string.Format("{0} goes first and receives 50 gold.", p1Name)); UpdateUI();
+            AddActionLog(string.Format(T("LogPlayerGoesFirst"), p1Name)); UpdateUI();
         }
 
         private void P2FirstTurnButton_Click(object sender, RoutedEventArgs e)
         {
             if (round != 1 || firstTurnChosen) return;
             PushUndoState(); firstTurnChosen = true; firstTurnPlayer = 2; p2Gold += 50; SetGoldGreen(2);
-            AddActionLog(string.Format("{0} goes first and receives 50 gold.", p2Name)); UpdateUI();
+            AddActionLog(string.Format(T("LogPlayerGoesFirst"), p2Name)); UpdateUI();
         }
 
         private int CalcInterest(int gold) { return Math.Min((gold / 50) * 10, 100); }
@@ -2890,8 +3416,8 @@ T("NewGameConfirmMsg"))) return;
         {
             if (!IsIncomeAvailable()) return;
             int cost = GetDisplayedIncomeCost(p1IncomeCost, p1IncomeDecayPercent, p1HasIncomeDiscount);
-            if (p1BoughtIncomeThisRound) { ShowNotice(string.Format("{0} already bought income this round.", p1Name)); return; }
-            if (p1Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold.", p1Name)); return; }
+            if (p1BoughtIncomeThisRound) { ShowNotice(string.Format(T("IncomeAlreadyBought"), p1Name)); return; }
+            if (p1Gold < cost) { ShowNotice(string.Format(T("NotEnoughGold"), p1Name)); return; }
             PushUndoState();
             ApplyGoldSpend(1, cost);
             int gain = ft20ModeEnabled ? 13 : 10;
@@ -2909,8 +3435,8 @@ T("NewGameConfirmMsg"))) return;
         {
             if (!IsIncomeAvailable()) return;
             int cost = GetDisplayedIncomeCost(p2IncomeCost, p2IncomeDecayPercent, p2HasIncomeDiscount);
-            if (p2BoughtIncomeThisRound) { ShowNotice(string.Format("{0} already bought income this round.", p2Name)); return; }
-            if (p2Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold.", p2Name)); return; }
+            if (p2BoughtIncomeThisRound) { ShowNotice(string.Format(T("IncomeAlreadyBought"), p2Name)); return; }
+            if (p2Gold < cost) { ShowNotice(string.Format(T("NotEnoughGold"), p2Name)); return; }
             PushUndoState();
             ApplyGoldSpend(2, cost);
             int gain = ft20ModeEnabled ? 13 : 10;
@@ -2927,8 +3453,8 @@ T("NewGameConfirmMsg"))) return;
         private void P1BuyPermMove_Click(object sender, RoutedEventArgs e)
         {
             int cost = GetPermMoveCost();
-            if (p1PermMoveUpgrades >= 2) { ShowNotice(string.Format("{0} has reached the perm move cap (2).", p1Name)); return; }
-            if (p1Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold.", p1Name)); return; }
+            if (p1PermMoveUpgrades >= 2) { ShowNotice(string.Format(T("MaxedPermMove"), p1Name, 2)); return; }
+            if (p1Gold < cost) { ShowNotice(string.Format(T("NotEnoughGold"), p1Name)); return; }
             PushUndoState();
             ApplyGoldSpend(1, cost); p1PermMoveUpgrades++;
             SetGoldRed(1);
@@ -2939,8 +3465,8 @@ T("NewGameConfirmMsg"))) return;
         private void P2BuyPermMove_Click(object sender, RoutedEventArgs e)
         {
             int cost = GetPermMoveCost();
-            if (p2PermMoveUpgrades >= 2) { ShowNotice(string.Format("{0} has reached the perm move cap (2).", p2Name)); return; }
-            if (p2Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold.", p2Name)); return; }
+            if (p2PermMoveUpgrades >= 2) { ShowNotice(string.Format(T("MaxedPermMove"), p2Name, 2)); return; }
+            if (p2Gold < cost) { ShowNotice(string.Format(T("NotEnoughGold"), p2Name)); return; }
             PushUndoState();
             ApplyGoldSpend(2, cost); p2PermMoveUpgrades++;
             SetGoldRed(2);
@@ -2951,7 +3477,7 @@ T("NewGameConfirmMsg"))) return;
         private void P1SingleTroopMove_Click(object sender, RoutedEventArgs e)
         {
             int cost = GetSingleTroopMoveCost();
-            if (p1Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold ({1}).", p1Name, cost)); return; }
+            if (p1Gold < cost) { ShowNotice(string.Format(T("NotEnoughGoldAmount"), p1Name, cost)); return; }
             PushUndoState(); ApplyGoldSpend(1, cost); SetGoldRed(1);
             AddActionLog(string.Format(T("LogSingleTroopMove"), p1Name, cost));
             UpdateUI();
@@ -2960,7 +3486,7 @@ T("NewGameConfirmMsg"))) return;
         private void P2SingleTroopMove_Click(object sender, RoutedEventArgs e)
         {
             int cost = GetSingleTroopMoveCost();
-            if (p2Gold < cost) { ShowNotice(string.Format("{0} does not have enough gold ({1}).", p2Name, cost)); return; }
+            if (p2Gold < cost) { ShowNotice(string.Format(T("NotEnoughGoldAmount"), p2Name, cost)); return; }
             PushUndoState(); ApplyGoldSpend(2, cost); SetGoldRed(2);
             AddActionLog(string.Format(T("LogSingleTroopMove"), p2Name, cost));
             UpdateUI();
@@ -2968,8 +3494,8 @@ T("NewGameConfirmMsg"))) return;
 
         private void P1Replay_Click(object sender, RoutedEventArgs e)
         {
-            if (p1ReplayBoughtThisRound) { ShowNotice($"{p1Name} already bought replay this round."); return; }
-            if (p1Gold < 10) { ShowNotice($"{p1Name} does not have enough gold (10)."); return; }
+            if (p1ReplayBoughtThisRound) { ShowNotice(string.Format(T("ReplayAlreadyBought"), p1Name)); return; }
+            if (p1Gold < 10) { ShowNotice(string.Format(T("NotEnoughGoldAmount"), p1Name, 10)); return; }
 
             PushUndoState();
             ApplyGoldSpend(1, 10);
@@ -2981,8 +3507,8 @@ T("NewGameConfirmMsg"))) return;
 
         private void P2Replay_Click(object sender, RoutedEventArgs e)
         {
-            if (p2ReplayBoughtThisRound) { ShowNotice($"{p2Name} already bought replay this round."); return; }
-            if (p2Gold < 10) { ShowNotice($"{p2Name} does not have enough gold (10)."); return; }
+            if (p2ReplayBoughtThisRound) { ShowNotice(string.Format(T("ReplayAlreadyBought"), p2Name)); return; }
+            if (p2Gold < 10) { ShowNotice(string.Format(T("NotEnoughGoldAmount"), p2Name, 10)); return; }
 
             PushUndoState();
             ApplyGoldSpend(2, 10);
@@ -2995,8 +3521,8 @@ T("NewGameConfirmMsg"))) return;
         private void P1Spend_Click(object sender, RoutedEventArgs e)
         {
             int amount = ReadNumber(P1SpendBox);
-            if (amount <= 0) { ShowNotice("Enter a valid amount to spend."); return; }
-            if (p1Gold < amount) { ShowNotice(string.Format("{0} does not have enough gold.", p1Name)); return; }
+            if (amount <= 0) { ShowNotice(T("EnterValidSpendAmount")); return; }
+            if (p1Gold < amount) { ShowNotice(string.Format(T("NotEnoughGold"), p1Name)); return; }
             PushUndoState(); ApplyGoldSpend(1, amount); SetGoldRed(1);
             AddActionLog(string.Format(T("LogSpentTroops"), p1Name, amount));
             UpdateUI();
@@ -3005,8 +3531,8 @@ T("NewGameConfirmMsg"))) return;
         private void P2Spend_Click(object sender, RoutedEventArgs e)
         {
             int amount = ReadNumber(P2SpendBox);
-            if (amount <= 0) { ShowNotice("Enter a valid amount to spend."); return; }
-            if (p2Gold < amount) { ShowNotice(string.Format("{0} does not have enough gold.", p2Name)); return; }
+            if (amount <= 0) { ShowNotice(T("EnterValidSpendAmount")); return; }
+            if (p2Gold < amount) { ShowNotice(string.Format(T("NotEnoughGold"), p2Name)); return; }
             PushUndoState(); ApplyGoldSpend(2, amount); SetGoldRed(2);
             AddActionLog(string.Format(T("LogSpentTroops"), p2Name, amount));
             UpdateUI();
@@ -3015,11 +3541,11 @@ T("NewGameConfirmMsg"))) return;
         private void P1SellUnit_Click(object sender, RoutedEventArgs e)
         {
             int value = ReadNumber(P1UnitBox);
-            if (value <= 0) { ShowNotice("Enter the unit's value first."); return; }
+            if (value <= 0) { ShowNotice(T("EnterValidUnitValue")); return; }
             PushUndoState();
             int refund;
-            if (p1HasFullRefund) { refund = value; p1HasFullRefund = false; AddActionLog(string.Format("{0} used Full Refund — sold unit for full {1} gold.", p1Name, refund)); ShowNotice(string.Format("Full refund used! {0} got {1} gold back.", p1Name, refund)); }
-            else { refund = (int)Math.Floor(value * (p1SellbackPct / 100.0)); AddActionLog(string.Format("{0} sold unit worth {1} gold for {2} gold ({3}%).", p1Name, value, refund, p1SellbackPct)); }
+            if (p1HasFullRefund) { refund = value; p1HasFullRefund = false; AddActionLog(string.Format(T("LogFullRefundSell"), p1Name, refund)); ShowNotice(string.Format(T("NoticeFullRefundSell"), p1Name, refund)); }
+            else { refund = (int)Math.Floor(value * (p1SellbackPct / 100.0)); AddActionLog(string.Format(T("LogSoldUnit"), p1Name, value, refund, p1SellbackPct)); }
             p1Gold += refund; SetGoldGreen(1);
             UpdateUI();
         }
@@ -3027,11 +3553,11 @@ T("NewGameConfirmMsg"))) return;
         private void P2SellUnit_Click(object sender, RoutedEventArgs e)
         {
             int value = ReadNumber(P2UnitBox);
-            if (value <= 0) { ShowNotice("Enter the unit's value first."); return; }
+            if (value <= 0) { ShowNotice(T("EnterValidUnitValue")); return; }
             PushUndoState();
             int refund;
-            if (p2HasFullRefund) { refund = value; p2HasFullRefund = false; AddActionLog(string.Format("{0} used Full Refund — sold unit for full {1} gold.", p2Name, refund)); ShowNotice(string.Format("Full refund used! {0} got {1} gold back.", p2Name, refund)); }
-            else { refund = (int)Math.Floor(value * (p2SellbackPct / 100.0)); AddActionLog(string.Format("{0} sold unit worth {1} gold for {2} gold ({3}%).", p2Name, value, refund, p2SellbackPct)); }
+            if (p2HasFullRefund) { refund = value; p2HasFullRefund = false; AddActionLog(string.Format(T("LogFullRefundSell"), p2Name, refund)); ShowNotice(string.Format(T("NoticeFullRefundSell"), p2Name, refund)); }
+            else { refund = (int)Math.Floor(value * (p2SellbackPct / 100.0)); AddActionLog(string.Format(T("LogSoldUnit"), p2Name, value, refund, p2SellbackPct)); }
             p2Gold += refund; SetGoldGreen(2);
             UpdateUI(); ;
         }
@@ -3258,9 +3784,7 @@ T("NewGameConfirmMsg"))) return;
             if (saveSetting)
             {
                 AppPrefs.WindowMode = borderless ? SavedWindowMode.BorderlessFullscreen : SavedWindowMode.Windowed;
-                AppPrefs.Language = currentLanguage == AppLanguage.Spanish
-                    ? TwoVTwoGameMode.Loc.Language.Spanish
-                    : TwoVTwoGameMode.Loc.Language.English;
+                AppPrefs.Language = ToSharedLanguage(currentLanguage);
                 AppPrefs.Save();
             }
 
@@ -3320,12 +3844,12 @@ T("NewGameConfirmMsg"))) return;
 
         private void SettingsLanguageLeft_Click(object sender, RoutedEventArgs e)
         {
-            ApplyLanguage(AppLanguage.English);
+            ApplyLanguage(PreviousLanguage(currentLanguage));
         }
 
         private void SettingsLanguageRight_Click(object sender, RoutedEventArgs e)
         {
-            ApplyLanguage(AppLanguage.Spanish);
+            ApplyLanguage(NextLanguage(currentLanguage));
         }
         private void WindowMinimize_Click(object sender, RoutedEventArgs e)
         {
@@ -3422,6 +3946,9 @@ T("NewGameConfirmMsg"))) return;
             currentLanguage = lang;
             SaveLanguage();
 
+            if (IsNoRoundYetText(p1Calc)) p1Calc = T("NoRoundYet");
+            if (IsNoRoundYetText(p2Calc)) p2Calc = T("NoRoundYet");
+
             UpdateLanguageSelectorUI();
             UpdateSoundSettingsUI();
             UpdateStaticText();
@@ -3435,14 +3962,20 @@ T("NewGameConfirmMsg"))) return;
         {
             if (SettingsLanguageText == null) return;
 
-            bool isSpanish = currentLanguage == AppLanguage.Spanish;
-            SettingsLanguageText.Text = isSpanish ? "Español" : "English";
+            SettingsLanguageText.Text = GetLanguageDisplayName(currentLanguage);
+            TwoVTwoGameMode.Loc.UpdateLanguageFlag(SettingsLanguageFlag, ToSharedLanguage(currentLanguage));
 
-            SettingsLangDot1.Background = !isSpanish
-                ? new SolidColorBrush(Color.FromRgb(110, 182, 218))
-                : new SolidColorBrush(Color.FromRgb(58, 74, 88));
+            SetLanguageDot(SettingsLangDot1, currentLanguage == AppLanguage.English);
+            SetLanguageDot(SettingsLangDot2, currentLanguage == AppLanguage.Spanish);
+            SetLanguageDot(SettingsLangDot3, currentLanguage == AppLanguage.Russian);
+            SetLanguageDot(SettingsLangDot4, currentLanguage == AppLanguage.Chinese);
+        }
 
-            SettingsLangDot2.Background = isSpanish
+        private void SetLanguageDot(Border dot, bool isActive)
+        {
+            if (dot == null) return;
+
+            dot.Background = isActive
                 ? new SolidColorBrush(Color.FromRgb(110, 182, 218))
                 : new SolidColorBrush(Color.FromRgb(58, 74, 88));
         }

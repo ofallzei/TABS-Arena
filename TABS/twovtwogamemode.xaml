@@ -849,14 +849,14 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                                 Content="Replay (10)"
                                 Background="#2B2F33" Click="P1Replay_Click" FontSize="11"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <TextBox x:Name="P1SpendBox" Width="160" Text="Custom troop spend"
+                            <TextBox x:Name="P1SpendBox" Width="160"
                                      GotFocus="PlaceholderBox_GotFocus"
                                      LostFocus="PlaceholderBox_LostFocus"/>
                             <Button x:Name="P1SpendButton" Content="Spend" Width="60"
                                     Margin="4,0,0,0" FontSize="11" Click="P1Spend_Click"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <TextBox x:Name="P1BuyTeamBox" Width="130" Text="Teammate unit cost"
+                            <TextBox x:Name="P1BuyTeamBox" Width="130"
                                      GotFocus="PlaceholderBox_GotFocus"
                                      LostFocus="PlaceholderBox_LostFocus"/>
                             <Button x:Name="P1BuyTeamButton" Content="BFT" Width="50"
@@ -869,7 +869,7 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                             </Border>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <TextBox x:Name="P1UnitBox" Width="130" Text="Unit value"
+                            <TextBox x:Name="P1UnitBox" Width="130"
                                      GotFocus="PlaceholderBox_GotFocus"
                                      LostFocus="PlaceholderBox_LostFocus"/>
                             <Button x:Name="P1SellUnitButton" Content="Sell" Width="50"
@@ -1064,14 +1064,14 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                                 Content="Replay (10)"
                                 Background="#2B2F33" Click="P2Replay_Click" FontSize="11"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <TextBox x:Name="P2SpendBox" Width="160" Text="Custom troop spend"
+                            <TextBox x:Name="P2SpendBox" Width="160"
                                      GotFocus="PlaceholderBox_GotFocus"
                                      LostFocus="PlaceholderBox_LostFocus"/>
                             <Button x:Name="P2SpendButton" Content="Spend" Width="60"
                                     Margin="4,0,0,0" FontSize="11" Click="P2Spend_Click"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <TextBox x:Name="P2BuyTeamBox" Width="130" Text="Teammate unit cost"
+                            <TextBox x:Name="P2BuyTeamBox" Width="130"
                                      GotFocus="PlaceholderBox_GotFocus"
                                      LostFocus="PlaceholderBox_LostFocus"/>
                             <Button x:Name="P2BuyTeamButton" Content="BFT" Width="50"
@@ -1084,7 +1084,7 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                             </Border>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <TextBox x:Name="P2UnitBox" Width="130" Text="Unit value"
+                            <TextBox x:Name="P2UnitBox" Width="130"
                                      GotFocus="PlaceholderBox_GotFocus"
                                      LostFocus="PlaceholderBox_LostFocus"/>
                             <Button x:Name="P2SellUnitButton" Content="Sell" Width="50"
@@ -1279,14 +1279,14 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                                 Content="Replay (10)"
                                 Background="#2B2F33" Click="P3Replay_Click" FontSize="11"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <TextBox x:Name="P3SpendBox" Width="160" Text="Custom troop spend"
+                            <TextBox x:Name="P3SpendBox" Width="160"
                                      GotFocus="PlaceholderBox_GotFocus"
                                      LostFocus="PlaceholderBox_LostFocus"/>
                             <Button x:Name="P3SpendButton" Content="Spend" Width="60"
                                     Margin="4,0,0,0" FontSize="11" Click="P3Spend_Click"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <TextBox x:Name="P3BuyTeamBox" Width="130" Text="Teammate unit cost"
+                            <TextBox x:Name="P3BuyTeamBox" Width="130"
                                      GotFocus="PlaceholderBox_GotFocus"
                                      LostFocus="PlaceholderBox_LostFocus"/>
                             <Button x:Name="P3BuyTeamButton" Content="BFT" Width="50"
@@ -1299,7 +1299,7 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                             </Border>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <TextBox x:Name="P3UnitBox" Width="130" Text="Unit value"
+                            <TextBox x:Name="P3UnitBox" Width="130"
                                      GotFocus="PlaceholderBox_GotFocus"
                                      LostFocus="PlaceholderBox_LostFocus"/>
                             <Button x:Name="P3SellUnitButton" Content="Sell" Width="50"
@@ -1493,14 +1493,14 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                                 Content="Replay (10)"
                                 Background="#2B2F33" Click="P4Replay_Click" FontSize="11"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <TextBox x:Name="P4SpendBox" Width="160" Text="Custom troop spend"
+                            <TextBox x:Name="P4SpendBox" Width="160"
                                      GotFocus="PlaceholderBox_GotFocus"
                                      LostFocus="PlaceholderBox_LostFocus"/>
                             <Button x:Name="P4SpendButton" Content="Spend" Width="60"
                                     Margin="4,0,0,0" FontSize="11" Click="P4Spend_Click"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <TextBox x:Name="P4BuyTeamBox" Width="130" Text="Teammate unit cost"
+                            <TextBox x:Name="P4BuyTeamBox" Width="130"
                                      GotFocus="PlaceholderBox_GotFocus"
                                      LostFocus="PlaceholderBox_LostFocus"/>
                             <Button x:Name="P4BuyTeamButton" Content="BFT" Width="50"
@@ -1513,7 +1513,7 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                             </Border>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <TextBox x:Name="P4UnitBox" Width="130" Text="Unit value"
+                            <TextBox x:Name="P4UnitBox" Width="130"
                                      GotFocus="PlaceholderBox_GotFocus"
                                      LostFocus="PlaceholderBox_LostFocus"/>
                             <Button x:Name="P4SellUnitButton" Content="Sell" Width="50"
@@ -1760,13 +1760,22 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                                         <StackPanel Grid.Column="2"
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center">
-                                            <TextBlock x:Name="SettingsLanguageText"
-                                                       Text="English"
-                                                       FontSize="13" FontWeight="SemiBold"
-                                                       Foreground="#6EB6DA"
-                                                       HorizontalAlignment="Center"
-                                                       TextAlignment="Center"
-                                                       Margin="0,0,0,5"/>
+                                            <StackPanel Orientation="Horizontal"
+                                                        HorizontalAlignment="Center"
+                                                        Margin="0,0,0,5">
+                                                <Grid x:Name="SettingsLanguageFlag"
+                                                      Width="24" Height="16"
+                                                      ClipToBounds="True"
+                                                      Margin="0,0,7,0"
+                                                      VerticalAlignment="Center"/>
+                                                <TextBlock x:Name="SettingsLanguageText"
+                                                           Text="English"
+                                                           FontSize="13" FontWeight="SemiBold"
+                                                           Foreground="#6EB6DA"
+                                                           HorizontalAlignment="Center"
+                                                           TextAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </StackPanel>
                                             <StackPanel Orientation="Horizontal"
                                                         HorizontalAlignment="Center">
                                                 <Border x:Name="SettingsLangDot1"
@@ -1775,6 +1784,16 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                                                         Background="#6EB6DA"
                                                         Margin="3,0"/>
                                                 <Border x:Name="SettingsLangDot2"
+                                                        Width="28" Height="3"
+                                                        CornerRadius="2"
+                                                        Background="#3A4A58"
+                                                        Margin="3,0"/>
+                                                <Border x:Name="SettingsLangDot3"
+                                                        Width="28" Height="3"
+                                                        CornerRadius="2"
+                                                        Background="#3A4A58"
+                                                        Margin="3,0"/>
+                                                <Border x:Name="SettingsLangDot4"
                                                         Width="28" Height="3"
                                                         CornerRadius="2"
                                                         Background="#3A4A58"

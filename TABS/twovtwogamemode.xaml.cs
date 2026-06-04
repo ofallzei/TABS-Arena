@@ -59,6 +59,8 @@ namespace TABS
             = new SolidColorBrush(Color.FromRgb(120, 40, 40));
         private static readonly SolidColorBrush TileNeutral
             = new SolidColorBrush(Color.FromRgb(44, 53, 64));
+        private static readonly Brush InputPlaceholderBrush = Brushes.Gray;
+        private static readonly Brush InputTextBrush = Brushes.White;
 
         // ── Income ────────────────────────────────────────────────────────
         private int _p1Income, _p2Income, _p3Income, _p4Income;
@@ -230,10 +232,16 @@ namespace TABS
         {
             for (int p = 1; p <= 4; p++)
             {
-                RegisterNumericOnly(GetSpendBox(p));
-                RegisterNumericOnly(GetBuyTeamBox(p));
-                RegisterNumericOnly(GetUnitBox(p));
+                RegisterNumericInput(GetSpendBox(p), "CustomTroopSpend");
+                RegisterNumericInput(GetBuyTeamBox(p), "TeammateUnitCost");
+                RegisterNumericInput(GetUnitBox(p), "UnitValue");
             }
+        }
+
+        private void RegisterNumericInput(TextBox box, string placeholderKey)
+        {
+            RegisterNumericOnly(box);
+            RegisterPlaceholder(box, placeholderKey);
         }
 
         private void RegisterNumericOnly(TextBox box)
@@ -277,6 +285,61 @@ namespace TABS
         private bool IsDigitsOnly(string text)
         {
             return !string.IsNullOrEmpty(text) && text.All(char.IsDigit);
+        }
+
+        private void RegisterPlaceholder(TextBox box, string placeholderKey)
+        {
+            if (box == null) return;
+
+            box.Tag = placeholderKey;
+            box.GotFocus -= PlaceholderBox_GotFocus;
+            box.LostFocus -= PlaceholderBox_LostFocus;
+            box.GotFocus += PlaceholderBox_GotFocus;
+            box.LostFocus += PlaceholderBox_LostFocus;
+
+            if (string.IsNullOrWhiteSpace(box.Text) || IsPlaceholderText(box.Text))
+                SetInputPlaceholder(box);
+        }
+
+        private void SetInputPlaceholder(TextBox box)
+        {
+            string key = GetPlaceholderKey(box);
+            if (box == null || string.IsNullOrWhiteSpace(key)) return;
+
+            box.Text = Loc.Get(key);
+            box.Foreground = InputPlaceholderBrush;
+        }
+
+        private void ClearInputPlaceholder(TextBox box)
+        {
+            if (box == null) return;
+
+            if (IsPlaceholderText(box.Text))
+                box.Text = "";
+
+            box.Foreground = InputTextBrush;
+        }
+
+        private void RefreshInputPlaceholder(TextBox box)
+        {
+            if (box == null) return;
+
+            if (string.IsNullOrWhiteSpace(box.Text) || IsPlaceholderText(box.Text))
+                SetInputPlaceholder(box);
+            else
+                box.Foreground = InputTextBrush;
+        }
+
+        private string GetPlaceholderKey(TextBox box)
+        {
+            return box?.Tag as string;
+        }
+
+        private bool IsPlaceholderText(string text)
+        {
+            return Loc.IsTranslatedText("CustomTroopSpend", text) ||
+                   Loc.IsTranslatedText("TeammateUnitCost", text) ||
+                   Loc.IsTranslatedText("UnitValue", text);
         }
 
         private void CreateChosenFactionButtons()
@@ -343,15 +406,20 @@ namespace TABS
 
         private void UpdateLanguageSelectorUI()
         {
-            bool isSpanish = Loc.Current == Loc.Language.Spanish;
+            SettingsLanguageText.Text = Loc.GetLanguageDisplayName(Loc.Current);
+            Loc.UpdateLanguageFlag(SettingsLanguageFlag, Loc.Current);
 
-            SettingsLanguageText.Text = isSpanish ? "Español" : "English";
+            SetLanguageDot(SettingsLangDot1, Loc.Current == Loc.Language.English);
+            SetLanguageDot(SettingsLangDot2, Loc.Current == Loc.Language.Spanish);
+            SetLanguageDot(SettingsLangDot3, Loc.Current == Loc.Language.Russian);
+            SetLanguageDot(SettingsLangDot4, Loc.Current == Loc.Language.Chinese);
+        }
 
-            SettingsLangDot1.Background = !isSpanish
-                ? new SolidColorBrush(Color.FromRgb(110, 182, 218))
-                : new SolidColorBrush(Color.FromRgb(58, 74, 88));
+        private void SetLanguageDot(Border dot, bool isActive)
+        {
+            if (dot == null) return;
 
-            SettingsLangDot2.Background = isSpanish
+            dot.Background = isActive
                 ? new SolidColorBrush(Color.FromRgb(110, 182, 218))
                 : new SolidColorBrush(Color.FromRgb(58, 74, 88));
         }
@@ -1325,10 +1393,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             if (!redHit && !blueHit) return;
             claimed = true;
             string team;
-            if (redHit) { AddGold(1, goldEach); AddGold(2, goldEach); team = "Red"; }
-            else { AddGold(3, goldEach); AddGold(4, goldEach); team = "Blue"; }
-            LogAction($"Milestone FT{pts}: {team} Team +{goldEach}g each.");
-            ShowNotice($"🏆 Milestone FT{pts}! {team} Team +{goldEach}g each.", NoticeType.Milestone);
+            if (redHit) { AddGold(1, goldEach); AddGold(2, goldEach); team = Loc.Get("RedTeamShort"); }
+            else { AddGold(3, goldEach); AddGold(4, goldEach); team = Loc.Get("BlueTeamShort"); }
+            LogAction(Loc.Get("LogSharedGoldMilestone", pts, team, goldEach));
+            ShowNotice(Loc.Get("NoticeSharedGoldMilestone", pts, team, goldEach), NoticeType.Milestone);
         }
 
         private void CheckMilestonePerm(int pts, ref bool claimed)
@@ -1339,10 +1407,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             if (!redHit && !blueHit) return;
             claimed = true;
             string team;
-            if (redHit) { _p1PermMoveUpgrades++; _p2PermMoveUpgrades++; team = "Red"; }
-            else { _p3PermMoveUpgrades++; _p4PermMoveUpgrades++; team = "Blue"; }
-            LogAction($"Milestone FT{pts}: {team} Team +1 perm move each.");
-            ShowNotice($"🏆 Milestone FT{pts}! {team} Team: +1 perm move each.", NoticeType.Milestone);
+            if (redHit) { _p1PermMoveUpgrades++; _p2PermMoveUpgrades++; team = Loc.Get("RedTeamShort"); }
+            else { _p3PermMoveUpgrades++; _p4PermMoveUpgrades++; team = Loc.Get("BlueTeamShort"); }
+            LogAction(Loc.Get("LogSharedPermMoveMilestone", pts, team));
+            ShowNotice(Loc.Get("NoticeSharedPermMoveMilestone", pts, team), NoticeType.Milestone);
         }
 
         private void CheckMilestoneSellback(int pts, ref bool claimed)
@@ -1357,16 +1425,16 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             if (redHit)
             {
                 _redPermanentSellbackBonusPct = Math.Max(_redPermanentSellbackBonusPct, 20);
-                team = "Red";
+                team = Loc.Get("RedTeamShort");
             }
             else
             {
                 _bluePermanentSellbackBonusPct = Math.Max(_bluePermanentSellbackBonusPct, 20);
-                team = "Blue";
+                team = Loc.Get("BlueTeamShort");
             }
 
-            LogAction($"Milestone FT{pts}: {team} Team +20% permanent sellback.");
-            ShowNotice($"🏆 Milestone FT{pts}! {team} Team: +20% permanent sellback.", NoticeType.Milestone);
+            LogAction(Loc.Get("LogSharedSellbackMilestone", pts, team));
+            ShowNotice(Loc.Get("NoticeSharedSellbackMilestone", pts, team), NoticeType.Milestone);
             UpdateSellPctDisplays();
         }
 
@@ -1395,8 +1463,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             string reward = _milestoneRewardsRemaining[0];
             _milestoneRewardsRemaining.RemoveAt(0);
             ApplyFT20Reward(reward, isRed);
-            string team = isRed ? "Red" : "Blue";
-            LogAction($"🏆 {Loc.Get("LogMilestone", threshold, team, reward)}");
+            string team = Loc.Get(isRed ? "RedTeamShort" : "BlueTeamShort");
+            LogAction($"🏆 {Loc.Get("LogMilestone", threshold, team, LocalizeReward(reward))}");
             ShowNotice(Loc.Get("NoticeMilestone", threshold, Loc.Get(isRed ? "RedTeamShort" : "BlueTeamShort"), LocalizeReward(reward)), NoticeType.Milestone);
         }
 
@@ -1454,8 +1522,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             string reward = _ft20RewardsRemaining[0];
             _ft20RewardsRemaining.RemoveAt(0);
             ApplyFT20Reward(reward, isRed);
-            string team = isRed ? "Red" : "Blue";
-            LogAction($"🏆 {Loc.Get("LogFT20Milestone", _ft20NextMilestone, team, reward)}");
+            string team = Loc.Get(isRed ? "RedTeamShort" : "BlueTeamShort");
+            LogAction($"🏆 {Loc.Get("LogFT20Milestone", _ft20NextMilestone, team, LocalizeReward(reward))}");
             ShowNotice(Loc.Get("NoticeFT20Milestone", _ft20NextMilestone, Loc.Get(isRed ? "RedTeamShort" : "BlueTeamShort"), LocalizeReward(reward)), NoticeType.Milestone);
             _ft20NextMilestone += GetTimedMilestoneStep();
         }
@@ -1684,7 +1752,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             if (discountPct > 0)
                 SetNextPermMoveDiscountPct(player, 0);
 
-            LogAction($"🏃 {Loc.Get("LogBoughtPermMove", player, finalCost, discountPct > 0 ? $" ({discountPct}% off)" : "", GetPermMoveUpgrades(player))}");
+            string discountText = discountPct > 0 ? Loc.Get("DiscountSuffix", discountPct) : "";
+            LogAction($"🏃 {Loc.Get("LogBoughtPermMove", player, finalCost, discountText, GetPermMoveUpgrades(player))}");
             ShowNotice(Loc.Get("NoticeBoughtPermMove", player, GetPermMoveUpgrades(player)), NoticeType.Success);
             RefreshAllUI();
         }
@@ -1736,7 +1805,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 SetNextFactionDiscountPct(player, 0);
 
             int nextCost = GetFactionCost(player);
-            LogAction($"⚔️ {Loc.Get("LogBoughtFaction", player, newFaction, cost, discountPct > 0 ? $" ({discountPct}% off)" : "", nextCost)}");
+            string discountText = discountPct > 0 ? Loc.Get("DiscountSuffix", discountPct) : "";
+            LogAction($"⚔️ {Loc.Get("LogBoughtFaction", player, newFaction, cost, discountText, nextCost)}");
             ShowNotice(Loc.Get("NoticeBoughtFaction", player, newFaction, nextCost), NoticeType.Success);
             RefreshAllUI();
         }
@@ -1902,7 +1972,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private void CustomSpend(int player, TextBox box)
         {
-            string raw = box.Text.Trim();
+            string raw = IsPlaceholderText(box.Text) ? "" : box.Text.Trim();
             if (!int.TryParse(raw, out int amount) || amount <= 0)
             {
                 ShowNotice(Loc.Get("EnterPositiveAmount"), NoticeType.Warning);
@@ -1917,6 +1987,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             AddGold(player, -amount);
             LogAction($"💸 {Loc.Get("LogSpent", player, amount)}");
             ShowNotice(Loc.Get("NoticeSpent", player, amount), NoticeType.Info);
+            ClearInputBox(box);
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -1929,7 +2000,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private void BuyForTeammate(int player, TextBox box)
         {
-            string raw = box.Text.Trim();
+            string raw = IsPlaceholderText(box.Text) ? "" : box.Text.Trim();
             if (!int.TryParse(raw, out int unitCost) || unitCost <= 0)
             {
                 ShowNotice(Loc.Get("EnterValidUnitCost"), NoticeType.Warning);
@@ -1948,6 +2019,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             AddGold(player, -total);
             LogAction($"🤝 {Loc.Get("LogBFT", player, unitCost, total, surcharge)}");
             ShowNotice(Loc.Get("NoticeBFT", player, total, surcharge), NoticeType.Info);
+            ClearInputBox(box);
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -1960,7 +2032,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private void SellUnit(int player, TextBox box)
         {
-            string raw = box.Text.Trim();
+            string raw = IsPlaceholderText(box.Text) ? "" : box.Text.Trim();
             if (!int.TryParse(raw, out int value) || value <= 0)
             {
                 ShowNotice(Loc.Get("EnterValidUnitValue"), NoticeType.Warning);
@@ -1981,15 +2053,19 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
             LogAction($"💱 {Loc.Get("LogSoldUnit", player, value, returns, totalPct)}");
             ShowNotice(Loc.Get("NoticeSoldUnit", player, returns, totalPct), NoticeType.Success);
+            ClearInputBox(box);
             RefreshAllUI();
         }
 
         // ─────────────────────────────────────────────────────────────────
-        //  ClearInputBox — just empties the box, no placeholder needed
+        //  ClearInputBox — clears the value and restores the translated placeholder
         // ─────────────────────────────────────────────────────────────────
         private void ClearInputBox(TextBox box)
         {
+            if (box == null) return;
+
             box.Text = "";
+            SetInputPlaceholder(box);
         }        // ─────────────────────────────────────────────────────────────────
                  //  Calc texts — FIX: only show win or loss line, not both
                  // ─────────────────────────────────────────────────────────────────
@@ -2846,12 +2922,12 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private void SettingsLanguageLeft_Click(object sender, RoutedEventArgs e)
         {
-            ApplyLanguage(Loc.Language.English);
+            ApplyLanguage(Loc.PreviousLanguage(Loc.Current));
         }
 
         private void SettingsLanguageRight_Click(object sender, RoutedEventArgs e)
         {
-            ApplyLanguage(Loc.Language.Spanish);
+            ApplyLanguage(Loc.NextLanguage(Loc.Current));
         }
 
         private void ApplyLanguage(Loc.Language lang)
@@ -2970,12 +3046,9 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 var spendBox = GetSpendBox(p);
                 var buyTeamBox = GetBuyTeamBox(p);
                 var unitBox = GetUnitBox(p);
-                if (spendBox.Text == "Custom troop spend" || spendBox.Text == "Gasto personalizado de tropas")
-                    spendBox.Text = Loc.Get("CustomTroopSpend");
-                if (buyTeamBox.Text == "Teammate unit cost" || buyTeamBox.Text == "Costo de unidad compañero")
-                    buyTeamBox.Text = Loc.Get("TeammateUnitCost");
-                if (unitBox.Text == "Unit value" || unitBox.Text == "Valor de unidad")
-                    unitBox.Text = Loc.Get("UnitValue");
+                RefreshInputPlaceholder(spendBox);
+                RefreshInputPlaceholder(buyTeamBox);
+                RefreshInputPlaceholder(unitBox);
             }
 
             // Refresh dynamic state text on language change
@@ -3477,40 +3550,13 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         private void PlaceholderBox_GotFocus(object sender, RoutedEventArgs e)
         {
             if (sender is TextBox box)
-            {
-                string text = box.Text?.Trim() ?? "";
-                if (text == "Custom troop spend" || text == "Gasto personalizado de tropas" ||
-                    text == "Teammate unit cost" || text == "Costo de unidad compañero" ||
-                    text == "Unit value" || text == "Valor de unidad")
-                {
-                    box.Text = "";
-                }
-            }
+                ClearInputPlaceholder(box);
         }
 
         private void PlaceholderBox_LostFocus(object sender, RoutedEventArgs e)
         {
             if (sender is TextBox box)
-            {
-                if (!string.IsNullOrWhiteSpace(box.Text))
-                    return;
-
-                if (ReferenceEquals(box, P1SpendBox) || ReferenceEquals(box, P2SpendBox) ||
-    ReferenceEquals(box, P3SpendBox) || ReferenceEquals(box, P4SpendBox))
-                {
-                    box.Text = Loc.Get("CustomTroopSpend");
-                }
-                else if (ReferenceEquals(box, P1BuyTeamBox) || ReferenceEquals(box, P2BuyTeamBox) ||
-                         ReferenceEquals(box, P3BuyTeamBox) || ReferenceEquals(box, P4BuyTeamBox))
-                {
-                    box.Text = Loc.Get("TeammateUnitCost");
-                }
-                else if (ReferenceEquals(box, P1UnitBox) || ReferenceEquals(box, P2UnitBox) ||
-                         ReferenceEquals(box, P3UnitBox) || ReferenceEquals(box, P4UnitBox))
-                {
-                    box.Text = Loc.Get("UnitValue");
-                }
-            }
+                RefreshInputPlaceholder(box);
         }
         private void SavesDropdown_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
 
@@ -3531,7 +3577,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         public static class Loc
         {
-            public enum Language { English, Spanish }
+            public enum Language { English, Spanish, Russian, Chinese }
             public static Language Current = Language.English;
 
             private static readonly string _langFilePath =
@@ -3564,9 +3610,140 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 {
                     if (!System.IO.File.Exists(_langFilePath)) return;
                     string lang = System.IO.File.ReadAllText(_langFilePath).Trim();
-                    Current = lang == "Spanish" ? Language.Spanish : Language.English;
+                    Language loadedLanguage;
+                    if (Enum.TryParse(lang, out loadedLanguage))
+                        Current = loadedLanguage;
                 }
                 catch { }
+            }
+
+            public static Language PreviousLanguage(Language language)
+            {
+                if (language == Language.English) return Language.Chinese;
+                if (language == Language.Spanish) return Language.English;
+                if (language == Language.Russian) return Language.Spanish;
+                return Language.Russian;
+            }
+
+            public static Language NextLanguage(Language language)
+            {
+                if (language == Language.English) return Language.Spanish;
+                if (language == Language.Spanish) return Language.Russian;
+                if (language == Language.Russian) return Language.Chinese;
+                return Language.English;
+            }
+
+            public static string GetLanguageDisplayName(Language language)
+            {
+                if (language == Language.Spanish) return "Español";
+                if (language == Language.Russian) return "Русский";
+                if (language == Language.Chinese) return "中文";
+                return "English";
+            }
+
+            public static void UpdateLanguageFlag(System.Windows.Controls.Grid flag, Language language)
+            {
+                if (flag == null) return;
+
+                flag.Children.Clear();
+
+                double width = double.IsNaN(flag.Width) || flag.Width <= 0 ? 24 : flag.Width;
+                double height = double.IsNaN(flag.Height) || flag.Height <= 0 ? 16 : flag.Height;
+
+                if (language == Language.Spanish)
+                {
+                    AddFlagRect(flag, "#AA151B", 0, 0, width, height * 0.25);
+                    AddFlagRect(flag, "#F1BF00", 0, height * 0.25, width, height * 0.5);
+                    AddFlagRect(flag, "#AA151B", 0, height * 0.75, width, height * 0.25);
+                }
+                else if (language == Language.Russian)
+                {
+                    AddFlagRect(flag, "#FFFFFF", 0, 0, width, height / 3);
+                    AddFlagRect(flag, "#0039A6", 0, height / 3, width, height / 3);
+                    AddFlagRect(flag, "#D52B1E", 0, height * 2 / 3, width, height / 3);
+                }
+                else if (language == Language.Chinese)
+                {
+                    AddFlagRect(flag, "#DE2910", 0, 0, width, height);
+                    AddFlagText(flag, "★", "#FFDE00", width * 0.12, height * 0.02, height * 0.55);
+                }
+                else
+                {
+                    double stripe = height / 13.0;
+                    for (int i = 0; i < 13; i++)
+                        AddFlagRect(flag, i % 2 == 0 ? "#B22234" : "#FFFFFF", 0, stripe * i, width, stripe + 0.2);
+
+                    AddFlagRect(flag, "#3C3B6E", 0, 0, width * 0.45, stripe * 7);
+                    AddFlagText(flag, "★", "#FFFFFF", width * 0.08, height * 0.03, height * 0.28);
+                    AddFlagText(flag, "★", "#FFFFFF", width * 0.25, height * 0.23, height * 0.28);
+                }
+
+                AddFlagOutline(flag, width, height);
+            }
+
+            private static void AddFlagRect(System.Windows.Controls.Grid flag, string color, double left, double top, double width, double height)
+            {
+                var rect = new System.Windows.Shapes.Rectangle
+                {
+                    Width = width,
+                    Height = height,
+                    Fill = new System.Windows.Media.SolidColorBrush(
+                        (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(color)),
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Margin = new Thickness(left, top, 0, 0)
+                };
+
+                flag.Children.Add(rect);
+            }
+
+            private static void AddFlagText(System.Windows.Controls.Grid flag, string text, string color, double left, double top, double fontSize)
+            {
+                var glyph = new TextBlock
+                {
+                    Text = text,
+                    FontSize = fontSize,
+                    FontWeight = FontWeights.Bold,
+                    Foreground = new System.Windows.Media.SolidColorBrush(
+                        (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(color)),
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Margin = new Thickness(left, top, 0, 0),
+                    LineHeight = fontSize,
+                    TextAlignment = TextAlignment.Center
+                };
+
+                flag.Children.Add(glyph);
+            }
+
+            private static void AddFlagOutline(System.Windows.Controls.Grid flag, double width, double height)
+            {
+                flag.Children.Add(new System.Windows.Shapes.Rectangle
+                {
+                    Width = width,
+                    Height = height,
+                    Fill = Brushes.Transparent,
+                    Stroke = new SolidColorBrush(Color.FromRgb(18, 27, 38)),
+                    StrokeThickness = 0.75,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top
+                });
+            }
+
+            public static bool IsTranslatedText(string key, string text)
+            {
+                if (string.IsNullOrWhiteSpace(text)) return false;
+
+                string value = text.Trim();
+                string def;
+                string es;
+                string ru;
+                string zh;
+
+                return (_defaults.TryGetValue(key, out def) && def == value) ||
+                       (_es.TryGetValue(key, out es) && es == value) ||
+                       (_ru.TryGetValue(key, out ru) && ru == value) ||
+                       (_zh.TryGetValue(key, out zh) && zh == value);
             }
 
             private static readonly Dictionary<string, string> _es = new Dictionary<string, string>
@@ -3795,6 +3972,13 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["Reward30NextSell"] = "+30% Próxima Venta",
                 ["RewardSellback15"] = "Reventa +15%",
                 ["RewardMinus5BFT"] = "-5% Recargo BFT",
+                ["DiscountSuffix"] = " ({0}% desc.)",
+                ["LogSharedGoldMilestone"] = "Hito FT{0}: Equipo {1} +{2}g cada uno.",
+                ["NoticeSharedGoldMilestone"] = "🏆 ¡Hito FT{0}! Equipo {1} +{2}g cada uno.",
+                ["LogSharedPermMoveMilestone"] = "Hito FT{0}: Equipo {1} +1 mv perm cada uno.",
+                ["NoticeSharedPermMoveMilestone"] = "🏆 ¡Hito FT{0}! Equipo {1}: +1 mv perm cada uno.",
+                ["LogSharedSellbackMilestone"] = "Hito FT{0}: Equipo {1} +20% reventa permanente.",
+                ["NoticeSharedSellbackMilestone"] = "🏆 ¡Hito FT{0}! Equipo {1}: +20% reventa permanente.",
                 ["NothingToUndo"] = "Nada que deshacer.",
                 ["RedTeamShort"] = "Rojo",
                 ["BlueTeamShort"] = "Azul",
@@ -3820,10 +4004,466 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["DeletedSave"] = "Borrado \"{0}\".",
             };
 
+            private static readonly Dictionary<string, string> _ru = new Dictionary<string, string>
+            {
+                ["MainMenu"] = "← Главное меню",
+                ["AppTitle"] = "TABS Arena v.1.1.3",
+                ["OverviewTitle"] = "Обзор матча 2v2",
+                ["OverviewSub"] = "Настройте всех четырех игроков, затем нажмите Следующий раунд, чтобы применить проценты, этапы и награды.",
+                ["CurrentRound"] = "ТЕКУЩИЙ РАУНД",
+                ["NextTurnOrder"] = "СЛЕДУЮЩИЙ ХОД",
+                ["PendingResult"] = "ОЖИДАЕМЫЙ РЕЗУЛЬТАТ",
+                ["NotAvailableYet"] = "Пока недоступно",
+                ["NotSet"] = "Не задано",
+                ["FactionMode"] = "РЕЖИМ ФРАКЦИЙ",
+                ["FactionModeOff"] = "Фракции: ВЫКЛ",
+                ["FactionModeOn"] = "Фракции: ВКЛ",
+                ["FT20Mode"] = "РЕЖИМ FT20",
+                ["FT20ModeOff"] = "FT20: ВЫКЛ",
+                ["FT20ModeOn"] = "FT20: ВКЛ",
+                ["FT30Mode"] = "РЕЖИМ FT30",
+                ["FT30ModeOff"] = "FT30: ВЫКЛ",
+                ["FT30ModeOn"] = "FT30: ВКЛ",
+                ["FT10Mode"] = "РЕЖИМ FT10",
+                ["FT10ModeOff"] = "FT10: ВЫКЛ",
+                ["FT10ModeOn"] = "FT10: ВКЛ",
+                ["WhichTeamFirst"] = "Какая команда ходит первой в этом матче?",
+                ["RedTeamFirst"] = "Красная команда ходит первой",
+                ["BlueTeamFirst"] = "Синяя команда ходит первой",
+                ["MatchSaves"] = "СОХРАНЕНИЯ",
+                ["MilestoneReward"] = "Награда этапа",
+                ["Save"] = "💾 Сохранить",
+                ["Load"] = "📂 Загрузить",
+                ["Delete"] = "🗑 Удалить",
+                ["NewGame"] = "🆕 Новая игра",
+                ["MilestoneProgress"] = "ПРОГРЕСС ЭТАПА",
+                ["NextReward"] = "СЛЕДУЮЩАЯ НАГРАДА",
+                ["RewardsLeft"] = "ВОЗМОЖНЫЕ НАГРАДЫ",
+                ["ActionLog"] = "Журнал действий",
+                ["ActionLogSub"] = "Покупки и результаты раундов появляются здесь.",
+                ["RoundControl"] = "Управление раундом",
+                ["RedTeamWins"] = "Победа красных",
+                ["Tie"] = "Ничья",
+                ["BlueTeamWins"] = "Победа синих",
+                ["NextRound"] = "Следующий раунд",
+                ["Undo"] = "Отменить",
+                ["RedTeam"] = "КРАСНАЯ КОМАНДА",
+                ["BlueTeam"] = "СИНЯЯ КОМАНДА",
+                ["Gold"] = "ЗОЛОТО",
+                ["Points"] = "ОЧКИ",
+                ["PermMv"] = "ПОСТ. ХОД",
+                ["Income"] = "ДОХОД",
+                ["InterestStat"] = "ПРОЦЕНТЫ",
+                ["MaxFactions"] = "Макс. фракций",
+                ["BuyIncome"] = "Купить доход +10 (100)",
+                ["BuyIncomeF"] = "Купить доход +13 (130)",
+                ["BuyPermMove"] = "Купить пост. ход +1 (200)",
+                ["BuyPermMoveF"] = "Купить пост. ход +1 (175)",
+                ["BuyFaction"] = "Купить фракцию (50)",
+                ["BuyChosenFaction"] = "Купить выбранную фракцию ({0}g)",
+                ["ChosenFactionLabel"] = "выбранная фракция",
+                ["ChooseFactionTitle"] = "Выбрать фракцию",
+                ["ChooseFactionSub"] = "{0}, выберите одну фракцию для покупки.",
+                ["LogBoughtChosenFaction"] = "Игрок {0} купил выбранную фракцию '{1}' за {2}g.",
+                ["NoticeBoughtChosenFaction"] = "Игрок {0} купил '{1}' за {2}g.",
+                ["Upgrades"] = "Улучшения",
+                ["FactionsOwned"] = "КУПЛЕННЫЕ ФРАКЦИИ",
+                ["Utility"] = "Утилиты",
+                ["SingleTroopMove"] = "Переместить одного юнита ({0})",
+                ["Replay"] = "Повтор (10)",
+                ["CustomSpend"] = "Своя трата на войска",
+                ["Spend"] = "Потратить",
+                ["TeammateUnit"] = "Цена юнита союзника",
+                ["BFT"] = "BFT",
+                ["UnitValue"] = "Цена юнита",
+                ["Sell"] = "Продать",
+                ["Set"] = "Готово",
+                ["Unset"] = "Изменить",
+                ["Calculations"] = "Расчеты",
+                ["NoRoundYet"] = "Раунда еще нет.",
+                ["Settings"] = "Настройки",
+                ["Guide"] = "Руководство 2v2",
+                ["GuideTitle"] = "Руководство 2v2",
+                ["ReplayUsed"] = "Повтор использован",
+                ["GuideBasicsTitle"] = "Основы",
+                ["GuideBasicsBody"] = "Каждый игрок начинает с 1200 золота. В начале матча выберите, какая команда ходит первой. Эта команда получает +40 золота на игрока, чтобы компенсировать контрвыбор в раунде 1.",
+                ["GuideTurnOrderTitle"] = "Порядок хода",
+                ["GuideTurnOrderBody"] = "В раунде 1 первой ходит выбранная команда. После этого первой ходит команда с большим количеством очков. Если очки равны, первой ходит команда, выигравшая последний раунд.",
+                ["GuideRoundTitle"] = "Раунды, ничьи и повтор",
+                ["GuideRoundBody"] = "Когда битва закончится, выберите победителя и нажмите Следующий раунд. Если обе команды согласны, что была ничья, используйте Ничья. Если согласия нет, используйте таймер на 3 минуты и принудительно ставьте ничью, если никто не победил. Повтор стоит 10 золота и может быть куплен только один раз за раунд каждой командой. Повтор нужен только для информации и не меняет результат или победителя раунда.",
+                ["GuideEconomyTitle"] = "Экономика",
+                ["GuideEconomyBody"] = "Проценты дают +10 золота за каждые 50 золота у игрока, максимум +100. Покупка дохода повышает постоянный доход: +10 в FT30 и +13 в FT20. FT10 убирает покупки дохода и спад дохода.",
+                ["GuideRulesTitle"] = "Правила 2v2",
+                ["GuideRulesBody"] = "Игроки не могут управлять юнитами во время битвы. На картах 2v2 не размещайте юнитов на возвышенностях, в центральном круге, в трещинах или у входов в круг и трещины. Должно быть 2 армии на сторону, 1 армия на игрока, всего 4 армии. Сейчас запрещены юниты: Present Elf и Dragon.",
+                ["GuideSavingTitle"] = "Сохранение",
+                ["GuideSavingBody"] = "Если вы не можете закончить матч, сохраните его в приложении. Также сохраните битву внутри TABS через Save Battle и включите Save Friendly Units.",
+                ["Back"] = "← Назад",
+                ["WindowMode"] = "Режим окна",
+                ["Windowed"] = "Оконный",
+                ["BorderlessFullscreen"] = "Полный экран без рамки",
+                ["Language"] = "Язык",
+                ["Sounds"] = "Звуки",
+                ["Volume"] = "Громкость",
+                ["On"] = "Вкл",
+                ["Off"] = "Выкл",
+                ["RedTeamPoints"] = "🔴  ОЧКИ КРАСНОЙ КОМАНДЫ: ",
+                ["BlueTeamPoints"] = "🔵  ОЧКИ СИНЕЙ КОМАНДЫ: ",
+                ["StartingGold"] = "Начальное золото",
+                ["Interest"] = "Проценты",
+                ["RoundReward"] = "Награда раунда",
+                ["PermanentIncome"] = "Постоянный доход",
+                ["FinalGold"] = "Итоговое золото",
+                ["CustomTroopSpend"] = "Своя трата на войска",
+                ["TeammateUnitCost"] = "Цена юнита союзника",
+                ["PtsAway"] = "очк. осталось",
+                ["NextAt"] = "следующая на",
+                ["AllRewardsClaimed"] = "Все награды получены!",
+                ["SaveDialogTitle"] = "Сохранить игру",
+                ["EnterSaveName"] = "Введите имя сохранения:",
+                ["SaveBtn"] = "Сохранить",
+                ["Cancel"] = "Отмена",
+                ["Yes"] = "Да",
+                ["No"] = "Нет",
+                ["NewGameConfirmTitle"] = "Новая игра",
+                ["NewGameConfirmMsg"] = "Начать новую игру? Несохраненный прогресс будет потерян.",
+                ["NewGameStarted"] = "Новая игра начата.",
+                ["MatchEndTitle"] = "Матч завершен",
+                ["MatchEndMessage"] = "{0} выиграла матч, набрав {1} очков.",
+                ["MatchEndWinByTwoMessage"] = "{0}: {1}   {2}: {3}\n\n{4} побеждает по правилу победы с разницей 2.",
+                ["MatchEndQuestion"] = "Начать новую игру или продолжить?",
+                ["NewGamePlain"] = "Новая игра",
+                ["ContinuePlaying"] = "Продолжить",
+                ["MainMenuConfirmTitle"] = "Главное меню",
+                ["MainMenuConfirmMsg"] = "Вы уверены, что хотите вернуться в главное меню?",
+                ["CloseGameConfirmTitle"] = "Закрыть игру",
+                ["CloseGameConfirmMsg"] = "Вы уверены, что хотите закрыть игру?",
+                ["DeleteConfirmTitle"] = "Удалить сохранение",
+                ["DeleteConfirmMsg"] = "Удалить \"{0}\"?",
+                ["TurnOrderRed"] = "Ход: Красные -> Синие",
+                ["TurnOrderBlue"] = "Ход: Синие -> Красные",
+                ["DefaultP1Name"] = "Красный игрок 1",
+                ["DefaultP2Name"] = "Красный игрок 2",
+                ["DefaultP3Name"] = "Синий игрок 1",
+                ["DefaultP4Name"] = "Синий игрок 2",
+                ["LogRedGoesFirst"] = "Красная команда ходит первой. +40g каждому.",
+                ["LogBlueGoesFirst"] = "Синяя команда ходит первой. +40g каждому.",
+                ["LogRedWins"] = "Победа красных",
+                ["LogBlueWins"] = "Победа синих",
+                ["LogRoundReward"] = "Награды раунда: красные +{0}g каждому, синие +{1}g каждому.",
+                ["LogRoundRewardTie"] = "Награды раунда: ничья - все игроки получают +{0}g.",
+                ["LogBoughtIncome"] = "Игрок {0} купил доход +{1} за {2}g (скидка {3}%) -> всего +{4}.",
+                ["LogBoughtPermMove"] = "Игрок {0} купил пост. ход за {1}g{2}. Всего: {3}.",
+                ["LogBoughtFaction"] = "Игрок {0} купил '{1}' за {2}g{3}. Следующая: {4}g.",
+                ["LogSpentOn"] = "Игрок {0} потратил {1}g на {2}.",
+                ["LogSpent"] = "Игрок {0} потратил {1}g.",
+                ["LogBFT"] = "Игрок {0} BFT юнита ({1}g) -> заплатил {2}g (+{3}% наценка).",
+                ["LogSoldUnit"] = "Игрок {0} продал юнита ({1}g) -> {2}g ({3}%).",
+                ["LogFactionModeOn"] = "Режим фракций ВКЛ - панели сброшены, стартовое золото режима, 3 случайные фракции.",
+                ["LogFactionModeOff"] = "Режим фракций ВЫКЛ.",
+                ["LogFT20ModeOn"] = "Режим FT20 ВКЛ - панели сброшены.",
+                ["LogFT20ModeOff"] = "Режим FT20 ВЫКЛ - панели сброшены.",
+                ["LogFT30ModeOn"] = "Режим FT30 ВКЛ - панели сброшены.",
+                ["LogFT30ModeOff"] = "Режим FT30 ВЫКЛ - выбран режим FT20.",
+                ["LogFT10ModeOn"] = "Режим FT10 ВКЛ - старт 1200g и доход выключен.",
+                ["LogFT10ModeOff"] = "Режим FT10 ВЫКЛ - выбран режим FT20.",
+                ["LogMilestone"] = "Этап {0} очк. - {1}: {2}",
+                ["LogFT20Milestone"] = "Этап FT20 {0} очк. - {1}: {2}",
+                ["LogLoaded"] = "Загружено {0}.",
+                ["SingleTroopMoveLabel"] = "перемещение юнита",
+                ["ReplayLabel"] = "повтор",
+                ["Pending"] = "Ожидает",
+                ["LogRoundComplete"] = "✅ Раунд {0} завершен. {1}. 🔴 {2} – {3} 🔵",
+                ["NoticeRoundTie"] = "🤝 Раунд {0} завершился ничьей! Все игроки получают +{1}g.",
+                ["NoticeRoundWin"] = "{0} {1} выигрывает раунд {2}! Победители +{3}g, проигравшие +{4}g на игрока.",
+                ["NoticeBoughtIncome"] = "Доход Игрока {0} теперь +{1}. Заплачено {2}g.",
+                ["NoticeBoughtPermMove"] = "У Игрока {0} теперь {1} пост. ход(ов).",
+                ["NoticeBoughtFaction"] = "Игрок {0} получил '{1}'! Следующая фракция: {2}g.",
+                ["NoticeSoldUnit"] = "Игрок {0} продал юнита за +{1}g ({2}% возврата).",
+                ["NoticeSpentOn"] = "Игрок {0} потратил {1}g на {2}.",
+                ["NoticeSpent"] = "Игрок {0} потратил {1}g.",
+                ["NoticeBFT"] = "Игрок {0} купил для союзника: {1}g (+{2}% наценка).",
+                ["NoticeFactionModeOn"] = "Режим фракций ВКЛ! Панели игроков сброшены.",
+                ["NoticeFactionModeOff"] = "Режим фракций ВЫКЛ.",
+                ["NoticeFT20ModeOn"] = "Режим FT20 ВКЛ! Панели игроков сброшены.",
+                ["NoticeFT20ModeOff"] = "Режим FT20 ВЫКЛ! Панели игроков сброшены.",
+                ["NoticeFT30ModeOn"] = "Режим FT30 ВКЛ! Панели игроков сброшены.",
+                ["NoticeFT30ModeOff"] = "Режим FT30 ВЫКЛ. Выбран режим FT20.",
+                ["NoticeFT10ModeOn"] = "Режим FT10 ВКЛ! Старт 1200g и доход выключен.",
+                ["NoticeFT10ModeOff"] = "Режим FT10 ВЫКЛ. Выбран режим FT20.",
+                ["NothingToUndo"] = "Нечего отменять.",
+                ["RedTeamShort"] = "Красные",
+                ["BlueTeamShort"] = "Синие",
+                ["NoticeMilestone"] = "🏆 Этап {0} очк.! {1} получил: {2}",
+                ["NoticeFT20Milestone"] = "🏆 Этап FT20 {0} очк.! {1} получил: {2}",
+                ["SetWinnerBeforeAdvancing"] = "Выберите победителя раунда перед продолжением.",
+                ["IncomeAlreadyBought"] = "Игрок {0} уже купил доход в этом раунде.",
+                ["NeedsGold"] = "Игрок {0} нуждается в {1}g (есть {2}g).",
+                ["NeedsGoldFor"] = "Игрок {0} нуждается в {1}g для {2} (есть {3}g).",
+                ["MaxedPermMove"] = "Игрок {0} уже достиг максимума пост. хода ({1}/{2}).",
+                ["HasAllFactions"] = "Игрок {0} уже имеет все фракции.",
+                ["RedReplayAlreadyBought"] = "Красная команда уже купила повтор в этом раунде.",
+                ["BlueReplayAlreadyBought"] = "Синяя команда уже купила повтор в этом раунде.",
+                ["EnterPositiveAmount"] = "Введите допустимую положительную сумму.",
+                ["OnlyHasGold"] = "У Игрока {0} только {1}g (нужно {2}g).",
+                ["EnterValidUnitCost"] = "Введите допустимую цену юнита.",
+                ["EnterValidUnitValue"] = "Введите допустимую стоимость юнита.",
+                ["SavedAs"] = "Сохранено как \"{0}\".",
+                ["SelectSaveToLoad"] = "Выберите сохранение для загрузки.",
+                ["SaveFileNotFound"] = "Файл сохранения не найден.",
+                ["LoadedSave"] = "Загружено \"{0}\".",
+                ["SelectSaveToDelete"] = "Выберите сохранение для удаления.",
+                ["DeletedSave"] = "Удалено \"{0}\".",
+                ["Reward80OffFaction"] = "80% скидка на след. фракцию",
+                ["Reward80OffChosenFaction"] = "80% скидка на след. выбранную фракцию",
+                ["Reward80OffPermMove"] = "80% скидка на след. пост. ход",
+                ["RewardSellback15"] = "Продажа +15%",
+                ["Reward10OffIncome"] = "10% скидка на след. доход",
+                ["Reward30NextSell"] = "+30% к след. продаже",
+                ["RewardMinus5BFT"] = "-5% наценка BFT",
+                ["DiscountSuffix"] = " (скидка {0}%)",
+                ["LogSharedGoldMilestone"] = "Этап FT{0}: команда {1} получает +{2}g каждому.",
+                ["NoticeSharedGoldMilestone"] = "🏆 Этап FT{0}! Команда {1} получает +{2}g каждому.",
+                ["LogSharedPermMoveMilestone"] = "Этап FT{0}: команда {1} получает +1 пост. ход каждому.",
+                ["NoticeSharedPermMoveMilestone"] = "🏆 Этап FT{0}! Команда {1}: +1 пост. ход каждому.",
+                ["LogSharedSellbackMilestone"] = "Этап FT{0}: команда {1} получает +20% постоянной продажи.",
+                ["NoticeSharedSellbackMilestone"] = "🏆 Этап FT{0}! Команда {1}: +20% постоянной продажи.",
+                ["GuideMoreTitle"] = "Больше правил",
+                ["GuideMoreBody"] = "Чтобы узнать больше о правилах, посетите",
+            };
+
+            private static readonly Dictionary<string, string> _zh = new Dictionary<string, string>
+            {
+                ["MainMenu"] = "← 主菜单",
+                ["AppTitle"] = "TABS Arena v.1.1.3",
+                ["OverviewTitle"] = "2v2 比赛总览",
+                ["OverviewSub"] = "管理四名玩家，然后点击下一回合以应用利息、里程碑和奖励。",
+                ["CurrentRound"] = "当前回合",
+                ["NextTurnOrder"] = "下回合顺序",
+                ["PendingResult"] = "待定结果",
+                ["NotAvailableYet"] = "暂不可用",
+                ["NotSet"] = "未设置",
+                ["FactionMode"] = "阵营模式",
+                ["FactionModeOff"] = "阵营：关",
+                ["FactionModeOn"] = "阵营：开",
+                ["FT20Mode"] = "FT20 模式",
+                ["FT20ModeOff"] = "FT20：关",
+                ["FT20ModeOn"] = "FT20：开",
+                ["FT30Mode"] = "FT30 模式",
+                ["FT30ModeOff"] = "FT30：关",
+                ["FT30ModeOn"] = "FT30：开",
+                ["FT10Mode"] = "FT10 模式",
+                ["FT10ModeOff"] = "FT10：关",
+                ["FT10ModeOn"] = "FT10：开",
+                ["WhichTeamFirst"] = "本场比赛哪支队伍先行动？",
+                ["RedTeamFirst"] = "红队先行动",
+                ["BlueTeamFirst"] = "蓝队先行动",
+                ["MatchSaves"] = "比赛存档",
+                ["MilestoneReward"] = "里程碑奖励",
+                ["Save"] = "💾 保存",
+                ["Load"] = "📂 读取",
+                ["Delete"] = "🗑 删除",
+                ["NewGame"] = "🆕 新游戏",
+                ["MilestoneProgress"] = "里程碑进度",
+                ["NextReward"] = "下一奖励",
+                ["RewardsLeft"] = "剩余可得奖励",
+                ["ActionLog"] = "行动日志",
+                ["ActionLogSub"] = "商店点击和回合结果会显示在这里。",
+                ["RoundControl"] = "回合控制",
+                ["RedTeamWins"] = "红队获胜",
+                ["Tie"] = "平局",
+                ["BlueTeamWins"] = "蓝队获胜",
+                ["NextRound"] = "下一回合",
+                ["Undo"] = "撤销",
+                ["RedTeam"] = "红队",
+                ["BlueTeam"] = "蓝队",
+                ["Gold"] = "金币",
+                ["Points"] = "分数",
+                ["PermMv"] = "永久移动",
+                ["Income"] = "收入",
+                ["InterestStat"] = "利息",
+                ["MaxFactions"] = "阵营上限",
+                ["BuyIncome"] = "购买收入 +10 (100)",
+                ["BuyIncomeF"] = "购买收入 +13 (130)",
+                ["BuyPermMove"] = "购买永久移动 +1 (200)",
+                ["BuyPermMoveF"] = "购买永久移动 +1 (175)",
+                ["BuyFaction"] = "购买阵营 (50)",
+                ["BuyChosenFaction"] = "购买指定阵营 ({0}g)",
+                ["ChosenFactionLabel"] = "指定阵营",
+                ["ChooseFactionTitle"] = "选择阵营",
+                ["ChooseFactionSub"] = "{0}，选择一个要购买的阵营。",
+                ["LogBoughtChosenFaction"] = "玩家 {0} 以 {2}g 购买了指定阵营 '{1}'。",
+                ["NoticeBoughtChosenFaction"] = "玩家 {0} 以 {2}g 购买了 '{1}'。",
+                ["Upgrades"] = "升级",
+                ["FactionsOwned"] = "已拥有阵营",
+                ["Utility"] = "实用",
+                ["SingleTroopMove"] = "单个部队移动 ({0})",
+                ["Replay"] = "重赛查看 (10)",
+                ["CustomSpend"] = "自定义部队支出",
+                ["Spend"] = "支出",
+                ["TeammateUnit"] = "队友单位花费",
+                ["BFT"] = "BFT",
+                ["UnitValue"] = "单位价值",
+                ["Sell"] = "出售",
+                ["Set"] = "设定",
+                ["Unset"] = "编辑",
+                ["Calculations"] = "计算",
+                ["NoRoundYet"] = "还没有回合。",
+                ["Settings"] = "设置",
+                ["Guide"] = "2v2 指南",
+                ["GuideTitle"] = "2v2 指南",
+                ["ReplayUsed"] = "重赛已用",
+                ["GuideBasicsTitle"] = "基础",
+                ["GuideBasicsBody"] = "每名玩家以 1200 金币开始。比赛开始时选择哪支队伍先行动。该队每名玩家获得 +40 金币，用来补偿第 1 回合被针对选兵的劣势。",
+                ["GuideTurnOrderTitle"] = "行动顺序",
+                ["GuideTurnOrderBody"] = "第 1 回合由选择的队伍先行动。之后，分数更高的队伍先行动。如果分数相同，则上一回合获胜的队伍先行动。",
+                ["GuideRoundTitle"] = "回合、平局和重赛查看",
+                ["GuideRoundBody"] = "战斗结束后，选择胜者并点击下一回合。如果双方队伍都同意是平局，使用平局。若无法达成一致，使用 3 分钟计时器；没人获胜则强制平局。重赛查看花费 10 金币，每支队伍每回合只能购买一次。重赛查看仅用于信息参考，不会改变回合结果或胜者。",
+                ["GuideEconomyTitle"] = "经济",
+                ["GuideEconomyBody"] = "利息按玩家每 50 金币给予 +10 金币，最高 +100。购买收入会提高永久收入：FT30 为 +10，FT20 为 +13。FT10 移除收入购买和收入衰减。",
+                ["GuideRulesTitle"] = "2v2 规则",
+                ["GuideRulesBody"] = "战斗期间玩家不得控制单位。在 2v2 地图上，不要把单位放在高地、中心圆圈、裂缝中，或圆圈/裂缝入口处。每边应有 2 支军队，每名玩家 1 支军队，总共 4 支军队。目前禁用单位：Present Elf 和 Dragon。",
+                ["GuideSavingTitle"] = "保存",
+                ["GuideSavingBody"] = "如果无法打完比赛，请在应用中保存。也要在 TABS 内使用 Save Battle 保存战斗，并启用 Save Friendly Units。",
+                ["Back"] = "← 返回",
+                ["WindowMode"] = "窗口模式",
+                ["Windowed"] = "窗口化",
+                ["BorderlessFullscreen"] = "无边框全屏",
+                ["Language"] = "语言",
+                ["Sounds"] = "音效",
+                ["Volume"] = "音量",
+                ["On"] = "开",
+                ["Off"] = "关",
+                ["RedTeamPoints"] = "🔴  红队分数：",
+                ["BlueTeamPoints"] = "🔵  蓝队分数：",
+                ["StartingGold"] = "初始金币",
+                ["Interest"] = "利息",
+                ["RoundReward"] = "回合奖励",
+                ["PermanentIncome"] = "永久收入",
+                ["FinalGold"] = "最终金币",
+                ["CustomTroopSpend"] = "自定义部队支出",
+                ["TeammateUnitCost"] = "队友单位花费",
+                ["PtsAway"] = "分后获得",
+                ["NextAt"] = "下一次在",
+                ["AllRewardsClaimed"] = "所有奖励已领取！",
+                ["SaveDialogTitle"] = "保存游戏",
+                ["EnterSaveName"] = "输入存档名称：",
+                ["SaveBtn"] = "保存",
+                ["Cancel"] = "取消",
+                ["Yes"] = "是",
+                ["No"] = "否",
+                ["NewGameConfirmTitle"] = "新游戏",
+                ["NewGameConfirmMsg"] = "开始新游戏？未保存进度会丢失。",
+                ["NewGameStarted"] = "新游戏已开始。",
+                ["MatchEndTitle"] = "比赛完成",
+                ["MatchEndMessage"] = "{0} 达到 {1} 分并赢得比赛。",
+                ["MatchEndWinByTwoMessage"] = "{0}: {1}   {2}: {3}\n\n{4} 通过领先 2 分规则获胜。",
+                ["MatchEndQuestion"] = "开始新游戏还是继续游玩？",
+                ["NewGamePlain"] = "新游戏",
+                ["ContinuePlaying"] = "继续",
+                ["MainMenuConfirmTitle"] = "主菜单",
+                ["MainMenuConfirmMsg"] = "确定要返回主菜单吗？",
+                ["CloseGameConfirmTitle"] = "关闭游戏",
+                ["CloseGameConfirmMsg"] = "确定要关闭游戏吗？",
+                ["DeleteConfirmTitle"] = "删除存档",
+                ["DeleteConfirmMsg"] = "删除 \"{0}\"？",
+                ["TurnOrderRed"] = "顺序：红队 -> 蓝队",
+                ["TurnOrderBlue"] = "顺序：蓝队 -> 红队",
+                ["DefaultP1Name"] = "红方玩家 1",
+                ["DefaultP2Name"] = "红方玩家 2",
+                ["DefaultP3Name"] = "蓝方玩家 1",
+                ["DefaultP4Name"] = "蓝方玩家 2",
+                ["LogRedGoesFirst"] = "红队先行动。每人 +40g。",
+                ["LogBlueGoesFirst"] = "蓝队先行动。每人 +40g。",
+                ["LogRedWins"] = "红队获胜",
+                ["LogBlueWins"] = "蓝队获胜",
+                ["LogRoundReward"] = "回合奖励：红队每人 +{0}g，蓝队每人 +{1}g。",
+                ["LogRoundRewardTie"] = "回合奖励：平局 - 所有玩家每人 +{0}g。",
+                ["LogBoughtIncome"] = "玩家 {0} 以 {2}g 购买收入 +{1}（{3}% 折扣）-> 总计 +{4}。",
+                ["LogBoughtPermMove"] = "玩家 {0} 以 {1}g{2} 购买永久移动。总计：{3}。",
+                ["LogBoughtFaction"] = "玩家 {0} 以 {2}g{3} 购买了 '{1}'。下一个：{4}g。",
+                ["LogSpentOn"] = "玩家 {0} 在 {2} 上花费 {1}g。",
+                ["LogSpent"] = "玩家 {0} 花费 {1}g。",
+                ["LogBFT"] = "玩家 {0} BFT 单位（{1}g）-> 支付 {2}g（+{3}% 加价）。",
+                ["LogSoldUnit"] = "玩家 {0} 出售单位（{1}g）-> {2}g（{3}%）。",
+                ["LogFactionModeOn"] = "阵营模式开启 - 面板已重置，使用模式初始金币，并获得 3 个随机阵营。",
+                ["LogFactionModeOff"] = "阵营模式关闭。",
+                ["LogFT20ModeOn"] = "FT20 模式开启 - 面板已重置。",
+                ["LogFT20ModeOff"] = "FT20 模式关闭 - 面板已重置。",
+                ["LogFT30ModeOn"] = "FT30 模式开启 - 面板已重置。",
+                ["LogFT30ModeOff"] = "FT30 模式关闭 - 已选择 FT20 模式。",
+                ["LogFT10ModeOn"] = "FT10 模式开启 - 1200g 开局，收入已禁用。",
+                ["LogFT10ModeOff"] = "FT10 模式关闭 - 已选择 FT20 模式。",
+                ["LogMilestone"] = "里程碑 {0} 分 - {1}: {2}",
+                ["LogFT20Milestone"] = "FT20 里程碑 {0} 分 - {1}: {2}",
+                ["LogLoaded"] = "已读取 {0}。",
+                ["SingleTroopMoveLabel"] = "部队移动",
+                ["ReplayLabel"] = "重赛查看",
+                ["Pending"] = "待定",
+                ["LogRoundComplete"] = "✅ 第 {0} 回合完成。{1}。🔴 {2} - {3} 🔵",
+                ["NoticeRoundTie"] = "🤝 第 {0} 回合平局！所有玩家获得 +{1}g。",
+                ["NoticeRoundWin"] = "{0} {1} 赢得第 {2} 回合！胜方每人 +{3}g，败方每人 +{4}g。",
+                ["NoticeBoughtIncome"] = "玩家 {0} 的收入现在为 +{1}。支付 {2}g。",
+                ["NoticeBoughtPermMove"] = "玩家 {0} 现在有 {1} 个永久移动。",
+                ["NoticeBoughtFaction"] = "玩家 {0} 获得了 '{1}'！下一个阵营：{2}g。",
+                ["NoticeSoldUnit"] = "玩家 {0} 出售单位获得 +{1}g（{2}% 返还）。",
+                ["NoticeSpentOn"] = "玩家 {0} 在 {2} 上花费 {1}g。",
+                ["NoticeSpent"] = "玩家 {0} 花费 {1}g。",
+                ["NoticeBFT"] = "玩家 {0} 为队友购买：{1}g（+{2}% 加价）。",
+                ["NoticeFactionModeOn"] = "阵营模式开启！玩家面板已重置。",
+                ["NoticeFactionModeOff"] = "阵营模式关闭。",
+                ["NoticeFT20ModeOn"] = "FT20 模式开启！玩家面板已重置。",
+                ["NoticeFT20ModeOff"] = "FT20 模式关闭！玩家面板已重置。",
+                ["NoticeFT30ModeOn"] = "FT30 模式开启！玩家面板已重置。",
+                ["NoticeFT30ModeOff"] = "FT30 模式关闭。已选择 FT20 模式。",
+                ["NoticeFT10ModeOn"] = "FT10 模式开启！1200g 开局，收入已禁用。",
+                ["NoticeFT10ModeOff"] = "FT10 模式关闭。已选择 FT20 模式。",
+                ["NothingToUndo"] = "没有可撤销的内容。",
+                ["RedTeamShort"] = "红队",
+                ["BlueTeamShort"] = "蓝队",
+                ["NoticeMilestone"] = "🏆 {0} 分里程碑！{1} 获得：{2}",
+                ["NoticeFT20Milestone"] = "🏆 FT20 {0} 分里程碑！{1} 获得：{2}",
+                ["SetWinnerBeforeAdvancing"] = "继续前请设置本回合胜者。",
+                ["IncomeAlreadyBought"] = "玩家 {0} 本回合已经购买过收入。",
+                ["NeedsGold"] = "玩家 {0} 需要 {1}g（现有 {2}g）。",
+                ["NeedsGoldFor"] = "玩家 {0} 需要 {1}g 来购买 {2}（现有 {3}g）。",
+                ["MaxedPermMove"] = "玩家 {0} 的永久移动已达到上限（{1}/{2}）。",
+                ["HasAllFactions"] = "玩家 {0} 已拥有所有阵营。",
+                ["RedReplayAlreadyBought"] = "红队本回合已经购买过重赛查看。",
+                ["BlueReplayAlreadyBought"] = "蓝队本回合已经购买过重赛查看。",
+                ["EnterPositiveAmount"] = "请输入有效的正数金额。",
+                ["OnlyHasGold"] = "玩家 {0} 只有 {1}g（需要 {2}g）。",
+                ["EnterValidUnitCost"] = "请输入有效的单位花费。",
+                ["EnterValidUnitValue"] = "请输入有效的单位价值。",
+                ["SavedAs"] = "已保存为 \"{0}\"。",
+                ["SelectSaveToLoad"] = "请选择要读取的存档。",
+                ["SaveFileNotFound"] = "找不到存档文件。",
+                ["LoadedSave"] = "已读取 \"{0}\"。",
+                ["SelectSaveToDelete"] = "请选择要删除的存档。",
+                ["DeletedSave"] = "已删除 \"{0}\"。",
+                ["Reward80OffFaction"] = "下个阵营 80% 折扣",
+                ["Reward80OffChosenFaction"] = "下个指定阵营 80% 折扣",
+                ["Reward80OffPermMove"] = "下个永久移动 80% 折扣",
+                ["RewardSellback15"] = "出售返还 +15%",
+                ["Reward10OffIncome"] = "下次收入 10% 折扣",
+                ["Reward30NextSell"] = "下次出售 +30%",
+                ["RewardMinus5BFT"] = "BFT 加价 -5%",
+                ["DiscountSuffix"] = "（{0}% 折扣）",
+                ["LogSharedGoldMilestone"] = "FT{0} 里程碑：{1} 每人 +{2}g。",
+                ["NoticeSharedGoldMilestone"] = "🏆 FT{0} 里程碑！{1} 每人 +{2}g。",
+                ["LogSharedPermMoveMilestone"] = "FT{0} 里程碑：{1} 每人 +1 永久移动。",
+                ["NoticeSharedPermMoveMilestone"] = "🏆 FT{0} 里程碑！{1}：每人 +1 永久移动。",
+                ["LogSharedSellbackMilestone"] = "FT{0} 里程碑：{1} 获得 +20% 永久出售返还。",
+                ["NoticeSharedSellbackMilestone"] = "🏆 FT{0} 里程碑！{1}：+20% 永久出售返还。",
+                ["GuideMoreTitle"] = "更多规则",
+                ["GuideMoreBody"] = "想了解更多规则，请访问",
+            };
+
             public static string Get(string key, params object[] args)
             {
                 string template;
-                if (Current == Language.Spanish && _es.TryGetValue(key, out var val)) template = val;
+                if (Current == Language.Chinese && _zh.TryGetValue(key, out var zh)) template = zh;
+                else if (Current == Language.Russian && _ru.TryGetValue(key, out var ru)) template = ru;
+                else if (Current == Language.Spanish && _es.TryGetValue(key, out var val)) template = val;
                 else if (_defaults.TryGetValue(key, out var def)) template = def;
                 else template = key;
                 return args.Length > 0 ? string.Format(template, args) : template;
@@ -3996,6 +4636,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["LogMilestone"] = "Milestone {0}pts — {1}: {2}",
                 ["LogFT20Milestone"] = "FT20 Milestone {0}pts — {1}: {2}",
                 ["LogLoaded"] = "Loaded {0}.",
+                ["SingleTroopMoveLabel"] = "troop move",
+                ["ReplayLabel"] = "replay",
                 ["Pending"] = "Pending",
                 ["LogRoundComplete"] = "✅ Round {0} complete. {1}. 🔴 {2} – {3} 🔵",
                 ["NoticeRoundTie"] = "🤝 Round {0} ends in a tie! All players gain +{1}g.",
@@ -4045,6 +4687,13 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["Reward10OffIncome"] = "10% Off Next Income",
                 ["Reward30NextSell"] = "+30% Next Sell",
                 ["RewardMinus5BFT"] = "-5% BFT Surcharge",
+                ["DiscountSuffix"] = " ({0}% off)",
+                ["LogSharedGoldMilestone"] = "Milestone FT{0}: {1} Team +{2}g each.",
+                ["NoticeSharedGoldMilestone"] = "🏆 Milestone FT{0}! {1} Team +{2}g each.",
+                ["LogSharedPermMoveMilestone"] = "Milestone FT{0}: {1} Team +1 perm move each.",
+                ["NoticeSharedPermMoveMilestone"] = "🏆 Milestone FT{0}! {1} Team: +1 perm move each.",
+                ["LogSharedSellbackMilestone"] = "Milestone FT{0}: {1} Team +20% permanent sellback.",
+                ["NoticeSharedSellbackMilestone"] = "🏆 Milestone FT{0}! {1} Team: +20% permanent sellback.",
                 ["GuideMoreTitle"] = "More Rules",
                 ["GuideMoreBody"] = "To learn more about the rules, visit",
                 ["CloseGameConfirmTitle"] = "Close Game",

@@ -44,18 +44,20 @@ namespace TABS
         private string S(string key)
         {
             bool es = TwoVTwoGameMode.Loc.Current == TwoVTwoGameMode.Loc.Language.Spanish;
+            bool ru = TwoVTwoGameMode.Loc.Current == TwoVTwoGameMode.Loc.Language.Russian;
+            bool zh = TwoVTwoGameMode.Loc.Current == TwoVTwoGameMode.Loc.Language.Chinese;
 
             switch (key)
             {
-                case "ChooseMatchMode": return es ? "Elige modo de partida" : "Choose Match Mode";
-                case "Duel": return es ? "Duelo" : "Duel";
-                case "DuelBody": return es ? "Dos jugadores, economía individual y control rápido de rondas." : "Two players, individual economy, fast round control.";
-                case "TeamBattle": return es ? "Batalla en Equipo" : "Team Battle";
-                case "TeamBattleBody": return es ? "Cuatro jugadores, puntuación por equipo, BFT, hitos y herramientas de facción." : "Four players, shared team score, BFT, milestones, and faction tools.";
-                case "Start1v1": return es ? "Iniciar 1v1" : "Start 1v1";
-                case "Start2v2": return es ? "Iniciar 2v2" : "Start 2v2";
-                case "CloseGameTitle": return es ? "Cerrar Juego" : "Close Game";
-                case "CloseGameMsg": return es ? "¿Seguro que quieres cerrar el juego?" : "Are you sure you want to close the game?";
+                case "ChooseMatchMode": return zh ? "选择比赛模式" : ru ? "Выберите режим матча" : es ? "Elige modo de partida" : "Choose Match Mode";
+                case "Duel": return zh ? "决斗" : ru ? "Дуэль" : es ? "Duelo" : "Duel";
+                case "DuelBody": return zh ? "两名玩家、独立经济、快速回合控制。" : ru ? "Два игрока, личная экономика и быстрый контроль раундов." : es ? "Dos jugadores, economía individual y control rápido de rondas." : "Two players, individual economy, fast round control.";
+                case "TeamBattle": return zh ? "团队战" : ru ? "Командная битва" : es ? "Batalla en Equipo" : "Team Battle";
+                case "TeamBattleBody": return zh ? "四名玩家、团队计分、BFT、里程碑和阵营工具。" : ru ? "Четыре игрока, командный счет, BFT, этапы и инструменты фракций." : es ? "Cuatro jugadores, puntuación por equipo, BFT, hitos y herramientas de facción." : "Four players, shared team score, BFT, milestones, and faction tools.";
+                case "Start1v1": return zh ? "开始 1v1" : ru ? "Начать 1v1" : es ? "Iniciar 1v1" : "Start 1v1";
+                case "Start2v2": return zh ? "开始 2v2" : ru ? "Начать 2v2" : es ? "Iniciar 2v2" : "Start 2v2";
+                case "CloseGameTitle": return zh ? "关闭游戏" : ru ? "Закрыть игру" : es ? "Cerrar Juego" : "Close Game";
+                case "CloseGameMsg": return zh ? "确定要关闭游戏吗？" : ru ? "Вы уверены, что хотите закрыть игру?" : es ? "¿Seguro que quieres cerrar el juego?" : "Are you sure you want to close the game?";
                 default: return key;
             }
         }
@@ -285,12 +287,12 @@ namespace TABS
 
         private void SettingsLanguageLeft_Click(object sender, RoutedEventArgs e)
         {
-            ApplyLanguage(TwoVTwoGameMode.Loc.Language.English);
+            ApplyLanguage(TwoVTwoGameMode.Loc.PreviousLanguage(TwoVTwoGameMode.Loc.Current));
         }
 
         private void SettingsLanguageRight_Click(object sender, RoutedEventArgs e)
         {
-            ApplyLanguage(TwoVTwoGameMode.Loc.Language.Spanish);
+            ApplyLanguage(TwoVTwoGameMode.Loc.NextLanguage(TwoVTwoGameMode.Loc.Current));
         }
 
         private void ApplyLanguage(TwoVTwoGameMode.Loc.Language lang)
@@ -324,14 +326,20 @@ namespace TABS
 
         private void UpdateLanguageSelectorUI()
         {
-            bool isSpanish = TwoVTwoGameMode.Loc.Current == TwoVTwoGameMode.Loc.Language.Spanish;
-            SettingsLanguageText.Text = isSpanish ? "Español" : "English";
+            SettingsLanguageText.Text = TwoVTwoGameMode.Loc.GetLanguageDisplayName(TwoVTwoGameMode.Loc.Current);
+            TwoVTwoGameMode.Loc.UpdateLanguageFlag(SettingsLanguageFlag, TwoVTwoGameMode.Loc.Current);
 
-            SettingsLangDot1.Background = !isSpanish
-                ? new SolidColorBrush(Color.FromRgb(110, 182, 218))
-                : new SolidColorBrush(Color.FromRgb(58, 74, 88));
+            SetLanguageDot(SettingsLangDot1, TwoVTwoGameMode.Loc.Current == TwoVTwoGameMode.Loc.Language.English);
+            SetLanguageDot(SettingsLangDot2, TwoVTwoGameMode.Loc.Current == TwoVTwoGameMode.Loc.Language.Spanish);
+            SetLanguageDot(SettingsLangDot3, TwoVTwoGameMode.Loc.Current == TwoVTwoGameMode.Loc.Language.Russian);
+            SetLanguageDot(SettingsLangDot4, TwoVTwoGameMode.Loc.Current == TwoVTwoGameMode.Loc.Language.Chinese);
+        }
 
-            SettingsLangDot2.Background = isSpanish
+        private void SetLanguageDot(System.Windows.Controls.Border dot, bool isActive)
+        {
+            if (dot == null) return;
+
+            dot.Background = isActive
                 ? new SolidColorBrush(Color.FromRgb(110, 182, 218))
                 : new SolidColorBrush(Color.FromRgb(58, 74, 88));
         }
