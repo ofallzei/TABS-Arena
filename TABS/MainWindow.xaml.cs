@@ -26,6 +26,7 @@ namespace TABS
         private const double ZoomStep = 0.05;
         private const double MinZoom = 0.5;
         private const double MaxZoom = 2.0;
+        private const int TieTimerStartSeconds = 120;
         private static readonly string SaveFolder = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "TABS", "Saves1v1");
@@ -122,7 +123,7 @@ namespace TABS
         private int p1IncomeDecayPercent = 0;
         private int p2IncomeDecayPercent = 0;
 
-        private bool factionModeEnabled = false;
+        private bool factionModeEnabled = true;
         private bool factionModeLocked = false;
         private int p1FactionPurchases = 0;
         private int p2FactionPurchases = 0;
@@ -146,9 +147,19 @@ namespace TABS
         private readonly Brush greenBrush = new SolidColorBrush(Color.FromRgb(40, 110, 60));
         private readonly Brush redBrush = new SolidColorBrush(Color.FromRgb(120, 40, 40));
         private readonly Brush normalPanelBrush = new SolidColorBrush(Color.FromRgb(44, 53, 64));
+        private readonly Brush p1MilestoneFlagBrush = new SolidColorBrush(Color.FromRgb(255, 139, 139));
+        private readonly Brush p2MilestoneFlagBrush = new SolidColorBrush(Color.FromRgb(134, 191, 255));
+        private readonly Brush milestoneNumberBrush = new SolidColorBrush(Color.FromRgb(102, 221, 235));
 
         private readonly DispatcherTimer noticeTimer;
+        private readonly DispatcherTimer zoomIndicatorTimer;
+        private readonly DispatcherTimer tieTimer;
+        private readonly DispatcherTimer tieTimerFlashTimer;
         private string lastNotice = "";
+        private int tieTimerRemainingSeconds = TieTimerStartSeconds;
+        private DateTime tieTimerEndsAtUtc = DateTime.MinValue;
+        private bool tieTimerHasStarted = false;
+        private bool tieTimerFlashVisible = true;
         private readonly LinkedList<string> actionLog = new LinkedList<string>();
         private readonly Stack<GameState> undoStack = new Stack<GameState>();
 
@@ -363,7 +374,7 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private static readonly Dictionary<string, string> En = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v1.1.4",
+            ["AppTitle"] = "TABS Arena v1.1.5",
             ["Settings"] = "Settings",
             ["Guide"] = "1v1 Guide",
             ["Back"] = "← Back",
@@ -397,6 +408,8 @@ private static readonly string[] BaseRewardPool = new string[]
             ["PendingResult"] = "PENDING RESULT",
             ["NotAvailableYet"] = "Not available yet",
             ["NotSet"] = "Not set",
+            ["TurnOrderRed"] = "Red -> Blue",
+            ["TurnOrderBlue"] = "Blue -> Red",
             ["FactionMode"] = "FACTION MODE",
             ["FactionModeOff"] = "Faction Mode: OFF",
             ["FactionModeOn"] = "Faction Mode: ON",
@@ -421,6 +434,10 @@ private static readonly string[] BaseRewardPool = new string[]
             ["Player1Wins"] = "Player 1 Wins",
             ["Player2Wins"] = "Player 2 Wins",
             ["Tie"] = "Tie",
+            ["StartTieTimer"] = "Start Tie Timer",
+            ["StopTimer"] = "Stop Timer",
+            ["ResumeTimer"] = "Resume Timer",
+            ["RestartTimer"] = "Restart Timer",
             ["NextRound"] = "Next Round",
             ["Undo"] = "Undo",
             ["Gold"] = "GOLD",
@@ -568,7 +585,7 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private static readonly Dictionary<string, string> Es = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v1.1.4",
+            ["AppTitle"] = "TABS Arena v1.1.5",
             ["Settings"] = "Ajustes",
             ["Guide"] = "Guía 1v1",
             ["Back"] = "← Volver",
@@ -602,6 +619,8 @@ private static readonly string[] BaseRewardPool = new string[]
             ["PendingResult"] = "RESULTADO PENDIENTE",
             ["NotAvailableYet"] = "No disponible aún",
             ["NotSet"] = "No establecido",
+            ["TurnOrderRed"] = "Rojo -> Azul",
+            ["TurnOrderBlue"] = "Azul -> Rojo",
             ["FactionMode"] = "MODO FACCIÓN",
             ["FactionModeOff"] = "Modo Facción: OFF",
             ["FactionModeOn"] = "Modo Facción: ON",
@@ -626,6 +645,10 @@ private static readonly string[] BaseRewardPool = new string[]
             ["Player1Wins"] = "Gana Jugador 1",
             ["Player2Wins"] = "Gana Jugador 2",
             ["Tie"] = "Empate",
+            ["StartTieTimer"] = "Iniciar temporizador",
+            ["StopTimer"] = "Detener",
+            ["ResumeTimer"] = "Reanudar",
+            ["RestartTimer"] = "Reiniciar",
             ["NextRound"] = "Siguiente Ronda",
             ["Undo"] = "Deshacer",
             ["Gold"] = "ORO",
@@ -773,7 +796,7 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private static readonly Dictionary<string, string> Ru = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v1.1.4",
+            ["AppTitle"] = "TABS Arena v1.1.5",
             ["Settings"] = "Настройки",
             ["Guide"] = "Руководство 1v1",
             ["Back"] = "← Назад",
@@ -807,6 +830,8 @@ private static readonly string[] BaseRewardPool = new string[]
             ["PendingResult"] = "ОЖИДАЕМЫЙ РЕЗУЛЬТАТ",
             ["NotAvailableYet"] = "Пока недоступно",
             ["NotSet"] = "Не задано",
+            ["TurnOrderRed"] = "Красные -> Синие",
+            ["TurnOrderBlue"] = "Синие -> Красные",
             ["FactionMode"] = "РЕЖИМ ФРАКЦИЙ",
             ["FactionModeOff"] = "Фракции: ВЫКЛ",
             ["FactionModeOn"] = "Фракции: ВКЛ",
@@ -831,6 +856,10 @@ private static readonly string[] BaseRewardPool = new string[]
             ["Player1Wins"] = "Победа Игрока 1",
             ["Player2Wins"] = "Победа Игрока 2",
             ["Tie"] = "Ничья",
+            ["StartTieTimer"] = "Запустить таймер",
+            ["StopTimer"] = "Остановить",
+            ["ResumeTimer"] = "Продолжить",
+            ["RestartTimer"] = "Сбросить",
             ["NextRound"] = "Следующий раунд",
             ["Undo"] = "Отменить",
             ["Gold"] = "ЗОЛОТО",
@@ -978,7 +1007,7 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private static readonly Dictionary<string, string> Zh = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v1.1.4",
+            ["AppTitle"] = "TABS Arena v1.1.5",
             ["Settings"] = "设置",
             ["Guide"] = "1v1 指南",
             ["Back"] = "← 返回",
@@ -1012,6 +1041,8 @@ private static readonly string[] BaseRewardPool = new string[]
             ["PendingResult"] = "待定结果",
             ["NotAvailableYet"] = "暂不可用",
             ["NotSet"] = "未设置",
+            ["TurnOrderRed"] = "红方 -> 蓝方",
+            ["TurnOrderBlue"] = "蓝方 -> 红方",
             ["FactionMode"] = "阵营模式",
             ["FactionModeOff"] = "阵营：关",
             ["FactionModeOn"] = "阵营：开",
@@ -1036,6 +1067,10 @@ private static readonly string[] BaseRewardPool = new string[]
             ["Player1Wins"] = "玩家 1 获胜",
             ["Player2Wins"] = "玩家 2 获胜",
             ["Tie"] = "平局",
+            ["StartTieTimer"] = "开始平局计时器",
+            ["StopTimer"] = "停止计时器",
+            ["ResumeTimer"] = "继续计时器",
+            ["RestartTimer"] = "重置计时器",
             ["NextRound"] = "下一回合",
             ["Undo"] = "撤销",
             ["Gold"] = "金币",
@@ -1187,9 +1222,10 @@ private static readonly string[] BaseRewardPool = new string[]
             TwoVTwoGameMode.Loc.Current = AppPrefs.Language;
 
             InitializeComponent();
+            ApplyPlayerPanelTypography();
             if (IsNoRoundYetText(p1Calc)) p1Calc = T("NoRoundYet");
             if (IsNoRoundYetText(p2Calc)) p2Calc = T("NoRoundYet");
-            RootScaleHost.LayoutTransform = new ScaleTransform(1.0, 1.0);
+            InitializeZoom();
             SetupPlaceholders();
             SetupNumericInputBoxes();
             WindowStyle = WindowStyle.None;
@@ -1203,13 +1239,25 @@ private static readonly string[] BaseRewardPool = new string[]
                 if (IncomeNoticePopup != null) IncomeNoticePopup.IsOpen = false;
                 lastNotice = "";
             };
+            zoomIndicatorTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+            zoomIndicatorTimer.Tick += (s, e) =>
+            {
+                zoomIndicatorTimer.Stop();
+                FadeOutZoomIndicator();
+            };
+            tieTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+            tieTimer.Tick += TieTimer_Tick;
+            tieTimerFlashTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(450) };
+            tieTimerFlashTimer.Tick += TieTimerFlash_Tick;
 
             InitMilestoneRewardQueue();
+            GrantStartingFactions();
 
             Loaded += (s, e) =>
             {
                 Window_Loaded(s, e);
                 ApplyWindowMode(AppPrefs.WindowMode == SavedWindowMode.BorderlessFullscreen, false);
+                UpdateZoomIndicatorPlacement();
             };
 
             Closing += (s, e) =>
@@ -1219,6 +1267,7 @@ private static readonly string[] BaseRewardPool = new string[]
                     : SavedWindowMode.Windowed;
 
                 AppPrefs.Language = ToSharedLanguage(currentLanguage);
+                AppPrefs.ZoomScale = GetCurrentZoom();
 
                 AppPrefs.Save();
             };
@@ -1227,6 +1276,266 @@ private static readonly string[] BaseRewardPool = new string[]
             UpdateStaticText();
             UpdateLanguageSelectorUI();
             UpdateSoundSettingsUI();
+        }
+
+        private void ApplyPlayerPanelTypography()
+        {
+            PlayerPanelText.ApplyButtonTypography(
+                P1NameEditButton, P2NameEditButton,
+                P1BuyIncomeButton, P2BuyIncomeButton,
+                P1BuyPermMoveButton, P2BuyPermMoveButton,
+                P1BuyFactionButton, P2BuyFactionButton,
+                P1BuyChosenFactionButton, P2BuyChosenFactionButton,
+                P1SingleTroopMoveButton, P2SingleTroopMoveButton,
+                P1ReplayButton, P2ReplayButton,
+                P1SpendButton, P2SpendButton,
+                P1SellUnitButton, P2SellUnitButton);
+
+            PlayerPanelText.ApplyTextSize(
+                PlayerPanelText.StatLabelFontSize,
+                P1LblGold, P1LblPoints, P1LblPermMove, P1LblIncome, P1LblInterest,
+                P2LblGold, P2LblPoints, P2LblPermMove, P2LblIncome, P2LblInterest);
+
+            PlayerPanelText.ApplyTextSize(
+                PlayerPanelText.StatValueFontSize,
+                P1GoldText, P1PointsText, P1UpgradesText, P1IncomeText, P1InterestText,
+                P2GoldText, P2PointsText, P2UpgradesText, P2IncomeText, P2InterestText);
+        }
+
+        private void InitializeZoom()
+        {
+            RootScaleHost.LayoutTransform = new ScaleTransform(1.0, 1.0);
+            AppScroll.SizeChanged += (s, e) => UpdateZoomIndicatorPlacement();
+            AppScroll.ScrollChanged += (s, e) => UpdateZoomIndicatorPlacement();
+            ZoomIndicator.SizeChanged += (s, e) => UpdateZoomIndicatorPlacement();
+            ApplyZoom(AppPrefs.ZoomScale, false, false);
+            Dispatcher.BeginInvoke(new Action(UpdateZoomIndicatorPlacement), DispatcherPriority.Loaded);
+        }
+
+        private double GetCurrentZoom()
+        {
+            if (RootScaleHost.LayoutTransform is ScaleTransform scale)
+                return scale.ScaleX;
+
+            return 1.0;
+        }
+
+        private double ClampZoom(double value)
+        {
+            return Math.Max(MinZoom, Math.Min(MaxZoom, value));
+        }
+
+        private void ApplyZoom(double zoom, bool persist, bool showIndicator)
+        {
+            zoom = ClampZoom(zoom);
+
+            if (!(RootScaleHost.LayoutTransform is ScaleTransform scale))
+            {
+                scale = new ScaleTransform(1.0, 1.0);
+                RootScaleHost.LayoutTransform = scale;
+            }
+
+            scale.ScaleX = zoom;
+            scale.ScaleY = zoom;
+
+            if (ZoomIndicatorText != null)
+                ZoomIndicatorText.Text = string.Format("{0}%", Math.Round(zoom * 100));
+
+            UpdateZoomIndicatorPlacement();
+            if (showIndicator)
+                ShowZoomIndicator();
+
+            if (persist)
+            {
+                AppPrefs.ZoomScale = zoom;
+                AppPrefs.Save();
+            }
+        }
+
+        private void UpdateZoomIndicatorPlacement()
+        {
+            if (ZoomIndicatorPopup == null || ZoomIndicator == null || AppScroll == null || AppScroll.ActualWidth <= 0)
+                return;
+
+            ZoomIndicatorPopup.PlacementTarget = AppScroll;
+            ZoomIndicatorPopup.Placement = PlacementMode.Relative;
+            double badgeWidth = ZoomIndicator.ActualWidth > 0 ? ZoomIndicator.ActualWidth : 86;
+            ZoomIndicatorPopup.HorizontalOffset = Math.Max(12, (AppScroll.ActualWidth - badgeWidth) / 2);
+            ZoomIndicatorPopup.VerticalOffset = 10;
+        }
+
+        private void ShowZoomIndicator()
+        {
+            if (ZoomIndicatorPopup == null || ZoomIndicator == null)
+                return;
+
+            UpdateZoomIndicatorPlacement();
+            ZoomIndicator.BeginAnimation(UIElement.OpacityProperty, null);
+            ZoomIndicator.Opacity = 1.0;
+            ZoomIndicatorPopup.IsOpen = true;
+            zoomIndicatorTimer.Stop();
+            zoomIndicatorTimer.Start();
+        }
+
+        private void FadeOutZoomIndicator()
+        {
+            if (ZoomIndicatorPopup == null || ZoomIndicator == null || !ZoomIndicatorPopup.IsOpen)
+                return;
+
+            var fade = new DoubleAnimation(1.0, 0.0, TimeSpan.FromSeconds(1));
+            fade.Completed += (s, e) =>
+            {
+                ZoomIndicatorPopup.IsOpen = false;
+                ZoomIndicator.Opacity = 1.0;
+            };
+            ZoomIndicator.BeginAnimation(UIElement.OpacityProperty, fade);
+        }
+
+        private void TieTimer_Tick(object sender, EventArgs e)
+        {
+            SyncTieTimerFromClock();
+        }
+
+        private void SyncTieTimerFromClock()
+        {
+            if (tieTimerEndsAtUtc == DateTime.MinValue)
+                return;
+
+            int newRemaining = (int)Math.Ceiling((tieTimerEndsAtUtc - DateTime.UtcNow).TotalSeconds);
+            tieTimerRemainingSeconds = Math.Max(0, newRemaining);
+
+            if (tieTimerRemainingSeconds <= 0)
+            {
+                tieTimer.Stop();
+                tieTimerHasStarted = false;
+                tieTimerEndsAtUtc = DateTime.MinValue;
+                StartTieTimerFlash();
+            }
+
+            UpdateTieTimerUi();
+        }
+
+        private void TieTimerFlash_Tick(object sender, EventArgs e)
+        {
+            tieTimerFlashVisible = !tieTimerFlashVisible;
+            if (TieTimerText != null)
+                TieTimerText.Opacity = tieTimerFlashVisible ? 1.0 : 0.15;
+        }
+
+        private void TieTimerToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (tieTimer.IsEnabled)
+            {
+                SyncTieTimerFromClock();
+                if (tieTimerRemainingSeconds <= 0)
+                    return;
+
+                tieTimer.Stop();
+                tieTimerHasStarted = true;
+                StopTieTimerFlash();
+            }
+            else
+            {
+                if (tieTimerRemainingSeconds <= 0)
+                    tieTimerRemainingSeconds = TieTimerStartSeconds;
+
+                bool isFreshStart = !tieTimerHasStarted && tieTimerRemainingSeconds == TieTimerStartSeconds;
+                tieTimerHasStarted = true;
+                StopTieTimerFlash();
+                if (isFreshStart)
+                    tieTimerRemainingSeconds--;
+
+                tieTimerEndsAtUtc = DateTime.UtcNow.AddSeconds(tieTimerRemainingSeconds);
+                if (tieTimerRemainingSeconds > 0)
+                {
+                    tieTimer.Start();
+                    SyncTieTimerFromClock();
+                }
+                else
+                {
+                    StartTieTimerFlash();
+                }
+            }
+
+            UpdateTieTimerUi();
+        }
+
+        private void TieTimerRestartButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResetTieTimer();
+        }
+
+        private void ResetTieTimer()
+        {
+            if (tieTimer != null)
+                tieTimer.Stop();
+
+            tieTimerRemainingSeconds = TieTimerStartSeconds;
+            tieTimerEndsAtUtc = DateTime.MinValue;
+            tieTimerHasStarted = false;
+            StopTieTimerFlash();
+            UpdateTieTimerUi();
+        }
+
+        private void StartTieTimerFlash()
+        {
+            if (tieTimerFlashTimer == null)
+                return;
+
+            tieTimerFlashVisible = true;
+            if (TieTimerText != null)
+                TieTimerText.Opacity = 1.0;
+
+            tieTimerFlashTimer.Stop();
+            tieTimerFlashTimer.Start();
+        }
+
+        private void StopTieTimerFlash()
+        {
+            if (tieTimerFlashTimer != null)
+                tieTimerFlashTimer.Stop();
+
+            tieTimerFlashVisible = true;
+            if (TieTimerText != null)
+                TieTimerText.Opacity = 1.0;
+        }
+
+        private void UpdateTieTimerUi()
+        {
+            if (TieTimerText != null)
+                TieTimerText.Text = FormatTieTimer(tieTimerRemainingSeconds);
+
+            if (TieTimerToggleButton != null)
+                TieTimerToggleButton.Content = tieTimer != null && tieTimer.IsEnabled
+                    ? T("StopTimer")
+                    : tieTimerHasStarted ? T("ResumeTimer") : T("StartTieTimer");
+
+            if (TieTimerRestartButton != null)
+                TieTimerRestartButton.Content = T("RestartTimer");
+        }
+
+        private static string FormatTieTimer(int seconds)
+        {
+            seconds = Math.Max(0, seconds);
+            return string.Format("{0}:{1:00}", seconds / 60, seconds % 60);
+        }
+
+        private void SetMilestoneProgressText(string p1DisplayName, int p1Away, string p2DisplayName, int p2Away)
+        {
+            if (Ft20PoolStatusText == null) return;
+
+            Ft20PoolStatusText.Inlines.Clear();
+            AddMilestoneProgressLine(p1MilestoneFlagBrush, p1DisplayName, p1Away);
+            Ft20PoolStatusText.Inlines.Add(new LineBreak());
+            AddMilestoneProgressLine(p2MilestoneFlagBrush, p2DisplayName, p2Away);
+        }
+
+        private void AddMilestoneProgressLine(Brush flagBrush, string displayName, int pointsAway)
+        {
+            Ft20PoolStatusText.Inlines.Add(PlayerPanelText.CreateFlagInline(flagBrush, 35, 31, new Thickness(0, 0, 10, -7)));
+            Ft20PoolStatusText.Inlines.Add(new Run(string.Format("{0}:  ", displayName)));
+            Ft20PoolStatusText.Inlines.Add(PlayerPanelText.CreateOutlinedTextInline(pointsAway.ToString(), 26, new Thickness(1, 4, 3, -4), milestoneNumberBrush));
+            Ft20PoolStatusText.Inlines.Add(new Run(" " + T("PointsAway")));
         }
 
         private void UpdateTurnOrderText()
@@ -1242,8 +1551,8 @@ private static readonly string[] BaseRewardPool = new string[]
             else if (lastRoundWinner == 1 || lastRoundWinner == 2)
                 first = lastRoundWinner;
 
-            TurnOrderText.Text = first == 1 ? $"{p1Name} -> {p2Name}"
-                  : first == 2 ? $"{p2Name} -> {p1Name}"
+            TurnOrderText.Text = first == 1 ? T("TurnOrderRed")
+                  : first == 2 ? T("TurnOrderBlue")
                   : T("NotAvailableYet");
         }
 
@@ -1373,19 +1682,44 @@ private static readonly string[] BaseRewardPool = new string[]
         private string GetNextRewardLabel()
         {
             if (milestoneRewardQueue == null || milestoneRewardQueue.Count == 0) return T("NoneLeft");
-            return RewardKey(milestoneRewardQueue[0]);
+            return RewardLabel(milestoneRewardQueue[0]);
+        }
+
+        private string GetNextRewardIcon()
+        {
+            if (milestoneRewardQueue == null || milestoneRewardQueue.Count == 0) return "🏆";
+            return RewardIcon(milestoneRewardQueue[0]);
         }
 
         private string RewardKey(string key)
         {
+            return string.Format("{0} {1}", RewardIcon(key), RewardLabel(key));
+        }
+
+        private string RewardIcon(string key)
+        {
             switch (key)
             {
-                case "choose_free_faction": return "🎯 " + T("RewardChooseFreeFaction");
-                case "free_faction": return "🎲 " + T("RewardFreeFaction");
-                case "perm_move_upgrade": return "⚔  " + T("RewardPermMove");
-                case "sellback_20": return "💰 " + T("RewardSellback20");
-                case "income_discount": return "📉 " + T("RewardIncomeDiscount");
-                case "full_refund": return "🔁 " + T("RewardFullRefund");
+                case "choose_free_faction": return "🎯";
+                case "free_faction": return "🎲";
+                case "perm_move_upgrade": return "⚔";
+                case "sellback_20": return "💰";
+                case "income_discount": return "📉";
+                case "full_refund": return "🔁";
+                default: return "★";
+            }
+        }
+
+        private string RewardLabel(string key)
+        {
+            switch (key)
+            {
+                case "choose_free_faction": return T("RewardChooseFreeFaction");
+                case "free_faction": return T("RewardFreeFaction");
+                case "perm_move_upgrade": return T("RewardPermMove");
+                case "sellback_20": return T("RewardSellback20");
+                case "income_discount": return T("RewardIncomeDiscount");
+                case "full_refund": return T("RewardFullRefund");
                 default: return key;
             }
         }
@@ -2231,9 +2565,14 @@ T("NewGameConfirmMsg"))) return;
 
         private void DoFullReset()
         {
+            bool keepFactionModeEnabled = factionModeEnabled;
+            bool keepFt10ModeEnabled = ft10ModeEnabled;
+            bool keepFt30ModeEnabled = ft30ModeEnabled;
+
             _currentSaveName = null; undoStack.Clear();
             round = 1; pendingWinner = 0; namesLocked = false; resetArmed = false; firstTurnChosen = false;
-            ft20ModeEnabled = true; ft10ModeEnabled = false; ft30ModeEnabled = false; ft20ModeLocked = false;
+            factionModeEnabled = keepFactionModeEnabled; factionModeLocked = false;
+            ft10ModeEnabled = keepFt10ModeEnabled; ft30ModeEnabled = keepFt30ModeEnabled; NormalizeMatchModeFlags(); ft20ModeLocked = false;
             matchEndPromptSuppressed = false;
             p1Gold = GetStartingGold(); p2Gold = GetStartingGold(); p1Points = 0; p2Points = 0;
             p1Income = 0; p2Income = 0;
@@ -2250,16 +2589,16 @@ T("NewGameConfirmMsg"))) return;
             milestone5Claimed = false; milestone10Claimed = false; milestone15Claimed = false;
             milestone20Claimed = false; milestone25Claimed = false;
             globalClaimedMilestones.Clear();
-            InitMilestoneRewardQueue();
             p1SellbackPct = 50; p2SellbackPct = 50;
             p1Sellback70 = false; p2Sellback70 = false;
             p1MissedIncomeRounds = 0; p2MissedIncomeRounds = 0;
             p1IncomeDecayPercent = 0; p2IncomeDecayPercent = 0;
-            factionModeEnabled = false; factionModeLocked = false;
             p1FactionPurchases = 0; p2FactionPurchases = 0;
             p1ChosenFactionPurchases = 0; p2ChosenFactionPurchases = 0;
             p1Factions.Clear(); p2Factions.Clear();
             ft20MilestonePool.Clear(); ft20NextMilestoneRound = GetMilestoneStep();
+            if (factionModeEnabled) GrantStartingFactions();
+            InitMilestoneRewardQueue();
             p1Calc = T("NoRoundYet"); p2Calc = T("NoRoundYet");
             P1NameBox.IsReadOnly = false; P2NameBox.IsReadOnly = false;
             P1NameEditButton.Visibility = Visibility.Visible; P2NameEditButton.Visibility = Visibility.Visible;
@@ -2269,6 +2608,7 @@ T("NewGameConfirmMsg"))) return;
             P1GoldBorder.Background = normalPanelBrush; P2GoldBorder.Background = normalPanelBrush;
             P1PointsBorder.Background = normalPanelBrush; P2PointsBorder.Background = normalPanelBrush;
             IncomeNoticePopup.IsOpen = false; noticeTimer.Stop();
+            ResetTieTimer();
             actionLog.Clear();
             if (FindName("ActionLogPanel") is StackPanel alp) alp.Children.Clear();
             SavesDropdown.SelectedItem = null;
@@ -2827,6 +3167,7 @@ T("NewGameConfirmMsg"))) return;
             if (TieButton != null) TieButton.Content = T("Tie");
             if (NextRoundButton != null) NextRoundButton.Content = T("NextRound");
             if (UndoButton != null) UndoButton.Content = T("Undo");
+            UpdateTieTimerUi();
 
             if (IsDefaultP1Name(p1Name)) p1Name = T("DefaultP1Name");
             if (IsDefaultP2Name(p2Name)) p2Name = T("DefaultP2Name");
@@ -2902,8 +3243,8 @@ T("NewGameConfirmMsg"))) return;
                 int p1DisplayedIncomeCost = GetDisplayedIncomeCost(p1IncomeCost, p1IncomeDecayPercent, p1HasIncomeDiscount);
                 int p2DisplayedIncomeCost = GetDisplayedIncomeCost(p2IncomeCost, p2IncomeDecayPercent, p2HasIncomeDiscount);
                 string incomeLabel = ft20ModeEnabled ? T("BuyIncomeF") : T("BuyIncome");
-                P1BuyIncomeButton.Content = string.Format(incomeLabel, p1DisplayedIncomeCost);
-                P2BuyIncomeButton.Content = string.Format(incomeLabel, p2DisplayedIncomeCost);
+                PlayerPanelText.SetButtonContent(P1BuyIncomeButton, string.Format(incomeLabel, p1DisplayedIncomeCost));
+                PlayerPanelText.SetButtonContent(P2BuyIncomeButton, string.Format(incomeLabel, p2DisplayedIncomeCost));
                 P1IncomeDecayPctText.Text = p1HasIncomeDiscount
                     ? string.Format("-{0}%  (+15% off)", p1IncomeDecayPercent)
                     : string.Format("-{0}%", p1IncomeDecayPercent);
@@ -2925,8 +3266,8 @@ T("NewGameConfirmMsg"))) return;
             }
 
             int permMoveCost = GetPermMoveCost();
-            P1BuyPermMoveButton.Content = string.Format(T("BuyPermMove"), permMoveCost);
-            P2BuyPermMoveButton.Content = string.Format(T("BuyPermMove"), permMoveCost);
+            PlayerPanelText.SetButtonContent(P1BuyPermMoveButton, string.Format(T("BuyPermMove"), permMoveCost));
+            PlayerPanelText.SetButtonContent(P2BuyPermMoveButton, string.Format(T("BuyPermMove"), permMoveCost));
             P1BuyPermMoveButton.IsEnabled = true;
             P2BuyPermMoveButton.IsEnabled = true;
             P1BuyPermMoveButton.Background = (p1PermMoveUpgrades < 2 && p1Gold >= permMoveCost) ? cyanBrush : disabledBrush;
@@ -2954,28 +3295,28 @@ T("NewGameConfirmMsg"))) return;
             if (P1BuyFactionButton != null)
             {
                 P1BuyFactionButton.Visibility = factionModeEnabled ? Visibility.Visible : Visibility.Collapsed;
-                P1BuyFactionButton.Content = string.Format(T("BuyFaction"), GetFactionCost(1));
+                PlayerPanelText.SetButtonContent(P1BuyFactionButton, string.Format(T("BuyFaction"), GetFactionCost(1)));
                 bool can = factionModeEnabled && GetAvailableFactionsForPlayer(1).Count > 0 && p1Gold >= GetFactionCost(1);
                 P1BuyFactionButton.IsEnabled = can; P1BuyFactionButton.Background = can ? cyanBrush : disabledBrush;
             }
             if (P1BuyChosenFactionButton != null)
             {
                 P1BuyChosenFactionButton.Visibility = factionModeEnabled ? Visibility.Visible : Visibility.Collapsed;
-                P1BuyChosenFactionButton.Content = string.Format(T("BuyChosenFaction"), GetChosenFactionCost(1));
+                PlayerPanelText.SetButtonContent(P1BuyChosenFactionButton, string.Format(T("BuyChosenFaction"), GetChosenFactionCost(1)));
                 bool can = factionModeEnabled && GetAvailableFactionsForPlayer(1).Count > 0 && p1Gold >= GetChosenFactionCost(1);
                 P1BuyChosenFactionButton.IsEnabled = can; P1BuyChosenFactionButton.Background = can ? cyanBrush : disabledBrush;
             }
             if (P2BuyFactionButton != null)
             {
                 P2BuyFactionButton.Visibility = factionModeEnabled ? Visibility.Visible : Visibility.Collapsed;
-                P2BuyFactionButton.Content = string.Format(T("BuyFaction"), GetFactionCost(2));
+                PlayerPanelText.SetButtonContent(P2BuyFactionButton, string.Format(T("BuyFaction"), GetFactionCost(2)));
                 bool can = factionModeEnabled && GetAvailableFactionsForPlayer(2).Count > 0 && p2Gold >= GetFactionCost(2);
                 P2BuyFactionButton.IsEnabled = can; P2BuyFactionButton.Background = can ? cyanBrush : disabledBrush;
             }
             if (P2BuyChosenFactionButton != null)
             {
                 P2BuyChosenFactionButton.Visibility = factionModeEnabled ? Visibility.Visible : Visibility.Collapsed;
-                P2BuyChosenFactionButton.Content = string.Format(T("BuyChosenFaction"), GetChosenFactionCost(2));
+                PlayerPanelText.SetButtonContent(P2BuyChosenFactionButton, string.Format(T("BuyChosenFaction"), GetChosenFactionCost(2)));
                 bool can = factionModeEnabled && GetAvailableFactionsForPlayer(2).Count > 0 && p2Gold >= GetChosenFactionCost(2);
                 P2BuyChosenFactionButton.IsEnabled = can; P2BuyChosenFactionButton.Background = can ? cyanBrush : disabledBrush;
             }
@@ -2986,20 +3327,15 @@ T("NewGameConfirmMsg"))) return;
                 MilestoneTrackerRow.Visibility = Visibility.Visible;
 
                 // Box 1 — per-player progress toward next unclaimed milestone
-                int p1Next = GetNextMilestone(p1Points);
-                int p2Next = GetNextMilestone(p2Points);
-                int p1Away = p1Next - p1Points;
-                int p2Away = p2Next - p2Points;
-
-                string p1Line = string.Format("{0}:  {1} {2}  ({3} {4} pts)",
-    p1Name, p1Away, T("PointsAway"), T("NextAt"), p1Next);
-                string p2Line = string.Format("{0}:  {1} {2}  ({3} {4} pts)",
-                    p2Name, p2Away, T("PointsAway"), T("NextAt"), p2Next);
+                int p1Away = GetNextMilestone(p1Points) - p1Points;
+                int p2Away = GetNextMilestone(p2Points) - p2Points;
                 if (Ft20PoolNextLabel != null) Ft20PoolNextLabel.Text = T("MilestoneProgress");
-                if (Ft20PoolStatusText != null)
-                    Ft20PoolStatusText.Text = p1Line + "\n" + p2Line;
+                SetMilestoneProgressText(p1Name, p1Away, p2Name, p2Away);
 
                 // Box 2 — next pre-rolled reward
+                if (MilestoneNextRewardIcon != null)
+                    MilestoneNextRewardIcon.Text = GetNextRewardIcon();
+
                 if (MilestoneNextRewardText != null)
                     MilestoneNextRewardText.Text = GetNextRewardLabel();
 
@@ -3011,12 +3347,12 @@ T("NewGameConfirmMsg"))) return;
             RefreshFactionIcons();
 
             int singleTroopMoveCost = GetSingleTroopMoveCost();
-            P1SingleTroopMoveButton.Content = string.Format(T("SingleTroopMove"), singleTroopMoveCost);
-            P2SingleTroopMoveButton.Content = string.Format(T("SingleTroopMove"), singleTroopMoveCost);
+            PlayerPanelText.SetButtonContent(P1SingleTroopMoveButton, string.Format(T("SingleTroopMove"), singleTroopMoveCost));
+            PlayerPanelText.SetButtonContent(P2SingleTroopMoveButton, string.Format(T("SingleTroopMove"), singleTroopMoveCost));
             P1SingleTroopMoveButton.Background = p1Gold >= singleTroopMoveCost ? cyanBrush : disabledBrush;
             P2SingleTroopMoveButton.Background = p2Gold >= singleTroopMoveCost ? cyanBrush : disabledBrush;
-            P1ReplayButton.Content = p1ReplayBoughtThisRound ? T("ReplayUsed") : T("Replay");
-            P2ReplayButton.Content = p2ReplayBoughtThisRound ? T("ReplayUsed") : T("Replay");
+            PlayerPanelText.SetButtonContent(P1ReplayButton, p1ReplayBoughtThisRound ? T("ReplayUsed") : T("Replay"));
+            PlayerPanelText.SetButtonContent(P2ReplayButton, p2ReplayBoughtThisRound ? T("ReplayUsed") : T("Replay"));
             P1ReplayButton.IsEnabled = !p1ReplayBoughtThisRound;
             P2ReplayButton.IsEnabled = !p2ReplayBoughtThisRound;
             P1ReplayButton.Background = (!p1ReplayBoughtThisRound && p1Gold >= 10) ? cyanBrush : disabledBrush;
@@ -3029,8 +3365,11 @@ T("NewGameConfirmMsg"))) return;
             UndoButton.IsEnabled = undoStack.Count > 0;
             UndoButton.Background = undoStack.Count > 0 ? new SolidColorBrush(Color.FromRgb(142, 108, 245)) : disabledBrush;
 
+            Visibility firstTurnOverlayVisibility = (round == 1 && !firstTurnChosen) ? Visibility.Visible : Visibility.Collapsed;
             if (FirstTurnPromptBorder != null)
-                FirstTurnPromptBorder.Visibility = (round == 1 && !firstTurnChosen) ? Visibility.Visible : Visibility.Collapsed;
+                FirstTurnPromptBorder.Visibility = firstTurnOverlayVisibility;
+            if (FirstTurnDimOverlay != null)
+                FirstTurnDimOverlay.Visibility = firstTurnOverlayVisibility;
         }
 
         private void P1NameEdit_Click(object sender, RoutedEventArgs e) => ToggleNameLock(1);
@@ -3408,6 +3747,7 @@ T("NewGameConfirmMsg"))) return;
 
             round++;
             pendingWinner = 0;
+            ResetTieTimer();
             UpdateUI();
             ShowMatchEndPromptIfNeeded(prevP1Points, prevP2Points);
         }
@@ -3700,7 +4040,7 @@ T("NewGameConfirmMsg"))) return;
             stack.Children.Add(new TextBlock
             {
                 Text = title,
-                FontSize = 15,
+                FontSize = 17,
                 FontWeight = FontWeights.Bold,
                 Foreground = Brushes.White,
                 Margin = new Thickness(0, 0, 0, 8)
@@ -3709,10 +4049,10 @@ T("NewGameConfirmMsg"))) return;
             stack.Children.Add(new TextBlock
             {
                 Text = body,
-                FontSize = 12,
+                FontSize = 14,
                 Foreground = new SolidColorBrush(Color.FromRgb(220, 226, 235)),
                 TextWrapping = TextWrapping.Wrap,
-                LineHeight = 18
+                LineHeight = 21
             });
 
             GuideContentPanel.Children.Add(new Border
@@ -3729,9 +4069,10 @@ T("NewGameConfirmMsg"))) return;
         {
             var text = new TextBlock
             {
-                FontSize = 12,
+                FontSize = 14,
                 Foreground = new SolidColorBrush(Color.FromRgb(220, 226, 235)),
-                TextWrapping = TextWrapping.Wrap
+                TextWrapping = TextWrapping.Wrap,
+                LineHeight = 21
             };
 
             text.Inlines.Add(new Run(T("GuideMoreBody") + " "));
@@ -4036,27 +4377,67 @@ T("NewGameConfirmMsg"))) return;
             };
             AppScroll.RaiseEvent(args);
         }
+
+        private bool CanNestedScrollViewerHandleWheel(MouseWheelEventArgs e)
+        {
+            var source = e.OriginalSource as DependencyObject;
+            while (source != null)
+            {
+                var sv = source as ScrollViewer;
+                if (sv == SettingsScrollViewer || sv == GuideScrollViewer)
+                    return (e.Delta > 0 && sv.VerticalOffset > 0)
+                        || (e.Delta < 0 && sv.VerticalOffset < sv.ScrollableHeight);
+
+                source = GetUiParent(source);
+            }
+
+            return false;
+        }
+
+        private static DependencyObject GetUiParent(DependencyObject source)
+        {
+            if (source == null) return null;
+
+            DependencyObject parent = null;
+            try
+            {
+                parent = VisualTreeHelper.GetParent(source);
+            }
+            catch (InvalidOperationException)
+            {
+            }
+
+            if (parent != null) return parent;
+
+            var element = source as FrameworkElement;
+            if (element != null) return element.Parent;
+
+            var contentElement = source as FrameworkContentElement;
+            return contentElement != null ? contentElement.Parent : null;
+        }
+
         private void Window_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
-                if (!(RootScaleHost.LayoutTransform is ScaleTransform scale))
+                double current = GetCurrentZoom();
+                double next = ClampZoom(current + (e.Delta > 0 ? ZoomStep : -ZoomStep));
+                Point mouse = e.GetPosition(AppScroll);
+                double contentY = (AppScroll.VerticalOffset + mouse.Y) / current;
+
+                ApplyZoom(next, true, true);
+                Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    scale = new ScaleTransform(1.0, 1.0);
-                    RootScaleHost.LayoutTransform = scale;
-                }
-
-                double next = scale.ScaleX + (e.Delta > 0 ? ZoomStep : -ZoomStep);
-                next = Math.Max(MinZoom, Math.Min(MaxZoom, next));
-
-                scale.ScaleX = next;
-                scale.ScaleY = next;
+                    AppScroll.ScrollToVerticalOffset(Math.Max(0, contentY * next - mouse.Y));
+                    UpdateZoomIndicatorPlacement();
+                }), DispatcherPriority.Loaded);
 
                 e.Handled = true;
                 return;
             }
 
             if (AppScroll == null) return;
+            if (CanNestedScrollViewerHandleWheel(e)) return;
 
             AppScroll.ScrollToVerticalOffset(AppScroll.VerticalOffset - (e.Delta * 0.5));
             e.Handled = true;

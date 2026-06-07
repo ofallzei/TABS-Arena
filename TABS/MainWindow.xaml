@@ -440,7 +440,7 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                     </Button>
 
                     <TextBlock x:Name="AppTitleText"
-                               Text="TABS Arena v1.1.4"
+                               Text="TABS Arena v1.1.5"
                                FontSize="26"
                                FontWeight="SemiBold"
                                Foreground="White"
@@ -454,37 +454,29 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                     <TextBlock x:Name="OverviewTitle" Text="Match Overview" FontSize="24" FontWeight="Bold"/>
                     <TextBlock x:Name="OverviewSub" Text="Use the controls below, then press Next Round to apply interest, upgrades, and spending."
                                Foreground="{StaticResource TextMuted}" Margin="0,6,0,14" TextWrapping="Wrap"/>
-                    <Grid Margin="0,0,0,8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="0.9*" MinWidth="150"/>
-                            <ColumnDefinition Width="1*" MinWidth="180"/>
-                            <ColumnDefinition Width="1*" MinWidth="180"/>
-                            <ColumnDefinition Width="1.12*" MinWidth="200"/>
-                            <ColumnDefinition Width="1*" MinWidth="180"/>
-                            <ColumnDefinition Width="1*" MinWidth="180"/>
-                        </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
+                    <WrapPanel Margin="0,0,0,8">
+                            <Border Width="150" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
                                 <StackPanel>
                                     <TextBlock x:Name="LblCurrentRound" Text="CURRENT ROUND" Foreground="{StaticResource TextMuted}" FontSize="12"/>
                                     <TextBlock x:Name="RoundText" Text="1" FontSize="30" FontWeight="Bold"/>
                                 </StackPanel>
                             </Border>
 
-                            <Border Grid.Column="1" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
+                            <Border Width="180" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
                                 <StackPanel>
                                     <TextBlock x:Name="LblNextTurnOrder" Text="NEXT TURN ORDER" Foreground="{StaticResource TextMuted}" FontSize="12"/>
                                     <TextBlock x:Name="TurnOrderText" Text="Not available yet" FontSize="18" FontWeight="Bold" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </Border>
 
-                            <Border Grid.Column="2" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
+                            <Border Width="180" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="14" Margin="0,0,10,10">
                                 <StackPanel>
                                     <TextBlock x:Name="LblPendingResult" Text="PENDING RESULT" Foreground="{StaticResource TextMuted}" FontSize="12"/>
                                     <TextBlock x:Name="PendingResultText" Text="Not set" FontSize="18" FontWeight="Bold"/>
                                 </StackPanel>
                             </Border>
 
-                            <Border Grid.Column="3" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,10,10">
+                            <Border Width="230" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,10,10">
                                 <StackPanel>
                                     <TextBlock x:Name="LblFactionMode" Text="FACTION MODE" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
                                     <CheckBox x:Name="FactionModeToggle"
@@ -493,7 +485,7 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                                 </StackPanel>
                             </Border>
 
-                            <Border Grid.Column="4" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,10,10">
+                            <Border Width="190" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,10,10">
                                 <StackPanel>
                                     <TextBlock x:Name="LblFT20Mode" Text="FT30 MODE" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
                                     <CheckBox x:Name="Ft20ModeToggle"
@@ -501,7 +493,7 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                       Click="Ft20ModeToggle_Click"/>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Column="5" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,0,10">
+                            <Border Width="190" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,0,10">
                                 <StackPanel>
                                     <TextBlock x:Name="LblFT10Mode" Text="FT10 MODE" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
                                     <CheckBox x:Name="Ft10ModeToggle"
@@ -509,25 +501,7 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                       Click="Ft10ModeToggle_Click"/>
                                 </StackPanel>
                             </Border>
-                    </Grid>
-
-                    <Border x:Name="FirstTurnPromptBorder" Background="#1A1C1F" CornerRadius="16"
-                            Padding="14" Margin="0,6,0,10" Visibility="Visible">
-                        <StackPanel>
-                            <TextBlock x:Name="LblWhichPlayerFirst" Text="Which player is doing their turn first?" FontSize="16"
-                                       FontWeight="Bold" TextWrapping="Wrap" Margin="0,0,0,10"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="1*"/>
-                                    <ColumnDefinition Width="1*"/>
-                                </Grid.ColumnDefinitions>
-                                <Button x:Name="P1FirstTurnButton" Grid.Column="0" Content="Player 1 Goes First"
-        Margin="0,0,8,0" Background="#8B3F3F" Click="P1FirstTurnButton_Click"/>
-                                <Button x:Name="P2FirstTurnButton" Grid.Column="1" Content="Player 2 Goes First"
-        Margin="8,0,0,0" Background="#315F7D" Click="P2FirstTurnButton_Click"/>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
+                    </WrapPanel>
 
                     <Border Background="{StaticResource Panel2Bg}" CornerRadius="16" Padding="16" Margin="0,0,0,0">
                         <StackPanel>
@@ -547,8 +521,8 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                     <Grid x:Name="MilestoneTrackerRow" Margin="0,12,0,0" Visibility="Collapsed">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1.25*"/>
-                            <ColumnDefinition Width="1*"/>
                             <ColumnDefinition Width="1.25*"/>
+                            <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
 
                         <Border x:Name="Ft20PoolTrackerBorder"
@@ -559,50 +533,68 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                                 <TextBlock x:Name="Ft20PoolNextLabel"
                        Text="MILESTONE PROGRESS"
                        Foreground="#A7ACB2"
-                       FontSize="11" FontWeight="Bold"
-                       Margin="0,0,0,8"/>
+                       FontSize="18" FontWeight="Bold"
+                       Margin="0,0,0,18"/>
                                 <TextBlock x:Name="Ft20PoolStatusText"
                        Text=""
                        Foreground="White"
-                       FontSize="15" FontWeight="Bold"
+                       FontSize="26" FontWeight="Bold"
                        TextWrapping="Wrap"
-                       LineHeight="24"/>
+                       LineHeight="42"/>
                             </StackPanel>
                         </Border>
 
                         <Border x:Name="MilestoneNextRewardBorder"
-            Grid.Column="1"
+            Grid.Column="2"
             Background="#1A2030" CornerRadius="14"
-            Padding="14,12" Margin="0,0,10,0">
-                            <StackPanel>
+            Padding="14,12">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
                                 <TextBlock x:Name="LblNextReward" Text="NEXT REWARD"
                        Foreground="#A7ACB2"
-                       FontSize="11" FontWeight="Bold"
-                       Margin="0,0,0,8"/>
+                       FontSize="14" FontWeight="Bold"
+                       Margin="0,0,0,10"/>
+                                <StackPanel Grid.Row="1"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Margin="0,2,0,0">
+                                    <TextBlock x:Name="MilestoneNextRewardIcon"
+                       Text="★"
+                       Foreground="#66DDEB"
+                       FontSize="54" FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"
+                       Margin="0,0,0,6"/>
                                 <TextBlock x:Name="MilestoneNextRewardText"
                        Text="—"
                        Foreground="#66DDEB"
-                       FontSize="15" FontWeight="Bold"
+                       FontSize="20" FontWeight="Bold"
                        TextWrapping="Wrap"
-                       LineHeight="24"/>
-                            </StackPanel>
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center"
+                       LineHeight="28"/>
+                                </StackPanel>
+                            </Grid>
                         </Border>
 
                         <Border x:Name="MilestoneRewardPoolBorder"
-            Grid.Column="2"
+            Grid.Column="1"
             Background="#1A1C1F" CornerRadius="14"
-            Padding="14,12">
+            Padding="14,12" Margin="0,0,10,0">
                             <StackPanel>
                                 <TextBlock x:Name="LblRewardsLeft" Text="POSSIBLE REWARDS LEFT"
                        Foreground="#A7ACB2"
-                       FontSize="11" FontWeight="Bold"
-                       Margin="0,0,0,8"/>
+                       FontSize="14" FontWeight="Bold"
+                       Margin="0,0,0,10"/>
                                 <TextBlock x:Name="Ft20PoolRewardLabel"
                        Text="—"
                        Foreground="White"
-                       FontSize="13" FontWeight="SemiBold"
+                       FontSize="17" FontWeight="SemiBold"
                        TextWrapping="Wrap"
-                       LineHeight="21"/>
+                       LineHeight="25"/>
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -620,8 +612,51 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                             <StackPanel x:Name="ActionLogPanel" MinHeight="345" MaxHeight="345"/>
                         </StackPanel>
                     </Border>
-                    <TextBlock x:Name="LblRoundControl" Text="Round Control" FontSize="22" FontWeight="Bold" Margin="0,14,0,0"/>
-                    <Grid Margin="0,12,0,0">
+                    <Grid Margin="0,14,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LblRoundControl" Text="Round Control" FontSize="22" FontWeight="Bold"/>
+                        <WrapPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Border Background="#171B21"
+                                    BorderBrush="#34404D"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Width="64"
+                                    Height="34"
+                                    Margin="12,0,6,0">
+                                <TextBlock x:Name="TieTimerText"
+                                           Text="2:00"
+                                           FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="#66DDEB"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                            <Button x:Name="TieTimerToggleButton"
+                                    Content="Start Tie Timer"
+                                    Height="34"
+                                    MinWidth="128"
+                                    FontSize="12"
+                                    Padding="10,0"
+                                    Margin="0,0,6,0"
+                                    Background="#313843"
+                                    Foreground="#7FC0E0"
+                                    Click="TieTimerToggleButton_Click"/>
+                            <Button x:Name="TieTimerRestartButton"
+                                    Content="Restart Timer"
+                                    Height="34"
+                                    MinWidth="112"
+                                    FontSize="12"
+                                    Padding="10,0"
+                                    Margin="0"
+                                    Background="#4B5563"
+                                    Foreground="#E8EDF3"
+                                    Click="TieTimerRestartButton_Click"/>
+                        </WrapPanel>
+                    </Grid>
+                    <Grid Margin="0,10,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*"/>
                             <ColumnDefinition Width="1*"/>
@@ -1061,6 +1096,51 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                         </Border>
                     </StackPanel>
                 </Border>
+
+                <Border x:Name="FirstTurnDimOverlay"
+                        Grid.ColumnSpan="2"
+                        Background="#AA05070A"
+                        CornerRadius="18"
+                        Visibility="Collapsed"
+                        Panel.ZIndex="90"/>
+                <Border x:Name="FirstTurnPromptBorder"
+                        Grid.ColumnSpan="2"
+                        Background="#1A1C1F"
+                        BorderBrush="#323A46"
+                        BorderThickness="1.5"
+                        CornerRadius="16"
+                        Padding="20"
+                        Margin="48"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        Visibility="Collapsed"
+                        Panel.ZIndex="100">
+                    <StackPanel>
+                        <TextBlock x:Name="LblWhichPlayerFirst" Text="Which player is doing their turn first?"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,14"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="P1FirstTurnButton" Grid.Column="0" Content="Player 1 Goes First"
+                                    Height="64"
+                                    FontSize="28"
+                                    FontWeight="Bold"
+                                    Margin="0,0,10,0" Background="#8B3F3F"
+                                    Click="P1FirstTurnButton_Click"/>
+                            <Button x:Name="P2FirstTurnButton" Grid.Column="1" Content="Player 2 Goes First"
+                                    Height="64"
+                                    FontSize="28"
+                                    FontWeight="Bold"
+                                    Margin="10,0,0,0" Background="#315F7D"
+                                    Click="P2FirstTurnButton_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
             </Grid>
 
             <Grid x:Name="SettingsOverlay"
@@ -1317,7 +1397,7 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
         Content="← Back"
         Height="32"
         Padding="14,0"
-        FontSize="12"
+        FontSize="13"
         FontWeight="SemiBold"
         Background="#313843"
         Foreground="#7FC0E0"
@@ -1326,14 +1406,19 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
         Click="GuideBackButton_Click"/>
                                 <TextBlock x:Name="GuideTitleText"
                                            Text="1v1 Guide"
-                                           FontSize="18"
+                                           FontSize="20"
                                            FontWeight="Bold"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
 
-                        <ScrollViewer Grid.Row="1" Padding="20">
+                        <ScrollViewer Grid.Row="1"
+                                      x:Name="GuideScrollViewer"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      Padding="20"
+                                      PreviewMouseWheel="SettingsScrollViewer_PreviewMouseWheel">
                             <StackPanel x:Name="GuideContentPanel"/>
                         </ScrollViewer>
                     </Grid>
@@ -1341,5 +1426,38 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
             </Grid>
         </Grid>
         </ScrollViewer>
+        <Popup x:Name="ZoomIndicatorPopup"
+               Placement="Relative"
+               PlacementTarget="{Binding ElementName=AppScroll}"
+               StaysOpen="True"
+               AllowsTransparency="True"
+               IsOpen="False"
+               Focusable="False"
+               IsHitTestVisible="False">
+            <Border x:Name="ZoomIndicator"
+                    Background="#E61A1D23"
+                    BorderBrush="#3F5166"
+                    BorderThickness="1.5"
+                    CornerRadius="12"
+                    Padding="10,6">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Path Data="M 8 2 A 6 6 0 1 0 8 14 A 6 6 0 1 0 8 2 M 12.5 12.5 L 18 18"
+                          Width="16"
+                          Height="16"
+                          Stretch="Uniform"
+                          Stroke="#66DDEB"
+                          StrokeThickness="2"
+                          StrokeStartLineCap="Round"
+                          StrokeEndLineCap="Round"
+                          Margin="0,0,7,0"/>
+                    <TextBlock x:Name="ZoomIndicatorText"
+                               Text="100%"
+                               FontSize="13"
+                               FontWeight="Bold"
+                               Foreground="#F2F4F7"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Popup>
     </Grid>
 </Window>

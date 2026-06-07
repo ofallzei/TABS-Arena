@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using IOPath = System.IO.Path;
 
@@ -26,6 +27,7 @@ namespace TABS
         private const double ZoomStep = 0.05;
         private const double MinZoom = 0.5;
         private const double MaxZoom = 2.0;
+        private const int TieTimerStartSeconds = 120;
 
         // ── Save paths ────────────────────────────────────────────────────
         private static readonly string SaveFolder =
@@ -59,6 +61,12 @@ namespace TABS
             = new SolidColorBrush(Color.FromRgb(120, 40, 40));
         private static readonly SolidColorBrush TileNeutral
             = new SolidColorBrush(Color.FromRgb(44, 53, 64));
+        private static readonly Brush RedFlagBrush
+            = new SolidColorBrush(Color.FromRgb(255, 139, 139));
+        private static readonly Brush BlueFlagBrush
+            = new SolidColorBrush(Color.FromRgb(134, 191, 255));
+        private static readonly Brush MilestoneNumberBrush
+            = new SolidColorBrush(Color.FromRgb(110, 182, 218));
         private static readonly Brush InputPlaceholderBrush = Brushes.Gray;
         private static readonly Brush InputTextBrush = Brushes.White;
 
@@ -86,7 +94,7 @@ namespace TABS
 
         // ── Faction mode ──────────────────────────────────────────────────
         private const int StartingFactionCount = 3;
-        private bool _factionModeEnabled = false;
+        private bool _factionModeEnabled = true;
         private bool _factionModeLocked = false;
 
         private List<string> _p1Factions = new List<string>();
@@ -191,6 +199,13 @@ namespace TABS
 
         // ── Notice timer ──────────────────────────────────────────────────
         private DispatcherTimer _noticeTimer;
+        private DispatcherTimer _zoomIndicatorTimer;
+        private DispatcherTimer _tieTimer;
+        private DispatcherTimer _tieTimerFlashTimer;
+        private int _tieTimerRemainingSeconds = TieTimerStartSeconds;
+        private DateTime _tieTimerEndsAtUtc = DateTime.MinValue;
+        private bool _tieTimerHasStarted = false;
+        private bool _tieTimerFlashVisible = true;
 
         // ── Last applied calc text ────────────────────────────────────────
         private string _p1LastCalcText = "";
@@ -206,8 +221,9 @@ namespace TABS
             InitializeComponent();
             SetupNumericInputBoxes();
             CreateChosenFactionButtons();
+            ApplyPlayerPanelTypography();
             Directory.CreateDirectory(SaveFolder);
-            LayoutTransform = new ScaleTransform(1.0, 1.0);
+            InitializeZoom();
 
             _noticeTimer = new DispatcherTimer
             { Interval = TimeSpan.FromSeconds(3) };
@@ -216,6 +232,19 @@ namespace TABS
                 IncomeNoticePopup.IsOpen = false;
                 _noticeTimer.Stop();
             };
+            _zoomIndicatorTimer = new DispatcherTimer
+            { Interval = TimeSpan.FromSeconds(3) };
+            _zoomIndicatorTimer.Tick += (s, e) =>
+            {
+                _zoomIndicatorTimer.Stop();
+                FadeOutZoomIndicator();
+            };
+            _tieTimer = new DispatcherTimer
+            { Interval = TimeSpan.FromMilliseconds(100) };
+            _tieTimer.Tick += TieTimer_Tick;
+            _tieTimerFlashTimer = new DispatcherTimer
+            { Interval = TimeSpan.FromMilliseconds(450) };
+            _tieTimerFlashTimer.Tick += TieTimerFlash_Tick;
 
             UpdateLanguageSelectorUI();
             InitNewGame();
@@ -225,7 +254,282 @@ namespace TABS
             UpdateSoundSettingsUI();
 
             Loaded += (s, e) =>
+            {
                 ApplyWindowMode(AppPrefs.WindowMode == SavedWindowMode.BorderlessFullscreen, false);
+                UpdateZoomIndicatorPlacement();
+            };
+        }
+
+        private void TieTimer_Tick(object sender, EventArgs e)
+        {
+            SyncTieTimerFromClock();
+        }
+
+        private void SyncTieTimerFromClock()
+        {
+            if (_tieTimerEndsAtUtc == DateTime.MinValue)
+                return;
+
+            int newRemaining = (int)Math.Ceiling((_tieTimerEndsAtUtc - DateTime.UtcNow).TotalSeconds);
+            _tieTimerRemainingSeconds = Math.Max(0, newRemaining);
+
+            if (_tieTimerRemainingSeconds <= 0)
+            {
+                _tieTimer.Stop();
+                _tieTimerHasStarted = false;
+                _tieTimerEndsAtUtc = DateTime.MinValue;
+                StartTieTimerFlash();
+            }
+
+            UpdateTieTimerUi();
+        }
+
+        private void TieTimerFlash_Tick(object sender, EventArgs e)
+        {
+            _tieTimerFlashVisible = !_tieTimerFlashVisible;
+            if (TieTimerText != null)
+                TieTimerText.Opacity = _tieTimerFlashVisible ? 1.0 : 0.15;
+        }
+
+        private void TieTimerToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_tieTimer.IsEnabled)
+            {
+                SyncTieTimerFromClock();
+                if (_tieTimerRemainingSeconds <= 0)
+                    return;
+
+                _tieTimer.Stop();
+                _tieTimerHasStarted = true;
+                StopTieTimerFlash();
+            }
+            else
+            {
+                if (_tieTimerRemainingSeconds <= 0)
+                    _tieTimerRemainingSeconds = TieTimerStartSeconds;
+
+                bool isFreshStart = !_tieTimerHasStarted && _tieTimerRemainingSeconds == TieTimerStartSeconds;
+                _tieTimerHasStarted = true;
+                StopTieTimerFlash();
+                if (isFreshStart)
+                    _tieTimerRemainingSeconds--;
+
+                _tieTimerEndsAtUtc = DateTime.UtcNow.AddSeconds(_tieTimerRemainingSeconds);
+                if (_tieTimerRemainingSeconds > 0)
+                {
+                    _tieTimer.Start();
+                    SyncTieTimerFromClock();
+                }
+                else
+                {
+                    StartTieTimerFlash();
+                }
+            }
+
+            UpdateTieTimerUi();
+        }
+
+        private void TieTimerRestartButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResetTieTimer();
+        }
+
+        private void ResetTieTimer()
+        {
+            if (_tieTimer != null)
+                _tieTimer.Stop();
+
+            _tieTimerRemainingSeconds = TieTimerStartSeconds;
+            _tieTimerEndsAtUtc = DateTime.MinValue;
+            _tieTimerHasStarted = false;
+            StopTieTimerFlash();
+            UpdateTieTimerUi();
+        }
+
+        private void StartTieTimerFlash()
+        {
+            if (_tieTimerFlashTimer == null)
+                return;
+
+            _tieTimerFlashVisible = true;
+            if (TieTimerText != null)
+                TieTimerText.Opacity = 1.0;
+
+            _tieTimerFlashTimer.Stop();
+            _tieTimerFlashTimer.Start();
+        }
+
+        private void StopTieTimerFlash()
+        {
+            if (_tieTimerFlashTimer != null)
+                _tieTimerFlashTimer.Stop();
+
+            _tieTimerFlashVisible = true;
+            if (TieTimerText != null)
+                TieTimerText.Opacity = 1.0;
+        }
+
+        private void UpdateTieTimerUi()
+        {
+            if (TieTimerText != null)
+                TieTimerText.Text = FormatTieTimer(_tieTimerRemainingSeconds);
+
+            if (TieTimerToggleButton != null)
+                TieTimerToggleButton.Content = _tieTimer != null && _tieTimer.IsEnabled
+                    ? Loc.Get("StopTimer")
+                    : _tieTimerHasStarted ? Loc.Get("ResumeTimer") : Loc.Get("StartTieTimer");
+
+            if (TieTimerRestartButton != null)
+                TieTimerRestartButton.Content = Loc.Get("RestartTimer");
+        }
+
+        private static string FormatTieTimer(int seconds)
+        {
+            seconds = Math.Max(0, seconds);
+            return string.Format("{0}:{1:00}", seconds / 60, seconds % 60);
+        }
+
+        private void ApplyPlayerPanelTypography()
+        {
+            PlayerPanelText.ApplyButtonTypography(
+                P1NameEditButton, P2NameEditButton, P3NameEditButton, P4NameEditButton,
+                P1BuyIncomeButton, P2BuyIncomeButton, P3BuyIncomeButton, P4BuyIncomeButton,
+                P1BuyPermMoveButton, P2BuyPermMoveButton, P3BuyPermMoveButton, P4BuyPermMoveButton,
+                P1BuyFactionButton, P2BuyFactionButton, P3BuyFactionButton, P4BuyFactionButton,
+                _p1BuyChosenFactionButton, _p2BuyChosenFactionButton, _p3BuyChosenFactionButton, _p4BuyChosenFactionButton,
+                P1SingleTroopMoveButton, P2SingleTroopMoveButton, P3SingleTroopMoveButton, P4SingleTroopMoveButton,
+                P1ReplayButton, P2ReplayButton, P3ReplayButton, P4ReplayButton,
+                P1SpendButton, P2SpendButton, P3SpendButton, P4SpendButton,
+                P1BuyTeamButton, P2BuyTeamButton, P3BuyTeamButton, P4BuyTeamButton,
+                P1SellUnitButton, P2SellUnitButton, P3SellUnitButton, P4SellUnitButton);
+
+            PlayerPanelText.ApplyTextSize(
+                PlayerPanelText.StatLabelFontSize,
+                P1LblGold, P1LblPoints, P1LblPermMv, P1LblIncome, P1LblInterest,
+                P2LblGold, P2LblPoints, P2LblPermMv, P2LblIncome, P2LblInterest,
+                P3LblGold, P3LblPoints, P3LblPermMv, P3LblIncome, P3LblInterest,
+                P4LblGold, P4LblPoints, P4LblPermMv, P4LblIncome, P4LblInterest);
+
+            PlayerPanelText.ApplyTextSize(
+                PlayerPanelText.StatValueFontSize,
+                P1GoldText, P1PointsText, P1UpgradesText, P1IncomeText, P1InterestText,
+                P2GoldText, P2PointsText, P2UpgradesText, P2IncomeText, P2InterestText,
+                P3GoldText, P3PointsText, P3UpgradesText, P3IncomeText, P3InterestText,
+                P4GoldText, P4PointsText, P4UpgradesText, P4IncomeText, P4InterestText);
+        }
+
+        private void InitializeZoom()
+        {
+            RootScaleHost.LayoutTransform = new ScaleTransform(1.0, 1.0);
+            AppScroll.SizeChanged += (s, e) => UpdateZoomIndicatorPlacement();
+            AppScroll.ScrollChanged += (s, e) => UpdateZoomIndicatorPlacement();
+            ZoomIndicator.SizeChanged += (s, e) => UpdateZoomIndicatorPlacement();
+            ApplyZoom(AppPrefs.ZoomScale, false, false);
+            Dispatcher.BeginInvoke(new Action(UpdateZoomIndicatorPlacement), DispatcherPriority.Loaded);
+        }
+
+        private double GetCurrentZoom()
+        {
+            if (RootScaleHost.LayoutTransform is ScaleTransform scale)
+                return scale.ScaleX;
+
+            return 1.0;
+        }
+
+        private double ClampZoom(double value)
+        {
+            return Math.Max(MinZoom, Math.Min(MaxZoom, value));
+        }
+
+        private void ApplyZoom(double zoom, bool persist, bool showIndicator)
+        {
+            zoom = ClampZoom(zoom);
+
+            if (!(RootScaleHost.LayoutTransform is ScaleTransform scale))
+            {
+                scale = new ScaleTransform(1.0, 1.0);
+                RootScaleHost.LayoutTransform = scale;
+            }
+
+            scale.ScaleX = zoom;
+            scale.ScaleY = zoom;
+
+            if (ZoomIndicatorText != null)
+                ZoomIndicatorText.Text = string.Format("{0}%", Math.Round(zoom * 100));
+
+            UpdateZoomIndicatorPlacement();
+            if (showIndicator)
+                ShowZoomIndicator();
+
+            if (persist)
+            {
+                AppPrefs.ZoomScale = zoom;
+                AppPrefs.Save();
+            }
+        }
+
+        private void UpdateZoomIndicatorPlacement()
+        {
+            if (ZoomIndicatorPopup == null || ZoomIndicator == null || AppScroll == null || AppScroll.ActualWidth <= 0)
+                return;
+
+            ZoomIndicatorPopup.PlacementTarget = AppScroll;
+            ZoomIndicatorPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
+            double badgeWidth = ZoomIndicator.ActualWidth > 0 ? ZoomIndicator.ActualWidth : 86;
+            ZoomIndicatorPopup.HorizontalOffset = Math.Max(12, (AppScroll.ActualWidth - badgeWidth) / 2);
+            ZoomIndicatorPopup.VerticalOffset = 10;
+        }
+
+        private void ShowZoomIndicator()
+        {
+            if (ZoomIndicatorPopup == null || ZoomIndicator == null)
+                return;
+
+            UpdateZoomIndicatorPlacement();
+            ZoomIndicator.BeginAnimation(UIElement.OpacityProperty, null);
+            ZoomIndicator.Opacity = 1.0;
+            ZoomIndicatorPopup.IsOpen = true;
+            _zoomIndicatorTimer.Stop();
+            _zoomIndicatorTimer.Start();
+        }
+
+        private void FadeOutZoomIndicator()
+        {
+            if (ZoomIndicatorPopup == null || ZoomIndicator == null || !ZoomIndicatorPopup.IsOpen)
+                return;
+
+            var fade = new DoubleAnimation(1.0, 0.0, TimeSpan.FromSeconds(1));
+            fade.Completed += (s, e) =>
+            {
+                ZoomIndicatorPopup.IsOpen = false;
+                ZoomIndicator.Opacity = 1.0;
+            };
+            ZoomIndicator.BeginAnimation(UIElement.OpacityProperty, fade);
+        }
+
+        private static void SetTeamFlagText(TextBlock target, Brush flagBrush, string text)
+        {
+            if (target == null) return;
+
+            target.Inlines.Clear();
+            target.Inlines.Add(PlayerPanelText.CreateFlagInline(flagBrush, 27, 24, new Thickness(0, 0, 7, -5)));
+            target.Inlines.Add(new Run(StripTeamMarker(text)));
+        }
+
+        private static void SetMilestoneFlagText(TextBlock target, Brush flagBrush, string teamName, int pointsAway)
+        {
+            if (target == null) return;
+
+            target.Inlines.Clear();
+            target.Inlines.Add(PlayerPanelText.CreateFlagInline(flagBrush, 35, 31, new Thickness(0, 0, 10, -7)));
+            target.Inlines.Add(new Run(string.Format("{0}:  ", teamName)));
+            target.Inlines.Add(PlayerPanelText.CreateOutlinedTextInline(pointsAway.ToString(), 26, new Thickness(1, 0, 3, -2), MilestoneNumberBrush));
+            target.Inlines.Add(new Run(" " + Loc.Get("PtsAway")));
+        }
+
+        private static string StripTeamMarker(string text)
+        {
+            return (text ?? "").Replace("🔴", "").Replace("🔵", "").TrimStart();
         }
 
         private void SetupNumericInputBoxes()
@@ -363,9 +667,10 @@ namespace TABS
 
             var button = new Button
             {
-                Content = Loc.Get("BuyChosenFaction", GetChosenFactionCost(player)),
+                Content = PlayerPanelText.CreateButtonContent(Loc.Get("BuyChosenFaction", GetChosenFactionCost(player))),
                 Background = new SolidColorBrush(Color.FromRgb(110, 169, 200)),
-                FontSize = 11,
+                FontSize = PlayerPanelText.ButtonFontSize,
+                FontWeight = FontWeights.SemiBold,
                 Margin = new Thickness(0)
             };
 
@@ -520,7 +825,7 @@ namespace TABS
             _lastRoundWinner = 0;
             _namesLocked = false; _firstTurnChosen = false;
             _redPoints = 0; _bluePoints = 0;
-            _factionModeEnabled = false; _factionModeLocked = false;
+            _factionModeEnabled = true; _factionModeLocked = false;
             _ft20ModeEnabled = true; _ft10ModeEnabled = false; _ft30ModeEnabled = false; _ft20ModeLocked = false;
             _matchEndPromptSuppressed = false;
             _p1GoldState = _p2GoldState = _p3GoldState = _p4GoldState = 0;
@@ -597,6 +902,7 @@ _p3NextFactionDiscountPct = _p4NextFactionDiscountPct = 0;
             _actionLog = new List<string>();
             _undoStack = new Stack<TwoV2SaveData>();
             _currentSaveName = null;
+            ResetTieTimer();
 
             P1NameBox.Text = Loc.Get("DefaultP1Name");
             P2NameBox.Text = Loc.Get("DefaultP2Name");
@@ -616,6 +922,7 @@ _p3NextFactionDiscountPct = _p4NextFactionDiscountPct = 0;
             _p4LastCalcText = Loc.Get("NoRoundYet");
 
             BuildFT20RewardPool();
+            if (_factionModeEnabled) AssignRandomFactions();
         }
 
         private void BuildFT20RewardPool()
@@ -741,8 +1048,10 @@ _p3NextFactionDiscountPct = _p4NextFactionDiscountPct = 0;
 
             bool matchStarted = _round > 1 || _factionModeLocked || _ft20ModeLocked;
 
-            FirstTurnPromptBorder.Visibility =
+            Visibility firstTurnOverlayVisibility =
                 (!matchStarted && !_firstTurnChosen) ? Visibility.Visible : Visibility.Collapsed;
+            FirstTurnPromptBorder.Visibility = firstTurnOverlayVisibility;
+            FirstTurnDimOverlay.Visibility = firstTurnOverlayVisibility;
 
             UpdateNameEditState();
 
@@ -1091,6 +1400,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             _firstTurnChosen = true;
             TurnOrderText.Text = Loc.Get("TurnOrderRed");
             FirstTurnPromptBorder.Visibility = Visibility.Collapsed;
+            FirstTurnDimOverlay.Visibility = Visibility.Collapsed;
 
             AddGold(1, 40);
             AddGold(2, 40);
@@ -1109,6 +1419,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             _firstTurnChosen = true;
             TurnOrderText.Text = Loc.Get("TurnOrderBlue");
             FirstTurnPromptBorder.Visibility = Visibility.Collapsed;
+            FirstTurnDimOverlay.Visibility = Visibility.Collapsed;
 
             AddGold(3, 40);
             AddGold(4, 40);
@@ -1326,6 +1637,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
             _pendingWinner = 0;
             _round++;
+            ResetTieTimer();
 
             RefreshAllUI();
             ShowMatchEndPromptIfNeeded(previousRedPoints, previousBluePoints);
@@ -1472,8 +1784,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         {
             int redAway = Math.Max(0, _milestoneNextThreshold - _redPoints);
             int blueAway = Math.Max(0, _milestoneNextThreshold - _bluePoints);
-            MilestoneP1Text.Text = $"🔴 {redAway} {Loc.Get("PtsAway")} ({Loc.Get("NextAt")} {_milestoneNextThreshold})";
-            MilestoneP2Text.Text = $"🔵 {blueAway} {Loc.Get("PtsAway")} ({Loc.Get("NextAt")} {_milestoneNextThreshold})";
+            SetMilestoneFlagText(MilestoneP1Text, RedFlagBrush, Loc.Get("RedTeam"), redAway);
+            SetMilestoneFlagText(MilestoneP2Text, BlueFlagBrush, Loc.Get("BlueTeam"), blueAway);
 
             if (_milestoneRewardsRemaining.Count > 0)
             {
@@ -1494,11 +1806,12 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 MilestoneRewardsLeftPanel.Children.Add(new TextBlock
                 {
                     Text = $"{g.Count()} {GetRewardIcon(g.Key)} {LocalizeReward(g.Key)}",
-                    FontSize = 11,
+                    FontSize = 17,
                     Foreground = new SolidColorBrush(
                         (Color)ColorConverter.ConvertFromString("#E8EDF3")),
                     FontWeight = FontWeights.SemiBold,
-                    Margin = new Thickness(0, 0, 0, 3)
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 0, 0, 4)
                 });
             }
         }
@@ -1923,10 +2236,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         private void UpdateFixedSpendButtons()
         {
             int cost = GetSingleTroopMoveCost();
-            P1SingleTroopMoveButton.Content = Loc.Get("SingleTroopMove", cost);
-            P2SingleTroopMoveButton.Content = Loc.Get("SingleTroopMove", cost);
-            P3SingleTroopMoveButton.Content = Loc.Get("SingleTroopMove", cost);
-            P4SingleTroopMoveButton.Content = Loc.Get("SingleTroopMove", cost);
+            PlayerPanelText.SetButtonContent(P1SingleTroopMoveButton, Loc.Get("SingleTroopMove", cost));
+            PlayerPanelText.SetButtonContent(P2SingleTroopMoveButton, Loc.Get("SingleTroopMove", cost));
+            PlayerPanelText.SetButtonContent(P3SingleTroopMoveButton, Loc.Get("SingleTroopMove", cost));
+            PlayerPanelText.SetButtonContent(P4SingleTroopMoveButton, Loc.Get("SingleTroopMove", cost));
             SetCostButtonVisual(P1SingleTroopMoveButton, 1, cost);
             SetCostButtonVisual(P2SingleTroopMoveButton, 2, cost);
             SetCostButtonVisual(P3SingleTroopMoveButton, 3, cost);
@@ -1951,10 +2264,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             P3ReplayButton.IsEnabled = true;
             P4ReplayButton.IsEnabled = true;
 
-            P1ReplayButton.Content = redCanReplay ? Loc.Get("Replay") : Loc.Get("ReplayUsed");
-            P2ReplayButton.Content = redCanReplay ? Loc.Get("Replay") : Loc.Get("ReplayUsed");
-            P3ReplayButton.Content = blueCanReplay ? Loc.Get("Replay") : Loc.Get("ReplayUsed");
-            P4ReplayButton.Content = blueCanReplay ? Loc.Get("Replay") : Loc.Get("ReplayUsed");
+            PlayerPanelText.SetButtonContent(P1ReplayButton, redCanReplay ? Loc.Get("Replay") : Loc.Get("ReplayUsed"));
+            PlayerPanelText.SetButtonContent(P2ReplayButton, redCanReplay ? Loc.Get("Replay") : Loc.Get("ReplayUsed"));
+            PlayerPanelText.SetButtonContent(P3ReplayButton, blueCanReplay ? Loc.Get("Replay") : Loc.Get("ReplayUsed"));
+            PlayerPanelText.SetButtonContent(P4ReplayButton, blueCanReplay ? Loc.Get("Replay") : Loc.Get("ReplayUsed"));
 
             P1ReplayButton.Background = (redCanReplay && GetGold(1) >= 10) ? new SolidColorBrush(Color.FromRgb(110, 169, 200)) : new SolidColorBrush(Color.FromRgb(75, 85, 99));
             P2ReplayButton.Background = (redCanReplay && GetGold(2) >= 10) ? new SolidColorBrush(Color.FromRgb(110, 169, 200)) : new SolidColorBrush(Color.FromRgb(75, 85, 99));
@@ -2204,7 +2517,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
             bool canBuy = !GetBoughtIncomeThisRound(player) && GetGold(player) >= shownCost;
 
-            button.Content = $"{Loc.Get(_ft20ModeEnabled ? "BuyIncomeF" : "BuyIncome").Split('(')[0].Trim()} ({shownCost}g)";
+            PlayerPanelText.SetButtonContent(button, $"{Loc.Get(_ft20ModeEnabled ? "BuyIncomeF" : "BuyIncome").Split('(')[0].Trim()} ({shownCost}g)");
             button.IsEnabled = true;
             button.Background = canBuy
                 ? new SolidColorBrush(Color.FromRgb(110, 169, 200))
@@ -2242,7 +2555,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
             bool canBuy = purchases < max && GetGold(player) >= shownCost;
 
-            button.Content = $"{Loc.Get(_ft20ModeEnabled ? "BuyPermMoveF" : "BuyPermMove").Split('(')[0].Trim()} ({shownCost}g) [{purchases}/{max}]";
+            PlayerPanelText.SetButtonContent(button, $"{Loc.Get(_ft20ModeEnabled ? "BuyPermMoveF" : "BuyPermMove").Split('(')[0].Trim()} ({shownCost}g) [{purchases}/{max}]");
             button.IsEnabled = true;
             button.Background = canBuy
                 ? new SolidColorBrush(Color.FromRgb(110, 169, 200))
@@ -2268,7 +2581,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             int discountPct = GetNextPermMoveDiscountPct(player);
             int shownCost = (int)Math.Ceiling(Math.Max(1m, baseCost * (1m - discountPct / 100m)));
 
-            button.Content = $"Buy perm move +1 ({shownCost}g) [{purchases}/{max}]";
+            PlayerPanelText.SetButtonContent(button, $"Buy perm move +1 ({shownCost}g) [{purchases}/{max}]");
             button.IsEnabled = purchases < max;
 
             TextBlock badge = player == 1 ? P1PermMoveDiscountText
@@ -2317,7 +2630,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
             if (purchases >= AllFactions.Count)
             {
-                button.Content = Loc.Get("MaxFactions");
+                PlayerPanelText.SetButtonContent(button, Loc.Get("MaxFactions"));
                 button.IsEnabled = true;
                 button.Background = new SolidColorBrush(Color.FromRgb(75, 85, 99));
                 badgeBorder.Visibility = Visibility.Collapsed;
@@ -2330,7 +2643,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
             bool canBuy = GetGold(player) >= shownCost;
 
-            button.Content = $"{Loc.Get("BuyFaction").Split('(')[0].Trim()} ({shownCost}g)";
+            PlayerPanelText.SetButtonContent(button, $"{Loc.Get("BuyFaction").Split('(')[0].Trim()} ({shownCost}g)");
             button.IsEnabled = true;
             button.Background = canBuy
                 ? new SolidColorBrush(Color.FromRgb(110, 169, 200))
@@ -2362,7 +2675,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             int cost = GetDisplayedChosenFactionCost(player);
             bool can = GetFactions(player).Count < AllFactions.Count && GetGold(player) >= cost;
 
-            button.Content = Loc.Get("BuyChosenFaction", cost);
+            PlayerPanelText.SetButtonContent(button, Loc.Get("BuyChosenFaction", cost));
             button.IsEnabled = true;
             button.Background = can
                 ? new SolidColorBrush(Color.FromRgb(110, 169, 200))
@@ -2482,8 +2795,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         {
             int redAway = Math.Max(0, _ft20NextMilestone - _redPoints);
             int blueAway = Math.Max(0, _ft20NextMilestone - _bluePoints);
-            MilestoneP1Text.Text = $"🔴 {redAway} {Loc.Get("PtsAway")} ({Loc.Get("NextAt")} {_ft20NextMilestone})";
-            MilestoneP2Text.Text = $"🔵 {blueAway} {Loc.Get("PtsAway")} ({Loc.Get("NextAt")} {_ft20NextMilestone})";
+            SetMilestoneFlagText(MilestoneP1Text, RedFlagBrush, Loc.Get("RedTeam"), redAway);
+            SetMilestoneFlagText(MilestoneP2Text, BlueFlagBrush, Loc.Get("BlueTeam"), blueAway);
 
             if (_ft20RewardsRemaining.Count > 0)
             {
@@ -2504,11 +2817,12 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 MilestoneRewardsLeftPanel.Children.Add(new TextBlock
                 {
                     Text = $"{g.Count()} {GetRewardIcon(g.Key)} {LocalizeReward(g.Key)}",
-                    FontSize = 11,
+                    FontSize = 17,
                     Foreground = new SolidColorBrush(
                         (Color)ColorConverter.ConvertFromString("#E8EDF3")),
                     FontWeight = FontWeights.SemiBold,
-                    Margin = new Thickness(0, 0, 0, 3)
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 0, 0, 4)
                 });
             }
         }
@@ -2820,7 +3134,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             {
                 Text = title,
                 Foreground = Brushes.White,
-                FontSize = 15,
+                FontSize = 17,
                 FontWeight = FontWeights.Bold,
                 Margin = new Thickness(0, 0, 0, 8)
             });
@@ -2829,9 +3143,9 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             {
                 Text = body,
                 Foreground = new SolidColorBrush(Color.FromRgb(220, 226, 235)),
-                FontSize = 12,
+                FontSize = 14,
                 TextWrapping = TextWrapping.Wrap,
-                LineHeight = 18
+                LineHeight = 21
             });
 
             border.Child = stack;
@@ -2856,7 +3170,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             {
                 Text = Loc.Get("GuideMoreTitle"),
                 Foreground = Brushes.White,
-                FontSize = 15,
+                FontSize = 17,
                 FontWeight = FontWeights.Bold,
                 Margin = new Thickness(0, 0, 0, 8)
             });
@@ -2864,9 +3178,9 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             var text = new TextBlock
             {
                 Foreground = new SolidColorBrush(Color.FromRgb(220, 226, 235)),
-                FontSize = 12,
+                FontSize = 14,
                 TextWrapping = TextWrapping.Wrap,
-                LineHeight = 18
+                LineHeight = 21
             };
 
             text.Inlines.Add(new Run(Loc.Get("GuideMoreBody") + " "));
@@ -2999,6 +3313,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             BlueTeamWinsButton.Content = Loc.Get("BlueTeamWins");
             NextRoundButton.Content = Loc.Get("NextRound");
             UndoButton.Content = Loc.Get("Undo");
+            UpdateTieTimerUi();
 
             // Faction/FT20 toggles
             bool factionOn = FactionModeToggleButton.Tag?.ToString() == "True";
@@ -3012,12 +3327,13 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             foreach (int p in new[] { 1, 2, 3, 4 })
             {
                 bool isFT20 = _ft20ModeEnabled;
-                GetBuyIncomeButton(p).Content = Loc.Get(isFT20 ? "BuyIncomeF" : "BuyIncome");
-                GetBuyPermMoveButton(p).Content = Loc.Get(isFT20 ? "BuyPermMoveF" : "BuyPermMove")
-                                                    + $" [{GetPermMovePurchases(p)}/{GetPermMoveMaxPurchases(p)}]";
-                GetBuyFactionButton(p).Content = Loc.Get("BuyFaction");
-                GetSingleTroopMoveButton(p).Content = Loc.Get("SingleTroopMove", GetSingleTroopMoveCost());
-                GetReplayButton(p).Content = Loc.Get("Replay");
+                PlayerPanelText.SetButtonContent(GetBuyIncomeButton(p), Loc.Get(isFT20 ? "BuyIncomeF" : "BuyIncome"));
+                PlayerPanelText.SetButtonContent(
+                    GetBuyPermMoveButton(p),
+                    Loc.Get(isFT20 ? "BuyPermMoveF" : "BuyPermMove") + $" [{GetPermMovePurchases(p)}/{GetPermMoveMaxPurchases(p)}]");
+                PlayerPanelText.SetButtonContent(GetBuyFactionButton(p), Loc.Get("BuyFaction"));
+                PlayerPanelText.SetButtonContent(GetSingleTroopMoveButton(p), Loc.Get("SingleTroopMove", GetSingleTroopMoveCost()));
+                PlayerPanelText.SetButtonContent(GetReplayButton(p), Loc.Get("Replay"));
                 GetSpendButton(p).Content = Loc.Get("Spend");
                 GetBuyTeamButton(p).Content = Loc.Get("BFT");
                 GetSellUnitButton(p).Content = Loc.Get("Sell");
@@ -3025,8 +3341,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             }
 
             // Team points bar
-            LblRedTeamPoints.Text = Loc.Get("RedTeamPoints");
-            LblBlueTeamPoints.Text = Loc.Get("BlueTeamPoints");
+            SetTeamFlagText(LblRedTeamPoints, RedFlagBrush, Loc.Get("RedTeamPoints"));
+            SetTeamFlagText(LblBlueTeamPoints, BlueFlagBrush, Loc.Get("BlueTeamPoints"));
 
             // Per-player static labels
             foreach (int p in new[] { 1, 2, 3, 4 })
@@ -3255,12 +3571,20 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private void Page_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (Keyboard.Modifiers != ModifierKeys.Control) return;
-            var st = LayoutTransform as ScaleTransform;
-            if (st == null) return;
-            double ns = Math.Max(MinZoom, Math.Min(MaxZoom,
-                st.ScaleX + (e.Delta > 0 ? ZoomStep : -ZoomStep)));
-            st.ScaleX = st.ScaleY = ns;
+            if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control) return;
+
+            double current = GetCurrentZoom();
+            double next = ClampZoom(current + (e.Delta > 0 ? ZoomStep : -ZoomStep));
+            Point mouse = e.GetPosition(AppScroll);
+            double contentY = (AppScroll.VerticalOffset + mouse.Y) / current;
+
+            ApplyZoom(next, true, true);
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                AppScroll.ScrollToVerticalOffset(Math.Max(0, contentY * next - mouse.Y));
+                UpdateZoomIndicatorPlacement();
+            }), DispatcherPriority.Loaded);
+
             e.Handled = true;
         }        // ─────────────────────────────────────────────────────────────────
         //  Save / Load / Delete / New Game
@@ -3457,6 +3781,11 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             _ft30ModeEnabled = wasFT30;
             NormalizeMatchModeFlags();
             ResetAllPlayerPanelsForModeSwap();
+            if (!_factionModeEnabled)
+            {
+                _p1Factions.Clear(); _p2Factions.Clear();
+                _p3Factions.Clear(); _p4Factions.Clear();
+            }
 
             if (IsTimedMilestoneMode())
             {
@@ -3750,7 +4079,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             {
                 // Top bar
                 ["MainMenu"] = "← Menú Principal",
-                ["AppTitle"] = "TABS Arena v1.1.4",
+                ["AppTitle"] = "TABS Arena v1.1.5",
 
                 // Overview panel
                 ["OverviewTitle"] = "Resumen 2v2",
@@ -3801,6 +4130,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["RoundControl"] = "Control de Ronda",
                 ["RedTeamWins"] = "Gana Equipo Rojo",
                 ["Tie"] = "Empate",
+                ["StartTieTimer"] = "Iniciar temporizador",
+                ["StopTimer"] = "Detener",
+                ["ResumeTimer"] = "Reanudar",
+                ["RestartTimer"] = "Reiniciar",
                 ["MaxFactions"] = "Máx. facciones",
                 ["BlueTeamWins"] = "Gana Equipo Azul",
                 ["NextRound"] = "Siguiente Ronda",
@@ -4007,7 +4340,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             private static readonly Dictionary<string, string> _ru = new Dictionary<string, string>
             {
                 ["MainMenu"] = "← Главное меню",
-                ["AppTitle"] = "TABS Arena v1.1.4",
+                ["AppTitle"] = "TABS Arena v1.1.5",
                 ["OverviewTitle"] = "Обзор матча 2v2",
                 ["OverviewSub"] = "Настройте всех четырех игроков, затем нажмите Следующий раунд, чтобы применить проценты, этапы и награды.",
                 ["CurrentRound"] = "ТЕКУЩИЙ РАУНД",
@@ -4044,6 +4377,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["RoundControl"] = "Управление раундом",
                 ["RedTeamWins"] = "Победа красных",
                 ["Tie"] = "Ничья",
+                ["StartTieTimer"] = "Запустить таймер",
+                ["StopTimer"] = "Остановить",
+                ["ResumeTimer"] = "Продолжить",
+                ["RestartTimer"] = "Сбросить",
                 ["BlueTeamWins"] = "Победа синих",
                 ["NextRound"] = "Следующий раунд",
                 ["Undo"] = "Отменить",
@@ -4234,7 +4571,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             private static readonly Dictionary<string, string> _zh = new Dictionary<string, string>
             {
                 ["MainMenu"] = "← 主菜单",
-                ["AppTitle"] = "TABS Arena v1.1.4",
+                ["AppTitle"] = "TABS Arena v1.1.5",
                 ["OverviewTitle"] = "2v2 比赛总览",
                 ["OverviewSub"] = "管理四名玩家，然后点击下一回合以应用利息、里程碑和奖励。",
                 ["CurrentRound"] = "当前回合",
@@ -4271,6 +4608,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["RoundControl"] = "回合控制",
                 ["RedTeamWins"] = "红队获胜",
                 ["Tie"] = "平局",
+                ["StartTieTimer"] = "开始平局计时器",
+                ["StopTimer"] = "停止计时器",
+                ["ResumeTimer"] = "继续计时器",
+                ["RestartTimer"] = "重置计时器",
                 ["BlueTeamWins"] = "蓝队获胜",
                 ["NextRound"] = "下一回合",
                 ["Undo"] = "撤销",
@@ -4474,7 +4815,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             private static readonly Dictionary<string, string> _defaults = new Dictionary<string, string>
             {
                 ["MainMenu"] = "← Main Menu",
-                ["AppTitle"] = "TABS Arena v1.1.4",
+                ["AppTitle"] = "TABS Arena v1.1.5",
                 ["OverviewTitle"] = "2v2 Match Overview",
                 ["OverviewSub"] = "Manage all four players then press Next Round to apply interest, milestones, rewards.",
                 ["CurrentRound"] = "CURRENT ROUND",
@@ -4511,6 +4852,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["RoundControl"] = "Round Control",
                 ["RedTeamWins"] = "Red Team Wins",
                 ["Tie"] = "Tie",
+                ["StartTieTimer"] = "Start Tie Timer",
+                ["StopTimer"] = "Stop Timer",
+                ["ResumeTimer"] = "Resume Timer",
+                ["RestartTimer"] = "Restart Timer",
                 ["BlueTeamWins"] = "Blue Team Wins",
                 ["NextRound"] = "Next Round",
                 ["Undo"] = "Undo",

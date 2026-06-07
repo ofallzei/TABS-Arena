@@ -350,7 +350,7 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                   HorizontalScrollBarVisibility="Disabled"
                   PanningMode="VerticalOnly"
                   Focusable="False">
-            <Grid Margin="14">
+            <Grid x:Name="RootScaleHost" Margin="14">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -414,7 +414,7 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                     </Button>
 
                     <TextBlock x:Name="AppTitleText"
-                               Text="TABS Arena v1.1.4"
+                               Text="TABS Arena v1.1.5"
                                FontSize="26"
                                FontWeight="SemiBold"
                                Foreground="White"
@@ -506,29 +506,6 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                             </Border>
                         </WrapPanel>
 
-                        <Border x:Name="FirstTurnPromptBorder" Background="#171B21"
-                                CornerRadius="14" Padding="14" Margin="0,10,0,0"
-                                Visibility="Visible">
-                            <StackPanel>
-                                <TextBlock x:Name="LblWhichTeamFirst" Text="Which team is going first this match?"
-                                           FontSize="14" FontWeight="Bold" Margin="0,0,0,8"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="1*"/>
-                                        <ColumnDefinition Width="1*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Button x:Name="RedTeamFirstTurnButton" Grid.Column="0"
-                                            Content="Red Team Goes First"
-                                            Margin="0,0,8,0" Background="#7A3A3A"
-                                            Click="RedTeamFirstTurnButton_Click"/>
-                                    <Button x:Name="BlueTeamFirstTurnButton" Grid.Column="1"
-                                            Content="Blue Team Goes First"
-                                            Margin="8,0,0,0" Background="#31556F"
-                                            Click="BlueTeamFirstTurnButton_Click"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-
                         <Border Background="#1A1D23" CornerRadius="14"
                                 Padding="14" Margin="0,10,0,0">
                             <StackPanel>
@@ -549,42 +526,56 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="1.2*"/>
-                                    <ColumnDefinition Width="1*"/>
                                     <ColumnDefinition Width="1.2*"/>
+                                    <ColumnDefinition Width="1*"/>
                                 </Grid.ColumnDefinitions>
                                 <Border Grid.Column="0" Background="#1A1D23" CornerRadius="14"
                                         Padding="14" Margin="0,0,8,0">
                                     <StackPanel>
                                         <TextBlock x:Name="LblMilestoneProgress" Text="MILESTONE PROGRESS" Foreground="#9AA3AF"
-                                                   FontSize="11" FontWeight="Bold" Margin="0,0,0,8"/>
+                                                   FontSize="18" FontWeight="Bold" Margin="0,0,0,18"/>
                                         <TextBlock x:Name="MilestoneP1Text"
                                                    Text="Red:  — pts away  (next at —)"
-                                                   FontSize="13" FontWeight="SemiBold"
-                                                   Foreground="#E8EDF3" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                                   FontSize="26" FontWeight="Bold"
+                                                   Foreground="#E8EDF3" TextWrapping="Wrap" Margin="0,0,0,14"/>
                                         <TextBlock x:Name="MilestoneP2Text"
                                                    Text="Blue:  — pts away  (next at —)"
-                                                   FontSize="13" FontWeight="SemiBold"
+                                                   FontSize="26" FontWeight="Bold"
                                                    Foreground="#E8EDF3" TextWrapping="Wrap"/>
                                     </StackPanel>
+                                </Border>
+                                <Border Grid.Column="2" Background="#1A2030" CornerRadius="14"
+                                        Padding="14">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock x:Name="LblNextReward" Text="NEXT REWARD" Foreground="#9AA3AF"
+                                                   FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                                        <StackPanel Grid.Row="1"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Margin="0,2,0,0">
+                                            <TextBlock x:Name="MilestoneNextRewardIcon"
+                                                       Text="⚔" FontSize="54" FontWeight="Bold"
+                                                       Foreground="#6EB6DA"
+                                                       HorizontalAlignment="Center"
+                                                       TextAlignment="Center"
+                                                       Margin="0,0,0,6"/>
+                                            <TextBlock x:Name="MilestoneNextRewardText"
+                                                       Text="—" FontSize="20" FontWeight="Bold"
+                                                       Foreground="#6EB6DA" TextWrapping="Wrap"
+                                                       TextAlignment="Center"
+                                                       HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
                                 </Border>
                                 <Border Grid.Column="1" Background="#1A1D23" CornerRadius="14"
                                         Padding="14" Margin="0,0,8,0">
                                     <StackPanel>
-                                        <TextBlock x:Name="LblNextReward" Text="NEXT REWARD" Foreground="#9AA3AF"
-                                                   FontSize="11" FontWeight="Bold" Margin="0,0,0,8"/>
-                                        <TextBlock x:Name="MilestoneNextRewardIcon"
-                                                   Text="⚔" FontSize="22"
-                                                   Foreground="#6EB6DA" Margin="0,0,0,4"/>
-                                        <TextBlock x:Name="MilestoneNextRewardText"
-                                                   Text="—" FontSize="14" FontWeight="Bold"
-                                                   Foreground="#6EB6DA" TextWrapping="Wrap"/>
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Column="2" Background="#1A1D23" CornerRadius="14"
-                                        Padding="14">
-                                    <StackPanel>
                                         <TextBlock x:Name="LblRewardsLeft" Text="POSSIBLE REWARDS LEFT" Foreground="#9AA3AF"
-                                                   FontSize="11" FontWeight="Bold" Margin="0,0,0,8"/>
+                                                   FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
                                         <StackPanel x:Name="MilestoneRewardsLeftPanel"/>
                                     </StackPanel>
                                 </Border>
@@ -607,8 +598,51 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                                 <StackPanel x:Name="ActionLogPanel" Height="420"/>
                             </StackPanel>
                         </Border>
-                        <TextBlock x:Name="LblRoundControl" Text="Round Control" FontSize="18" FontWeight="Bold" Margin="0,12,0,0"/>
-                        <Grid Margin="0,10,0,0">
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LblRoundControl" Text="Round Control" FontSize="18" FontWeight="Bold"/>
+                            <WrapPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Border Background="#171B21"
+                                        BorderBrush="#34404D"
+                                        BorderThickness="1"
+                                        CornerRadius="10"
+                                        Width="58"
+                                        Height="32"
+                                        Margin="10,0,5,0">
+                                    <TextBlock x:Name="TieTimerText"
+                                               Text="2:00"
+                                               FontSize="15"
+                                               FontWeight="Bold"
+                                               Foreground="#6EB6DA"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                                <Button x:Name="TieTimerToggleButton"
+                                        Content="Start Tie Timer"
+                                        Height="32"
+                                        MinWidth="118"
+                                        FontSize="11"
+                                        Padding="8,0"
+                                        Margin="0,0,5,0"
+                                        Background="#313843"
+                                        Foreground="#7FC0E0"
+                                        Click="TieTimerToggleButton_Click"/>
+                                <Button x:Name="TieTimerRestartButton"
+                                        Content="Restart Timer"
+                                        Height="32"
+                                        MinWidth="104"
+                                        FontSize="11"
+                                        Padding="8,0"
+                                        Margin="0"
+                                        Background="#4B5563"
+                                        Foreground="#E8EDF3"
+                                        Click="TieTimerRestartButton_Click"/>
+                            </WrapPanel>
+                        </Grid>
+                        <Grid Margin="0,8,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1*"/>
                                 <ColumnDefinition Width="1*"/>
@@ -652,7 +686,7 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                 <Border Grid.Column="0" Background="#4A1F1F" CornerRadius="14"
                         Padding="12" Margin="0,0,6,0">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock x:Name="LblRedTeamPoints" Text="🔴  RED TEAM POINTS: " FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="LblRedTeamPoints" Text="⚑  RED TEAM POINTS: " FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
                         <TextBlock x:Name="RedTeamPointsDisplay" Text="0" FontSize="20"
                                    FontWeight="Bold" Foreground="#FF8B8B" VerticalAlignment="Center"/>
                     </StackPanel>
@@ -660,7 +694,7 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                 <Border Grid.Column="1" Background="#1E3345" CornerRadius="14"
                         Padding="12" Margin="3,0,0,0">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock x:Name="LblBlueTeamPoints" Text="🔵  BLUE TEAM POINTS: " FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="LblBlueTeamPoints" Text="⚑  BLUE TEAM POINTS: " FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
                         <TextBlock x:Name="BlueTeamPointsDisplay" Text="0" FontSize="20"
                                    FontWeight="Bold" Foreground="#86BFFF" VerticalAlignment="Center"/>
                     </StackPanel>
@@ -1533,6 +1567,50 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                         </Border>
                     </StackPanel>
                 </Border>
+
+                <Border x:Name="FirstTurnDimOverlay"
+                        Grid.ColumnSpan="4"
+                        Background="#AA05070A"
+                        CornerRadius="18"
+                        Visibility="Collapsed"
+                        Panel.ZIndex="90"/>
+                <Border x:Name="FirstTurnPromptBorder"
+                        Grid.ColumnSpan="4"
+                        Background="#171B21"
+                        BorderBrush="#323A46"
+                        BorderThickness="1.5"
+                        CornerRadius="16"
+                        Padding="20"
+                        Margin="64"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        Visibility="Collapsed"
+                        Panel.ZIndex="100">
+                    <StackPanel>
+                        <TextBlock x:Name="LblWhichTeamFirst" Text="Which team is going first this match?"
+                                   FontSize="18" FontWeight="Bold" Margin="0,0,0,14"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="RedTeamFirstTurnButton" Grid.Column="0"
+                                    Content="Red Team Goes First"
+                                    Height="64"
+                                    FontSize="24"
+                                    FontWeight="Bold"
+                                    Margin="0,0,10,0" Background="#7A3A3A"
+                                    Click="RedTeamFirstTurnButton_Click"/>
+                            <Button x:Name="BlueTeamFirstTurnButton" Grid.Column="1"
+                                    Content="Blue Team Goes First"
+                                    Height="64"
+                                    FontSize="24"
+                                    FontWeight="Bold"
+                                    Margin="10,0,0,0" Background="#31556F"
+                                    Click="BlueTeamFirstTurnButton_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
             </Grid>
 
             <Popup x:Name="IncomeNoticePopup" Grid.RowSpan="4"
@@ -1579,14 +1657,14 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
                                         x:Name="GuideBackButton"
                                         Content="← Back"
                                         Height="32" Padding="14,0"
-                                        FontSize="12" FontWeight="SemiBold"
+                                        FontSize="13" FontWeight="SemiBold"
                                         Background="#313843" Foreground="#7FC0E0"
                                         BorderThickness="0"
                                         Click="GuideBackButton_Click"/>
                                 <TextBlock x:Name="GuideTitleText"
                                            Grid.Column="0" Grid.ColumnSpan="2"
                                            Text="2v2 Guide"
-                                           FontSize="18" FontWeight="Bold"
+                                           FontSize="20" FontWeight="Bold"
                                            Foreground="White"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"/>
@@ -1885,5 +1963,38 @@ Background="#31556F" Click="BlueTeamWins_Click"/>
 
         </Grid>
         </ScrollViewer>
+        <Popup x:Name="ZoomIndicatorPopup"
+               Placement="Relative"
+               PlacementTarget="{Binding ElementName=AppScroll}"
+               StaysOpen="True"
+               AllowsTransparency="True"
+               IsOpen="False"
+               Focusable="False"
+               IsHitTestVisible="False">
+            <Border x:Name="ZoomIndicator"
+                    Background="#E61A1D23"
+                    BorderBrush="#3F5166"
+                    BorderThickness="1.5"
+                    CornerRadius="12"
+                    Padding="10,6">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Path Data="M 8 2 A 6 6 0 1 0 8 14 A 6 6 0 1 0 8 2 M 12.5 12.5 L 18 18"
+                          Width="16"
+                          Height="16"
+                          Stretch="Uniform"
+                          Stroke="#66DDEB"
+                          StrokeThickness="2"
+                          StrokeStartLineCap="Round"
+                          StrokeEndLineCap="Round"
+                          Margin="0,0,7,0"/>
+                    <TextBlock x:Name="ZoomIndicatorText"
+                               Text="100%"
+                               FontSize="13"
+                               FontWeight="Bold"
+                               Foreground="#F2F4F7"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Popup>
     </Grid>
 </Page>

@@ -231,7 +231,7 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
 
                 <TextBlock x:Name="VersionText"
                            Grid.Row="2"
-                           Text="TABS Arena v1.1.4"
+                           Text="TABS Arena v1.1.5"
                            Foreground="#6B7280"
                            FontSize="12"
                            FontWeight="SemiBold"

@@ -22,6 +22,7 @@ namespace TABS
         public static TwoVTwoGameMode.Loc.Language Language { get; set; } = TwoVTwoGameMode.Loc.Language.English;
         public static bool SoundsEnabled { get; set; } = true;
         public static double SoundVolume { get; set; } = 1.0;
+        public static double ZoomScale { get; set; } = 1.0;
 
         public static void Load()
         {
@@ -51,6 +52,10 @@ namespace TABS
                     if (parts[0] == "SoundVolume" &&
                         double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out double soundVolume))
                         SoundVolume = Clamp(soundVolume, 0.0, 1.0);
+
+                    if (parts[0] == "ZoomScale" &&
+                        double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out double zoomScale))
+                        ZoomScale = Clamp(zoomScale, 0.5, 2.0);
                 }
             }
             catch { }
@@ -66,7 +71,8 @@ namespace TABS
                     "WindowMode=" + WindowMode,
                     "Language=" + Language,
                     "SoundsEnabled=" + SoundsEnabled,
-                    "SoundVolume=" + SoundVolume.ToString(CultureInfo.InvariantCulture)
+                    "SoundVolume=" + SoundVolume.ToString(CultureInfo.InvariantCulture),
+                    "ZoomScale=" + ZoomScale.ToString(CultureInfo.InvariantCulture)
                 });
             }
             catch { }
