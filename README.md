@@ -36,9 +36,9 @@ Important: Read the latest release notes before updating. Some larger updates ma
 Factions : NEW UNITS | FALLZ , NEW UNITS 2 | FALLZ , REBALANCED | FALLZ , Maps : 2v2 Floating Arena | Fallz , 
 2v2 Bridges | Fallz , 2v2 more open | Fallz , 2V2 | Fallz .
 
-<img width="1057" height="359" alt="image" src="https://github.com/user-attachments/assets/59f983e0-5f0e-48fe-9940-ae718a280da9" />
+<img width="1016" height="278" alt="image" src="https://github.com/user-attachments/assets/3b309227-142d-46ee-9b28-8a040d3dab5a" />
 
-<img width="1405" height="336" alt="image" src="https://github.com/user-attachments/assets/e87291e7-2a60-491e-8805-fed123d3ded7" />
+<img width="1362" height="273" alt="image" src="https://github.com/user-attachments/assets/6afdeeae-87ea-4fc7-9db9-a52cb6a30d85" />
 
 
 2. Make sure to read the workshop descriptions for the maps, since some maps have specific instructions on how they should be played.
