@@ -31,6 +31,16 @@ Important: Read the latest release notes before updating. Some larger updates ma
 
 1. It is strongly recommended that you download and subscribe to all workshop maps and factions involving the name `Fallz` for the best experience.
 
+- All the real factions and maps -
+
+Factions : NEW UNITS | FALLZ , NEW UNITS 2 | FALLZ , REBALANCED | FALLZ , Maps : 2v2 Floating Arena | Fallz , 
+2v2 Bridges | Fallz , 2v2 more open | Fallz , 2V2 | Fallz .
+
+<img width="1057" height="359" alt="image" src="https://github.com/user-attachments/assets/59f983e0-5f0e-48fe-9940-ae718a280da9" />
+
+<img width="1405" height="336" alt="image" src="https://github.com/user-attachments/assets/e87291e7-2a60-491e-8805-fed123d3ded7" />
+
+
 2. Make sure to read the workshop descriptions for the maps, since some maps have specific instructions on how they should be played.
 
 3. At least one player must own TABS on Steam and act as the host.
