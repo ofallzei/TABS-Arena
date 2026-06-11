@@ -249,19 +249,15 @@ Income decay reduces the price of buying income by a percentage every round that
 
 Once income is bought, the decay resets to `0%`.
 
--Income Decay Scaling
+Income Decay Scaling
 
-In FT30, income decay activates after not buying income for 4 rounds in a row.
+It starts at a discount and increases every round after that.
 
-It starts at a `2%` discount and increases by another `2%` every round after that.
+In FT30, income decay activates after not buying income for 4 rounds in a row.  2% every round. 
 
-In FT20, income decay activates after not buying income for 3 rounds in a row.
+In FT20, income decay activates after not buying income for 3 rounds in a row.  6% every round. 
 
-It increases by `4%` every round after that.
-
-In FT13, income decay activates after not buying income for 3 rounds in a row.
-
-It increases by `10%` every round after that.
+In FT13,  income decay activates after not buying income for 3 rounds in a row. 10% every round.
 
 -Match Rewards
 
