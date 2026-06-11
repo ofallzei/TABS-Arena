@@ -440,7 +440,7 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                     </Button>
 
                     <TextBlock x:Name="AppTitleText"
-                               Text="TABS Arena v1.1.5"
+                               Text="TABS Arena v1.1.6"
                                FontSize="26"
                                FontWeight="SemiBold"
                                Foreground="White"
@@ -495,9 +495,9 @@ MouseLeftButtonUp="CustomTitleBar_MouseLeftButtonUp">
                             </Border>
                             <Border Width="190" Height="90" Background="{StaticResource Panel2Bg}" CornerRadius="14" Padding="12" Margin="0,0,0,10">
                                 <StackPanel>
-                                    <TextBlock x:Name="LblFT10Mode" Text="FT10 MODE" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="LblFT10Mode" Text="FT13 MODE" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,8"/>
                                     <CheckBox x:Name="Ft10ModeToggle"
-                      Content="FT10 Mode: OFF"
+                      Content="FT13 Mode: OFF"
                       Click="Ft10ModeToggle_Click"/>
                                 </StackPanel>
                             </Border>

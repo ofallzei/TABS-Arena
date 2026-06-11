@@ -374,7 +374,7 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private static readonly Dictionary<string, string> En = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v1.1.5",
+            ["AppTitle"] = "TABS Arena v1.1.6",
             ["Settings"] = "Settings",
             ["Guide"] = "1v1 Guide",
             ["Back"] = "← Back",
@@ -396,7 +396,7 @@ private static readonly string[] BaseRewardPool = new string[]
             ["GuideSavingTitle"] = "Saving",
             ["GuideSavingBody"] = "If you cannot finish a match, save in the app. Also save the battle inside TABS using Save Battle and enable Save Friendly Units.",
             ["GuideEconomyTitle"] = "Economy",
-            ["GuideEconomyBody"] = "Interest gives +10 gold for every 50 gold a player has, capped at +100. Buying income gives +10 in FT30 and +13 in FT20. FT10 removes income purchases and income decay.",
+            ["GuideEconomyBody"] = "Interest gives +10 gold for every 50 gold a player has, capped at +100. Buying income gives +10 in FT30, +13 in FT20, and +18 in FT13. FT13 income starts at 140 gold and gains 10% decay each round after 2 missed rounds.",
             ["GuideMoreTitle"] = "More Rules",
             ["GuideMoreBody"] = "To learn more about the rules, visit",
             ["ReplayUsed"] = "Replay used",
@@ -419,9 +419,9 @@ private static readonly string[] BaseRewardPool = new string[]
             ["FT30Mode"] = "FT30 MODE",
             ["FT30ModeOff"] = "FT30 Mode: OFF",
             ["FT30ModeOn"] = "FT30 Mode: ON",
-            ["FT10Mode"] = "FT10 MODE",
-            ["FT10ModeOff"] = "FT10 Mode: OFF",
-            ["FT10ModeOn"] = "FT10 Mode: ON",
+            ["FT10Mode"] = "FT13 MODE",
+            ["FT10ModeOff"] = "FT13 Mode: OFF",
+            ["FT10ModeOn"] = "FT13 Mode: ON",
             ["WhichPlayerFirst"] = "Which player is doing their turn first?",
             ["MatchSaves"] = "MATCH SAVES",
             ["Save"] = "💾 Save",
@@ -468,6 +468,7 @@ private static readonly string[] BaseRewardPool = new string[]
             ["PanelSub"] = "Gold, points, upgrades, and spending controls.",
             ["BuyIncome"] = "Buy income +10 ({0})",
             ["BuyIncomeF"] = "Buy income +13 ({0})",
+            ["BuyIncomeFT13"] = "Buy income +18 ({0})",
             ["BuyPermMove"] = "Buy perm move +1 ({0})",
             ["BuyFaction"] = "Buy faction ({0})",
             ["BuyChosenFaction"] = "Buy chosen faction ({0})",
@@ -529,8 +530,8 @@ private static readonly string[] BaseRewardPool = new string[]
             ["LogFactionModeOff"] = "Faction mode disabled.",
             ["LogFT30ModeOn"] = "FT30 mode enabled. Player panels reset.",
             ["LogFT30ModeOff"] = "FT30 mode disabled. FT20 mode selected.",
-            ["LogFT10ModeOn"] = "FT10 mode enabled. Players start with 1200 gold and income is disabled.",
-            ["LogFT10ModeOff"] = "FT10 mode disabled. FT20 mode selected.",
+            ["LogFT10ModeOn"] = "FT13 mode enabled. First to 13 with income enabled.",
+            ["LogFT10ModeOff"] = "FT13 mode disabled. FT20 mode selected.",
             ["LogGainedFaction"] = "{0} gained faction: {1}.",
             ["NoticeGainedFaction"] = "{0} gained {1}.",
             ["LogBoughtIncome"] = "{0} bought income +{1} for {2} gold.",
@@ -585,7 +586,7 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private static readonly Dictionary<string, string> Es = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v1.1.5",
+            ["AppTitle"] = "TABS Arena v1.1.6",
             ["Settings"] = "Ajustes",
             ["Guide"] = "Guía 1v1",
             ["Back"] = "← Volver",
@@ -607,7 +608,7 @@ private static readonly string[] BaseRewardPool = new string[]
             ["GuideSavingTitle"] = "Guardado",
             ["GuideSavingBody"] = "Si no pueden terminar la partida, guarda en la app. También guarda la batalla dentro de TABS usando Save Battle y activa Save Friendly Units.",
             ["GuideEconomyTitle"] = "Economía",
-            ["GuideEconomyBody"] = "El interés da +10 de oro por cada 50 de oro que tenga un jugador, con máximo de +100. Comprar ingreso da +10 en FT30 y +13 en FT20. FT10 elimina compras de ingreso y decaimiento de ingreso.",
+            ["GuideEconomyBody"] = "El interés da +10 de oro por cada 50 de oro que tenga un jugador, con máximo de +100. Comprar ingreso da +10 en FT30, +13 en FT20 y +18 en FT13. En FT13 empieza en 140 de oro y gana 10% de decaimiento por ronda después de 2 rondas sin comprar.",
             ["GuideMoreTitle"] = "Más reglas",
             ["GuideMoreBody"] = "Para aprender más sobre las reglas, visita",
             ["ReplayUsed"] = "Replay usado",
@@ -630,9 +631,9 @@ private static readonly string[] BaseRewardPool = new string[]
             ["FT30Mode"] = "MODO FT30",
             ["FT30ModeOff"] = "Modo FT30: OFF",
             ["FT30ModeOn"] = "Modo FT30: ON",
-            ["FT10Mode"] = "MODO FT10",
-            ["FT10ModeOff"] = "Modo FT10: OFF",
-            ["FT10ModeOn"] = "Modo FT10: ON",
+            ["FT10Mode"] = "MODO FT13",
+            ["FT10ModeOff"] = "Modo FT13: OFF",
+            ["FT10ModeOn"] = "Modo FT13: ON",
             ["WhichPlayerFirst"] = "¿Qué jugador hace su turno primero?",
             ["MatchSaves"] = "GUARDADOS",
             ["Save"] = "💾 Guardar",
@@ -679,6 +680,7 @@ private static readonly string[] BaseRewardPool = new string[]
             ["PanelSub"] = "Oro, puntos, mejoras y controles de gasto.",
             ["BuyIncome"] = "Comprar ingreso +10 ({0})",
             ["BuyIncomeF"] = "Comprar ingreso +13 ({0})",
+            ["BuyIncomeFT13"] = "Comprar ingreso +18 ({0})",
             ["BuyPermMove"] = "Comprar mv perm +1 ({0})",
             ["BuyFaction"] = "Comprar facción ({0})",
             ["BuyChosenFaction"] = "Comprar facción elegida ({0})",
@@ -740,8 +742,8 @@ private static readonly string[] BaseRewardPool = new string[]
             ["LogFactionModeOff"] = "Modo Facción desactivado.",
             ["LogFT30ModeOn"] = "Modo FT30 activado. Paneles reiniciados.",
             ["LogFT30ModeOff"] = "Modo FT30 desactivado. Modo FT20 seleccionado.",
-            ["LogFT10ModeOn"] = "Modo FT10 activado. Los jugadores empiezan con 1200 de oro y el ingreso está desactivado.",
-            ["LogFT10ModeOff"] = "Modo FT10 desactivado. Modo FT20 seleccionado.",
+            ["LogFT10ModeOn"] = "Modo FT13 activado. Primero a 13 con ingreso activado.",
+            ["LogFT10ModeOff"] = "Modo FT13 desactivado. Modo FT20 seleccionado.",
             ["LogGainedFaction"] = "{0} obtuvo facción: {1}.",
             ["NoticeGainedFaction"] = "{0} obtuvo {1}.",
             ["LogBoughtIncome"] = "{0} compró ingreso +{1} por {2} de oro.",
@@ -796,7 +798,7 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private static readonly Dictionary<string, string> Ru = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v1.1.5",
+            ["AppTitle"] = "TABS Arena v1.1.6",
             ["Settings"] = "Настройки",
             ["Guide"] = "Руководство 1v1",
             ["Back"] = "← Назад",
@@ -818,7 +820,7 @@ private static readonly string[] BaseRewardPool = new string[]
             ["GuideSavingTitle"] = "Сохранение",
             ["GuideSavingBody"] = "Если вы не можете закончить матч, сохраните его в приложении. Также сохраните битву внутри TABS через Save Battle и включите Save Friendly Units.",
             ["GuideEconomyTitle"] = "Экономика",
-            ["GuideEconomyBody"] = "Проценты дают +10 золота за каждые 50 золота у игрока, максимум +100. Покупка дохода дает +10 в FT30 и +13 в FT20. FT10 убирает покупки дохода и спад дохода.",
+            ["GuideEconomyBody"] = "Проценты дают +10 золота за каждые 50 золота у игрока, максимум +100. Покупка дохода дает +10 в FT30, +13 в FT20 и +18 в FT13. В FT13 доход стоит от 140 золота и получает спад 10% за раунд после 2 пропущенных раундов без покупки.",
             ["GuideMoreTitle"] = "Больше правил",
             ["GuideMoreBody"] = "Чтобы узнать больше о правилах, посетите",
             ["ReplayUsed"] = "Повтор использован",
@@ -841,9 +843,9 @@ private static readonly string[] BaseRewardPool = new string[]
             ["FT30Mode"] = "РЕЖИМ FT30",
             ["FT30ModeOff"] = "FT30: ВЫКЛ",
             ["FT30ModeOn"] = "FT30: ВКЛ",
-            ["FT10Mode"] = "РЕЖИМ FT10",
-            ["FT10ModeOff"] = "FT10: ВЫКЛ",
-            ["FT10ModeOn"] = "FT10: ВКЛ",
+            ["FT10Mode"] = "РЕЖИМ FT13",
+            ["FT10ModeOff"] = "FT13: ВЫКЛ",
+            ["FT10ModeOn"] = "FT13: ВКЛ",
             ["WhichPlayerFirst"] = "Какой игрок ходит первым?",
             ["MatchSaves"] = "СОХРАНЕНИЯ",
             ["Save"] = "💾 Сохранить",
@@ -890,6 +892,7 @@ private static readonly string[] BaseRewardPool = new string[]
             ["PanelSub"] = "Золото, очки, улучшения и управление тратами.",
             ["BuyIncome"] = "Купить доход +10 ({0})",
             ["BuyIncomeF"] = "Купить доход +13 ({0})",
+            ["BuyIncomeFT13"] = "Купить доход +18 ({0})",
             ["BuyPermMove"] = "Купить пост. ход +1 ({0})",
             ["BuyFaction"] = "Купить фракцию ({0})",
             ["BuyChosenFaction"] = "Купить выбранную фракцию ({0})",
@@ -951,8 +954,8 @@ private static readonly string[] BaseRewardPool = new string[]
             ["LogFactionModeOff"] = "Режим фракций выключен.",
             ["LogFT30ModeOn"] = "Режим FT30 включен. Панели игроков сброшены.",
             ["LogFT30ModeOff"] = "Режим FT30 выключен. Выбран режим FT20.",
-            ["LogFT10ModeOn"] = "Режим FT10 включен. Игроки начинают с 1200 золота, доход выключен.",
-            ["LogFT10ModeOff"] = "Режим FT10 выключен. Выбран режим FT20.",
+            ["LogFT10ModeOn"] = "Режим FT13 включен. Игра до 13, доход включен.",
+            ["LogFT10ModeOff"] = "Режим FT13 выключен. Выбран режим FT20.",
             ["LogGainedFaction"] = "{0} получил фракцию: {1}.",
             ["NoticeGainedFaction"] = "{0} получил {1}.",
             ["LogBoughtIncome"] = "{0} купил доход +{1} за {2} золота.",
@@ -1007,7 +1010,7 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private static readonly Dictionary<string, string> Zh = new Dictionary<string, string>
         {
-            ["AppTitle"] = "TABS Arena v1.1.5",
+            ["AppTitle"] = "TABS Arena v1.1.6",
             ["Settings"] = "设置",
             ["Guide"] = "1v1 指南",
             ["Back"] = "← 返回",
@@ -1029,7 +1032,7 @@ private static readonly string[] BaseRewardPool = new string[]
             ["GuideSavingTitle"] = "保存",
             ["GuideSavingBody"] = "如果无法打完比赛，请在应用中保存。也要在 TABS 内使用 Save Battle 保存战斗，并启用 Save Friendly Units。",
             ["GuideEconomyTitle"] = "经济",
-            ["GuideEconomyBody"] = "利息按玩家每 50 金币给予 +10 金币，最高 +100。购买收入在 FT30 中给予 +10，在 FT20 中给予 +13。FT10 移除收入购买和收入衰减。",
+            ["GuideEconomyBody"] = "利息按玩家每 50 金币给予 +10 金币，最高 +100。购买收入在 FT30 中给予 +10，在 FT20 中给予 +13，在 FT13 中给予 +18。FT13 收入起价 140 金币，连续 2 回合未购买后每回合衰减 10%。",
             ["GuideMoreTitle"] = "更多规则",
             ["GuideMoreBody"] = "想了解更多规则，请访问",
             ["ReplayUsed"] = "重赛已用",
@@ -1052,9 +1055,9 @@ private static readonly string[] BaseRewardPool = new string[]
             ["FT30Mode"] = "FT30 模式",
             ["FT30ModeOff"] = "FT30：关",
             ["FT30ModeOn"] = "FT30：开",
-            ["FT10Mode"] = "FT10 模式",
-            ["FT10ModeOff"] = "FT10：关",
-            ["FT10ModeOn"] = "FT10：开",
+            ["FT10Mode"] = "FT13 模式",
+            ["FT10ModeOff"] = "FT13：关",
+            ["FT10ModeOn"] = "FT13：开",
             ["WhichPlayerFirst"] = "哪名玩家先行动？",
             ["MatchSaves"] = "比赛存档",
             ["Save"] = "💾 保存",
@@ -1101,6 +1104,7 @@ private static readonly string[] BaseRewardPool = new string[]
             ["PanelSub"] = "金币、分数、升级和支出控制。",
             ["BuyIncome"] = "购买收入 +10 ({0})",
             ["BuyIncomeF"] = "购买收入 +13 ({0})",
+            ["BuyIncomeFT13"] = "购买收入 +18 ({0})",
             ["BuyPermMove"] = "购买永久移动 +1 ({0})",
             ["BuyFaction"] = "购买阵营 ({0})",
             ["BuyChosenFaction"] = "购买指定阵营 ({0})",
@@ -1162,8 +1166,8 @@ private static readonly string[] BaseRewardPool = new string[]
             ["LogFactionModeOff"] = "阵营模式已关闭。",
             ["LogFT30ModeOn"] = "FT30 模式已开启。玩家面板已重置。",
             ["LogFT30ModeOff"] = "FT30 模式已关闭。已选择 FT20 模式。",
-            ["LogFT10ModeOn"] = "FT10 模式已开启。玩家以 1200 金币开始，收入已禁用。",
-            ["LogFT10ModeOff"] = "FT10 模式已关闭。已选择 FT20 模式。",
+            ["LogFT10ModeOn"] = "FT13 模式已开启。先到 13，收入已启用。",
+            ["LogFT10ModeOff"] = "FT13 模式已关闭。已选择 FT20 模式。",
             ["LogGainedFaction"] = "{0} 获得阵营：{1}。",
             ["NoticeGainedFaction"] = "{0} 获得了 {1}。",
             ["LogBoughtIncome"] = "{0} 以 {2} 金币购买收入 +{1}。",
@@ -1583,8 +1587,8 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private int GetRoundRewardTier()
         {
-            if (ft10ModeEnabled) return ((round - 1) / 2) * 40;
-            if (ft20ModeEnabled) return ((round - 1) / 3) * 15;
+            if (ft10ModeEnabled) return ((round - 1) / 2) * 35;
+            if (ft20ModeEnabled) return ((round - 1) / 3) * 20;
             return ((round - 1) / 5) * 10;
         }
 
@@ -1609,14 +1613,14 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private int GetMilestoneStep()
         {
-            if (ft10ModeEnabled) return 2;
+            if (ft10ModeEnabled) return 3;
             if (ft20ModeEnabled) return 4;
             return 5;
         }
 
         private int GetPermMoveCost()
         {
-            if (ft10ModeEnabled) return 125;
+            if (ft10ModeEnabled) return 150;
             if (ft20ModeEnabled) return 175;
             return 200;
         }
@@ -1628,19 +1632,30 @@ private static readonly string[] BaseRewardPool = new string[]
 
         private bool IsIncomeAvailable()
         {
-            return !ft10ModeEnabled;
+            return true;
+        }
+
+        private int GetIncomeGain()
+        {
+            if (ft10ModeEnabled) return 18;
+            return ft20ModeEnabled ? 13 : 10;
+        }
+
+        private string GetBuyIncomeLabel()
+        {
+            if (ft10ModeEnabled) return T("BuyIncomeFT13");
+            return ft20ModeEnabled ? T("BuyIncomeF") : T("BuyIncome");
         }
 
         private string[] GetRewardPoolForCurrentMode()
         {
-            if (ft10ModeEnabled)
-                return factionModeEnabled ? FactionRewardPoolNoIncome : BaseRewardPoolNoIncome;
-
             return factionModeEnabled ? FactionRewardPool : BaseRewardPool;
         }
 
         private void ResetEconomyForModeSwitch()
         {
+            firstTurnChosen = false;
+            firstTurnPlayer = 0;
             p1Gold = GetStartingGold();
             p2Gold = GetStartingGold();
             p1Income = 0; p2Income = 0;
@@ -2862,6 +2877,11 @@ T("NewGameConfirmMsg"))) return;
         {
             if (!IsIncomeAvailable()) return 0;
 
+            if (ft10ModeEnabled)
+            {
+                if (missedRounds < 3) return 0;
+                return Math.Min(100, (missedRounds - 2) * 10);
+            }
             if (ft20ModeEnabled)
             {
                 if (missedRounds < 3) return 0;
@@ -2873,6 +2893,7 @@ T("NewGameConfirmMsg"))) return;
 
         private decimal GetBaseIncomeCost()
         {
+            if (ft10ModeEnabled) return 140m;
             return ft20ModeEnabled ? 130m : 100m;
         }
 
@@ -2887,17 +2908,16 @@ T("NewGameConfirmMsg"))) return;
         private int GetFactionCost(int player)
         {
             int purchases = player == 1 ? p1FactionPurchases : p2FactionPurchases;
-            int baseCost = ft10ModeEnabled ? 25 : 50;
-            int scale = ft10ModeEnabled ? 15 : 20;
+            int baseCost = 50;
+            int scale = 20;
             return baseCost + (purchases * scale);
         }
 
         private int GetChosenFactionCost(int player)
         {
-            int purchases = player == 1 ? p1FactionPurchases : p2FactionPurchases;
-            int baseCost = ft10ModeEnabled ? 140 : 280;
-            int scale = ft10ModeEnabled ? 15 : 20;
-            return baseCost + (purchases * scale);
+            int baseCost = 280;
+            int ownedFactions = GetOwnedFactionsForPlayer(player).Count;
+            return Math.Max(1, baseCost - (ownedFactions * 15));
         }
 
         private int GetNextMilestone(int currentPoints)
@@ -3242,7 +3262,7 @@ T("NewGameConfirmMsg"))) return;
                 P2BuyIncomeButton.Visibility = Visibility.Visible;
                 int p1DisplayedIncomeCost = GetDisplayedIncomeCost(p1IncomeCost, p1IncomeDecayPercent, p1HasIncomeDiscount);
                 int p2DisplayedIncomeCost = GetDisplayedIncomeCost(p2IncomeCost, p2IncomeDecayPercent, p2HasIncomeDiscount);
-                string incomeLabel = ft20ModeEnabled ? T("BuyIncomeF") : T("BuyIncome");
+                string incomeLabel = GetBuyIncomeLabel();
                 PlayerPanelText.SetButtonContent(P1BuyIncomeButton, string.Format(incomeLabel, p1DisplayedIncomeCost));
                 PlayerPanelText.SetButtonContent(P2BuyIncomeButton, string.Format(incomeLabel, p2DisplayedIncomeCost));
                 P1IncomeDecayPctText.Text = p1HasIncomeDiscount
@@ -3556,7 +3576,7 @@ T("NewGameConfirmMsg"))) return;
 
         private int GetMatchGoalPoints()
         {
-            if (ft10ModeEnabled) return 10;
+            if (ft10ModeEnabled) return 13;
             if (ft30ModeEnabled) return 30;
             return 20;
         }
@@ -3760,7 +3780,7 @@ T("NewGameConfirmMsg"))) return;
             if (p1Gold < cost) { ShowNotice(string.Format(T("NotEnoughGold"), p1Name)); return; }
             PushUndoState();
             ApplyGoldSpend(1, cost);
-            int gain = ft20ModeEnabled ? 13 : 10;
+            int gain = GetIncomeGain();
             p1Income += gain; p1IncomeLevel++; p1IncomeUpgrades++;
             p1BoughtIncomeThisRound = true;
             p1MissedIncomeRounds = 0;
@@ -3779,7 +3799,7 @@ T("NewGameConfirmMsg"))) return;
             if (p2Gold < cost) { ShowNotice(string.Format(T("NotEnoughGold"), p2Name)); return; }
             PushUndoState();
             ApplyGoldSpend(2, cost);
-            int gain = ft20ModeEnabled ? 13 : 10;
+            int gain = GetIncomeGain();
             p2Income += gain; p2IncomeLevel++; p2IncomeUpgrades++;
             p2BoughtIncomeThisRound = true;
             p2MissedIncomeRounds = 0;

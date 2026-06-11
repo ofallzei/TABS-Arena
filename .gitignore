@@ -10,6 +10,10 @@
 *.userosscache
 *.sln.docstates
 
+# Local Discord bot secrets
+botsettings.local.json
+TABS.Bot/botsettings.local.json
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

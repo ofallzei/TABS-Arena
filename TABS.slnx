@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="TABS/TABS.csproj" Id="2d516847-566f-4157-ae52-964ea0ade9b5" />
+  <Project Path="TABS.Bot/TABS.Bot.csproj" Id="0fe83582-2d44-45da-9d40-b1d3fe9d8773" />
 </Solution>

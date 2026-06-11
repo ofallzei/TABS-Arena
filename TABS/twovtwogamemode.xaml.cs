@@ -939,11 +939,8 @@ _p3NextFactionDiscountPct = _p4NextFactionDiscountPct = 0;
             "+30% Next Sell",
             "-5% BFT Surcharge"
         };
-                if (!_ft10ModeEnabled)
-                {
-                    pool.Add("10% Off Next Income");
-                    pool.Add("10% Off Next Income");
-                }
+                pool.Add("10% Off Next Income");
+                pool.Add("10% Off Next Income");
             }
             else
             {
@@ -954,12 +951,9 @@ _p3NextFactionDiscountPct = _p4NextFactionDiscountPct = 0;
             "+30% Next Sell","+30% Next Sell",
             "-5% BFT Surcharge"
         };
-                if (!_ft10ModeEnabled)
-                {
-                    pool.Add("10% Off Next Income");
-                    pool.Add("10% Off Next Income");
-                    pool.Add("10% Off Next Income");
-                }
+                pool.Add("10% Off Next Income");
+                pool.Add("10% Off Next Income");
+                pool.Add("10% Off Next Income");
             }
             Shuffle(pool);
             _ft20RewardsRemaining = pool;
@@ -1326,7 +1320,19 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private bool IsIncomeAvailable()
         {
-            return !_ft10ModeEnabled;
+            return true;
+        }
+
+        private int GetIncomeGain()
+        {
+            if (_ft10ModeEnabled) return 18;
+            return _ft20ModeEnabled ? 13 : 10;
+        }
+
+        private string GetBuyIncomeLabelPrefix()
+        {
+            if (_ft10ModeEnabled) return Loc.Get("BuyIncomeFT13").Split('(')[0].Trim();
+            return Loc.Get(_ft20ModeEnabled ? "BuyIncomeF" : "BuyIncome").Split('(')[0].Trim();
         }
 
         private int GetStartingGold()
@@ -1336,8 +1342,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private int GetRoundRewardTier()
         {
-            if (_ft10ModeEnabled) return ((_round - 1) / 2) * 40;
-            if (_ft20ModeEnabled) return ((_round - 1) / 3) * 15;
+            if (_ft10ModeEnabled) return ((_round - 1) / 2) * 35;
+            if (_ft20ModeEnabled) return ((_round - 1) / 3) * 20;
             return ((_round - 1) / 5) * 10;
         }
 
@@ -1362,12 +1368,12 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private int GetTimedMilestoneStep()
         {
-            return _ft10ModeEnabled ? 2 : 4;
+            return _ft10ModeEnabled ? 3 : 4;
         }
 
         private int GetPermMoveBaseCost()
         {
-            if (_ft10ModeEnabled) return 125;
+            if (_ft10ModeEnabled) return 150;
             if (_ft20ModeEnabled) return 175;
             return 200;
         }
@@ -1375,8 +1381,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         private int GetFactionCost(int player)
         {
             int purchases = GetFactionPurchases(player);
-            int baseCost = _ft10ModeEnabled ? 25 : 50;
-            int scale = _ft10ModeEnabled ? 15 : 20;
+            int baseCost = 50;
+            int scale = 20;
             return baseCost + (purchases * scale);
         }
 
@@ -1387,6 +1393,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private int GetBaseIncomeCost()
         {
+            if (_ft10ModeEnabled) return 140;
             return _ft20ModeEnabled ? 130 : 100;
         }        // ─────────────────────────────────────────────────────────────────
                  //  First turn
@@ -1461,7 +1468,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         // ─────────────────────────────────────────────────────────────────
         private int GetMatchGoalPoints()
         {
-            if (_ft10ModeEnabled) return 10;
+            if (_ft10ModeEnabled) return 13;
             if (_ft30ModeEnabled) return 30;
             return 20;
         }
@@ -1943,7 +1950,11 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             {
                 missed++;
 
-                if (_ft20ModeEnabled)
+                if (_ft10ModeEnabled)
+                {
+                    decay = missed >= 3 ? Math.Min(100, (missed - 2) * 10) : 0;
+                }
+                else if (_ft20ModeEnabled)
                 {
                     // FT20: grace = 3 rounds, then 4% off per round after
                     // missed 1,2,3 = 0%, missed 4 = 4%, missed 5 = 8%, etc.
@@ -2007,7 +2018,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 return;
             }
 
-            int incomeGain = _ft20ModeEnabled ? 13 : 10;
+            int incomeGain = GetIncomeGain();
 
             PushUndoSnapshot();
             AddGold(player, -costInt);
@@ -2276,7 +2287,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
         }
 
         // ─────────────────────────────────────────────────────────────────
-        //  Custom spend — FIX: clear box on success
+        //  Custom spend
         // ─────────────────────────────────────────────────────────────────
         private void P1Spend_Click(object s, RoutedEventArgs e) => CustomSpend(1, P1SpendBox);
         private void P2Spend_Click(object s, RoutedEventArgs e) => CustomSpend(2, P2SpendBox);
@@ -2300,11 +2311,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             AddGold(player, -amount);
             LogAction($"💸 {Loc.Get("LogSpent", player, amount)}");
             ShowNotice(Loc.Get("NoticeSpent", player, amount), NoticeType.Info);
-            ClearInputBox(box);
         }
 
         // ─────────────────────────────────────────────────────────────────
-        //  BFT — FIX: clear box on success
+        //  BFT
         // ─────────────────────────────────────────────────────────────────
         private void P1BuyTeam_Click(object s, RoutedEventArgs e) => BuyForTeammate(1, P1BuyTeamBox);
         private void P2BuyTeam_Click(object s, RoutedEventArgs e) => BuyForTeammate(2, P2BuyTeamBox);
@@ -2332,11 +2342,10 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             AddGold(player, -total);
             LogAction($"🤝 {Loc.Get("LogBFT", player, unitCost, total, surcharge)}");
             ShowNotice(Loc.Get("NoticeBFT", player, total, surcharge), NoticeType.Info);
-            ClearInputBox(box);
         }
 
         // ─────────────────────────────────────────────────────────────────
-        //  Sell unit — FIX: clear box on success
+        //  Sell unit
         // ─────────────────────────────────────────────────────────────────
         private void P1SellUnit_Click(object s, RoutedEventArgs e) => SellUnit(1, P1UnitBox);
         private void P2SellUnit_Click(object s, RoutedEventArgs e) => SellUnit(2, P2UnitBox);
@@ -2366,25 +2375,11 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
             LogAction($"💱 {Loc.Get("LogSoldUnit", player, value, returns, totalPct)}");
             ShowNotice(Loc.Get("NoticeSoldUnit", player, returns, totalPct), NoticeType.Success);
-            ClearInputBox(box);
             RefreshAllUI();
         }
-
         // ─────────────────────────────────────────────────────────────────
-        //  ClearInputBox — clears the value and restores the translated placeholder
+        //  Calc texts — stored from the actual applied round
         // ─────────────────────────────────────────────────────────────────
-        private void ClearInputBox(TextBox box)
-        {
-            if (box == null) return;
-
-            box.Text = "";
-            SetInputPlaceholder(box);
-        }        // ─────────────────────────────────────────────────────────────────
-                 //  Calc texts — FIX: only show win or loss line, not both
-                 // ─────────────────────────────────────────────────────────────────
-                 // ─────────────────────────────────────────────────────────────────
-                 //  Calc texts — stored from the actual applied round
-                 // ─────────────────────────────────────────────────────────────────
         private void UpdateCalcTexts()
         {
             P1CalcText.Text = _p1LastCalcText;
@@ -2501,7 +2496,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 return;
             }
 
-            int incomeGain = _ft20ModeEnabled ? 13 : 10;
+            int incomeGain = GetIncomeGain();
 
             UpdateIncomeDiscountBadge(1, P1BuyIncomeButton, P1IncomeDecayPctText, P1IncomeBadgeBorder, incomeGain);
             UpdateIncomeDiscountBadge(2, P2BuyIncomeButton, P2IncomeDecayPctText, P2IncomeBadgeBorder, incomeGain);
@@ -2517,7 +2512,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
             bool canBuy = !GetBoughtIncomeThisRound(player) && GetGold(player) >= shownCost;
 
-            PlayerPanelText.SetButtonContent(button, $"{Loc.Get(_ft20ModeEnabled ? "BuyIncomeF" : "BuyIncome").Split('(')[0].Trim()} ({shownCost}g)");
+            PlayerPanelText.SetButtonContent(button, $"{GetBuyIncomeLabelPrefix()} ({shownCost}g)");
             button.IsEnabled = true;
             button.Background = canBuy
                 ? new SolidColorBrush(Color.FromRgb(110, 169, 200))
@@ -3327,7 +3322,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             foreach (int p in new[] { 1, 2, 3, 4 })
             {
                 bool isFT20 = _ft20ModeEnabled;
-                PlayerPanelText.SetButtonContent(GetBuyIncomeButton(p), Loc.Get(isFT20 ? "BuyIncomeF" : "BuyIncome"));
+                PlayerPanelText.SetButtonContent(GetBuyIncomeButton(p), $"{GetBuyIncomeLabelPrefix()} ({GetDisplayedIncomeCost(p)}g)");
                 PlayerPanelText.SetButtonContent(
                     GetBuyPermMoveButton(p),
                     Loc.Get(isFT20 ? "BuyPermMoveF" : "BuyPermMove") + $" [{GetPermMovePurchases(p)}/{GetPermMoveMaxPurchases(p)}]");
@@ -4079,7 +4074,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             {
                 // Top bar
                 ["MainMenu"] = "← Menú Principal",
-                ["AppTitle"] = "TABS Arena v1.1.5",
+                ["AppTitle"] = "TABS Arena v1.1.6",
 
                 // Overview panel
                 ["OverviewTitle"] = "Resumen 2v2",
@@ -4103,9 +4098,9 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["FT30Mode"] = "MODO FT30",
                 ["FT30ModeOff"] = "Modo FT30: OFF",
                 ["FT30ModeOn"] = "Modo FT30: ON",
-                ["FT10Mode"] = "MODO FT10",
-                ["FT10ModeOff"] = "Modo FT10: OFF",
-                ["FT10ModeOn"] = "Modo FT10: ON",
+                ["FT10Mode"] = "MODO FT13",
+                ["FT10ModeOff"] = "Modo FT13: OFF",
+                ["FT10ModeOn"] = "Modo FT13: ON",
                 ["WhichTeamFirst"] = "¿Qué equipo va primero esta partida?",
                 ["RedTeamFirst"] = "Equipo Rojo Va Primero",
                 ["BlueTeamFirst"] = "Equipo Azul Va Primero",
@@ -4153,6 +4148,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 // Upgrade buttons
                 ["BuyIncome"] = "Comprar ingreso +10 (100)",
                 ["BuyIncomeF"] = "Comprar ingreso +13 (130)",
+                ["BuyIncomeFT13"] = "Comprar ingreso +18 (140)",
                 ["BuyPermMove"] = "Comprar mv perm +1 (200)",
                 ["BuyPermMoveF"] = "Comprar mv perm +1 (175)",
                 ["BuyFaction"] = "Comprar facción (50)",
@@ -4196,7 +4192,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["GuideRoundTitle"] = "Rondas, empates y replay",
                 ["GuideRoundBody"] = "Cuando termine una batalla, elige el ganador y presiona Siguiente Ronda. Si ambos equipos están de acuerdo en que fue empate, usa Empate. Si no hay acuerdo, usa un temporizador de 3 minutos y fuerza empate si nadie gana. Replay cuesta 10 de oro y solo puede comprarse una vez por ronda por equipo. Replay es solo para propósitos informativos y no cambia el resultado ni el ganador de la ronda.",
                 ["GuideEconomyTitle"] = "Economía",
-                ["GuideEconomyBody"] = "El interés da +10 de oro por cada 50 de oro que tenga un jugador, con máximo de +100. Comprar ingreso aumenta el ingreso permanente: +10 en FT30 y +13 en FT20. FT10 elimina compras de ingreso y decaimiento de ingreso.",
+                ["GuideEconomyBody"] = "El interés da +10 de oro por cada 50 de oro que tenga un jugador, con máximo de +100. Comprar ingreso aumenta el ingreso permanente: +10 en FT30, +13 en FT20 y +18 en FT13. En FT13 empieza en 140 de oro y gana 10% de decaimiento por ronda después de 2 rondas sin comprar.",
                 ["GuideRulesTitle"] = "Reglas 2v2",
                 ["GuideRulesBody"] = "No se permite controlar unidades durante la batalla. En mapas 2v2, no coloques unidades en highground, en el círculo central, en grietas, ni en sus entradas. Deben ser 2 ejércitos por lado, 1 ejército por jugador, 4 ejércitos total. Unidades prohibidas actualmente: Present Elf y Dragon.",
                 ["GuideSavingTitle"] = "Guardado",
@@ -4270,8 +4266,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["LogFT20ModeOff"] = "Modo FT20 OFF — paneles reiniciados.",
                 ["LogFT30ModeOn"] = "Modo FT30 ON — paneles reiniciados.",
                 ["LogFT30ModeOff"] = "Modo FT30 OFF — modo FT20 seleccionado.",
-                ["LogFT10ModeOn"] = "Modo FT10 ON — 1200g inicial e ingreso desactivado.",
-                ["LogFT10ModeOff"] = "Modo FT10 OFF — modo FT20 seleccionado.",
+                ["LogFT10ModeOn"] = "Modo FT13 ON - primero a 13 con ingreso activado.",
+                ["LogFT10ModeOff"] = "Modo FT13 OFF - modo FT20 seleccionado.",
                 ["LogMilestone"] = "Hito {0}pts — {1}: {2}",
                 ["LogFT20Milestone"] = "Hito FT20 {0}pts — {1}: {2}",
                 ["LogLoaded"] = "Cargado {0}.",
@@ -4296,8 +4292,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["NoticeFT20ModeOff"] = "¡Modo FT20 DESACTIVADO! Paneles reiniciados.",
                 ["NoticeFT30ModeOn"] = "¡Modo FT30 ACTIVADO! Paneles reiniciados.",
                 ["NoticeFT30ModeOff"] = "Modo FT30 DESACTIVADO. Modo FT20 seleccionado.",
-                ["NoticeFT10ModeOn"] = "¡Modo FT10 ACTIVADO! 1200g inicial e ingreso desactivado.",
-                ["NoticeFT10ModeOff"] = "Modo FT10 DESACTIVADO. Modo FT20 seleccionado.",
+                ["NoticeFT10ModeOn"] = "¡Modo FT13 ACTIVADO! Primero a 13 con ingreso activado.",
+                ["NoticeFT10ModeOff"] = "Modo FT13 DESACTIVADO. Modo FT20 seleccionado.",
                 ["Reward80OffFaction"] = "80% Desc. Próxima Facción",
                 ["Reward80OffChosenFaction"] = "80% Desc. Próxima Facción Elegida",
                 ["Reward80OffPermMove"] = "80% Desc. Próximo Mv Perm",
@@ -4340,7 +4336,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             private static readonly Dictionary<string, string> _ru = new Dictionary<string, string>
             {
                 ["MainMenu"] = "← Главное меню",
-                ["AppTitle"] = "TABS Arena v1.1.5",
+                ["AppTitle"] = "TABS Arena v1.1.6",
                 ["OverviewTitle"] = "Обзор матча 2v2",
                 ["OverviewSub"] = "Настройте всех четырех игроков, затем нажмите Следующий раунд, чтобы применить проценты, этапы и награды.",
                 ["CurrentRound"] = "ТЕКУЩИЙ РАУНД",
@@ -4357,9 +4353,9 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["FT30Mode"] = "РЕЖИМ FT30",
                 ["FT30ModeOff"] = "FT30: ВЫКЛ",
                 ["FT30ModeOn"] = "FT30: ВКЛ",
-                ["FT10Mode"] = "РЕЖИМ FT10",
-                ["FT10ModeOff"] = "FT10: ВЫКЛ",
-                ["FT10ModeOn"] = "FT10: ВКЛ",
+                ["FT10Mode"] = "РЕЖИМ FT13",
+                ["FT10ModeOff"] = "FT13: ВЫКЛ",
+                ["FT10ModeOn"] = "FT13: ВКЛ",
                 ["WhichTeamFirst"] = "Какая команда ходит первой в этом матче?",
                 ["RedTeamFirst"] = "Красная команда ходит первой",
                 ["BlueTeamFirst"] = "Синяя команда ходит первой",
@@ -4394,6 +4390,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["MaxFactions"] = "Макс. фракций",
                 ["BuyIncome"] = "Купить доход +10 (100)",
                 ["BuyIncomeF"] = "Купить доход +13 (130)",
+                ["BuyIncomeFT13"] = "Купить доход +18 (140)",
                 ["BuyPermMove"] = "Купить пост. ход +1 (200)",
                 ["BuyPermMoveF"] = "Купить пост. ход +1 (175)",
                 ["BuyFaction"] = "Купить фракцию (50)",
@@ -4429,7 +4426,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["GuideRoundTitle"] = "Раунды, ничьи и повтор",
                 ["GuideRoundBody"] = "Когда битва закончится, выберите победителя и нажмите Следующий раунд. Если обе команды согласны, что была ничья, используйте Ничья. Если согласия нет, используйте таймер на 3 минуты и принудительно ставьте ничью, если никто не победил. Повтор стоит 10 золота и может быть куплен только один раз за раунд каждой командой. Повтор нужен только для информации и не меняет результат или победителя раунда.",
                 ["GuideEconomyTitle"] = "Экономика",
-                ["GuideEconomyBody"] = "Проценты дают +10 золота за каждые 50 золота у игрока, максимум +100. Покупка дохода повышает постоянный доход: +10 в FT30 и +13 в FT20. FT10 убирает покупки дохода и спад дохода.",
+                ["GuideEconomyBody"] = "Проценты дают +10 золота за каждые 50 золота у игрока, максимум +100. Покупка дохода повышает постоянный доход: +10 в FT30, +13 в FT20 и +18 в FT13. В FT13 доход стоит от 140 золота и получает спад 10% за раунд после 2 пропущенных раундов без покупки.",
                 ["GuideRulesTitle"] = "Правила 2v2",
                 ["GuideRulesBody"] = "Игроки не могут управлять юнитами во время битвы. На картах 2v2 не размещайте юнитов на возвышенностях, в центральном круге, в трещинах или у входов в круг и трещины. Должно быть 2 армии на сторону, 1 армия на игрока, всего 4 армии. Сейчас запрещены юниты: Present Elf и Dragon.",
                 ["GuideSavingTitle"] = "Сохранение",
@@ -4501,8 +4498,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["LogFT20ModeOff"] = "Режим FT20 ВЫКЛ - панели сброшены.",
                 ["LogFT30ModeOn"] = "Режим FT30 ВКЛ - панели сброшены.",
                 ["LogFT30ModeOff"] = "Режим FT30 ВЫКЛ - выбран режим FT20.",
-                ["LogFT10ModeOn"] = "Режим FT10 ВКЛ - старт 1200g и доход выключен.",
-                ["LogFT10ModeOff"] = "Режим FT10 ВЫКЛ - выбран режим FT20.",
+                ["LogFT10ModeOn"] = "Режим FT13 ВКЛ - игра до 13, доход включен.",
+                ["LogFT10ModeOff"] = "Режим FT13 ВЫКЛ - выбран режим FT20.",
                 ["LogMilestone"] = "Этап {0} очк. - {1}: {2}",
                 ["LogFT20Milestone"] = "Этап FT20 {0} очк. - {1}: {2}",
                 ["LogLoaded"] = "Загружено {0}.",
@@ -4525,8 +4522,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["NoticeFT20ModeOff"] = "Режим FT20 ВЫКЛ! Панели игроков сброшены.",
                 ["NoticeFT30ModeOn"] = "Режим FT30 ВКЛ! Панели игроков сброшены.",
                 ["NoticeFT30ModeOff"] = "Режим FT30 ВЫКЛ. Выбран режим FT20.",
-                ["NoticeFT10ModeOn"] = "Режим FT10 ВКЛ! Старт 1200g и доход выключен.",
-                ["NoticeFT10ModeOff"] = "Режим FT10 ВЫКЛ. Выбран режим FT20.",
+                ["NoticeFT10ModeOn"] = "Режим FT13 ВКЛ! Игра до 13, доход включен.",
+                ["NoticeFT10ModeOff"] = "Режим FT13 ВЫКЛ. Выбран режим FT20.",
                 ["NothingToUndo"] = "Нечего отменять.",
                 ["RedTeamShort"] = "Красные",
                 ["BlueTeamShort"] = "Синие",
@@ -4571,7 +4568,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             private static readonly Dictionary<string, string> _zh = new Dictionary<string, string>
             {
                 ["MainMenu"] = "← 主菜单",
-                ["AppTitle"] = "TABS Arena v1.1.5",
+                ["AppTitle"] = "TABS Arena v1.1.6",
                 ["OverviewTitle"] = "2v2 比赛总览",
                 ["OverviewSub"] = "管理四名玩家，然后点击下一回合以应用利息、里程碑和奖励。",
                 ["CurrentRound"] = "当前回合",
@@ -4588,9 +4585,9 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["FT30Mode"] = "FT30 模式",
                 ["FT30ModeOff"] = "FT30：关",
                 ["FT30ModeOn"] = "FT30：开",
-                ["FT10Mode"] = "FT10 模式",
-                ["FT10ModeOff"] = "FT10：关",
-                ["FT10ModeOn"] = "FT10：开",
+                ["FT10Mode"] = "FT13 模式",
+                ["FT10ModeOff"] = "FT13：关",
+                ["FT10ModeOn"] = "FT13：开",
                 ["WhichTeamFirst"] = "本场比赛哪支队伍先行动？",
                 ["RedTeamFirst"] = "红队先行动",
                 ["BlueTeamFirst"] = "蓝队先行动",
@@ -4625,6 +4622,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["MaxFactions"] = "阵营上限",
                 ["BuyIncome"] = "购买收入 +10 (100)",
                 ["BuyIncomeF"] = "购买收入 +13 (130)",
+                ["BuyIncomeFT13"] = "购买收入 +18 (140)",
                 ["BuyPermMove"] = "购买永久移动 +1 (200)",
                 ["BuyPermMoveF"] = "购买永久移动 +1 (175)",
                 ["BuyFaction"] = "购买阵营 (50)",
@@ -4660,7 +4658,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["GuideRoundTitle"] = "回合、平局和重赛查看",
                 ["GuideRoundBody"] = "战斗结束后，选择胜者并点击下一回合。如果双方队伍都同意是平局，使用平局。若无法达成一致，使用 3 分钟计时器；没人获胜则强制平局。重赛查看花费 10 金币，每支队伍每回合只能购买一次。重赛查看仅用于信息参考，不会改变回合结果或胜者。",
                 ["GuideEconomyTitle"] = "经济",
-                ["GuideEconomyBody"] = "利息按玩家每 50 金币给予 +10 金币，最高 +100。购买收入会提高永久收入：FT30 为 +10，FT20 为 +13。FT10 移除收入购买和收入衰减。",
+                ["GuideEconomyBody"] = "利息按玩家每 50 金币给予 +10 金币，最高 +100。购买收入会提高永久收入：FT30 为 +10，FT20 为 +13，FT13 为 +18。FT13 收入起价 140 金币，连续 2 回合未购买后每回合衰减 10%。",
                 ["GuideRulesTitle"] = "2v2 规则",
                 ["GuideRulesBody"] = "战斗期间玩家不得控制单位。在 2v2 地图上，不要把单位放在高地、中心圆圈、裂缝中，或圆圈/裂缝入口处。每边应有 2 支军队，每名玩家 1 支军队，总共 4 支军队。目前禁用单位：Present Elf 和 Dragon。",
                 ["GuideSavingTitle"] = "保存",
@@ -4732,8 +4730,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["LogFT20ModeOff"] = "FT20 模式关闭 - 面板已重置。",
                 ["LogFT30ModeOn"] = "FT30 模式开启 - 面板已重置。",
                 ["LogFT30ModeOff"] = "FT30 模式关闭 - 已选择 FT20 模式。",
-                ["LogFT10ModeOn"] = "FT10 模式开启 - 1200g 开局，收入已禁用。",
-                ["LogFT10ModeOff"] = "FT10 模式关闭 - 已选择 FT20 模式。",
+                ["LogFT10ModeOn"] = "FT13 模式开启 - 先到 13，收入已启用。",
+                ["LogFT10ModeOff"] = "FT13 模式关闭 - 已选择 FT20 模式。",
                 ["LogMilestone"] = "里程碑 {0} 分 - {1}: {2}",
                 ["LogFT20Milestone"] = "FT20 里程碑 {0} 分 - {1}: {2}",
                 ["LogLoaded"] = "已读取 {0}。",
@@ -4756,8 +4754,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["NoticeFT20ModeOff"] = "FT20 模式关闭！玩家面板已重置。",
                 ["NoticeFT30ModeOn"] = "FT30 模式开启！玩家面板已重置。",
                 ["NoticeFT30ModeOff"] = "FT30 模式关闭。已选择 FT20 模式。",
-                ["NoticeFT10ModeOn"] = "FT10 模式开启！1200g 开局，收入已禁用。",
-                ["NoticeFT10ModeOff"] = "FT10 模式关闭。已选择 FT20 模式。",
+                ["NoticeFT10ModeOn"] = "FT13 模式开启！先到 13，收入已启用。",
+                ["NoticeFT10ModeOff"] = "FT13 模式关闭。已选择 FT20 模式。",
                 ["NothingToUndo"] = "没有可撤销的内容。",
                 ["RedTeamShort"] = "红队",
                 ["BlueTeamShort"] = "蓝队",
@@ -4815,7 +4813,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
             private static readonly Dictionary<string, string> _defaults = new Dictionary<string, string>
             {
                 ["MainMenu"] = "← Main Menu",
-                ["AppTitle"] = "TABS Arena v1.1.5",
+                ["AppTitle"] = "TABS Arena v1.1.6",
                 ["OverviewTitle"] = "2v2 Match Overview",
                 ["OverviewSub"] = "Manage all four players then press Next Round to apply interest, milestones, rewards.",
                 ["CurrentRound"] = "CURRENT ROUND",
@@ -4832,9 +4830,9 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["FT30Mode"] = "FT30 MODE",
                 ["FT30ModeOff"] = "FT30 Mode: OFF",
                 ["FT30ModeOn"] = "FT30 Mode: ON",
-                ["FT10Mode"] = "FT10 MODE",
-                ["FT10ModeOff"] = "FT10 Mode: OFF",
-                ["FT10ModeOn"] = "FT10 Mode: ON",
+                ["FT10Mode"] = "FT13 MODE",
+                ["FT10ModeOff"] = "FT13 Mode: OFF",
+                ["FT10ModeOn"] = "FT13 Mode: ON",
                 ["WhichTeamFirst"] = "Which team is going first this match?",
                 ["RedTeamFirst"] = "Red Team Goes First",
                 ["BlueTeamFirst"] = "Blue Team Goes First",
@@ -4869,6 +4867,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["MaxFactions"] = "Max factions",
                 ["BuyIncome"] = "Buy income +10 (100)",
                 ["BuyIncomeF"] = "Buy income +13 (130)",
+                ["BuyIncomeFT13"] = "Buy income +18 (140)",
                 ["BuyPermMove"] = "Buy perm move +1 (200)",
                 ["BuyPermMoveF"] = "Buy perm move +1 (175)",
                 ["BuyFaction"] = "Buy faction (50)",
@@ -4904,7 +4903,7 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["GuideRoundTitle"] = "Rounds, Ties, And Replay",
                 ["GuideRoundBody"] = "When a battle ends, choose the winner and press Next Round. If both teams agree it was a tie, use Tie. If there is no agreement, use a 3-minute timer and force a tie if nobody wins. Replay costs 10 gold and can only be bought once per round per team. Replay is for informational purposes only and does not change the outcome or winner of the round.",
                 ["GuideEconomyTitle"] = "Economy",
-                ["GuideEconomyBody"] = "Interest gives +10 gold for every 50 gold a player has, capped at +100. Buying income increases permanent income: +10 in FT30 and +13 in FT20. FT10 removes income purchases and income decay.",
+                ["GuideEconomyBody"] = "Interest gives +10 gold for every 50 gold a player has, capped at +100. Buying income increases permanent income: +10 in FT30, +13 in FT20, and +18 in FT13. FT13 income starts at 140 gold and gains 10% decay each round after 2 missed rounds.",
                 ["GuideRulesTitle"] = "2v2 Rules",
                 ["GuideRulesBody"] = "Players may not control units during battle. On 2v2 maps, do not place units on high ground, in the middle circle, in crevices, or at entrances to the circle or crevices. There should be 2 armies per side, 1 army per player, 4 armies total. Currently banned units: Present Elf and Dragon.",
                 ["GuideSavingTitle"] = "Saving",
@@ -4976,8 +4975,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["LogFT20ModeOff"] = "FT20 Mode OFF — panels reset.",
                 ["LogFT30ModeOn"] = "FT30 Mode ON — panels reset.",
                 ["LogFT30ModeOff"] = "FT30 Mode OFF — FT20 mode selected.",
-                ["LogFT10ModeOn"] = "FT10 Mode ON — 1200g start and income disabled.",
-                ["LogFT10ModeOff"] = "FT10 Mode OFF — FT20 mode selected.",
+                ["LogFT10ModeOn"] = "FT13 Mode ON - first to 13 with income enabled.",
+                ["LogFT10ModeOff"] = "FT13 Mode OFF - FT20 mode selected.",
                 ["LogMilestone"] = "Milestone {0}pts — {1}: {2}",
                 ["LogFT20Milestone"] = "FT20 Milestone {0}pts — {1}: {2}",
                 ["LogLoaded"] = "Loaded {0}.",
@@ -5000,8 +4999,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
                 ["NoticeFT20ModeOff"] = "FT20 Mode OFF! Player panels reset.",
                 ["NoticeFT30ModeOn"] = "FT30 Mode ON! Player panels reset.",
                 ["NoticeFT30ModeOff"] = "FT30 Mode OFF. FT20 mode selected.",
-                ["NoticeFT10ModeOn"] = "FT10 Mode ON! 1200g start and income disabled.",
-                ["NoticeFT10ModeOff"] = "FT10 Mode OFF. FT20 mode selected.",
+                ["NoticeFT10ModeOn"] = "FT13 Mode ON! First to 13 with income enabled.",
+                ["NoticeFT10ModeOff"] = "FT13 Mode OFF. FT20 mode selected.",
                 ["NothingToUndo"] = "Nothing to undo.",
                 ["RedTeamShort"] = "Red",
                 ["BlueTeamShort"] = "Blue",
@@ -5414,9 +5413,8 @@ _p3BoughtIncomeThisRound = _p4BoughtIncomeThisRound = false;
 
         private int GetChosenFactionCost(int p)
         {
-            int baseCost = _ft10ModeEnabled ? 140 : 280;
-            int scale = _ft10ModeEnabled ? 15 : 20;
-            return baseCost + (GetFactionPurchases(p) * scale);
+            int baseCost = 280;
+            return Math.Max(1, baseCost - (GetFactions(p).Count * 15));
         }
 
         private int GetDisplayedChosenFactionCost(int p)
