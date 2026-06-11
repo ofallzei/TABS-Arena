@@ -113,7 +113,7 @@ Once `Next Round` has been pressed, normal sellback percentage and unit movement
 If both players or teams are at match point, the win-by-2 rule activates.
 
 Examples:
-- `9/9` in FT10
+- `12/12` in FT13
 - `19/19` in FT20
 - `29/29` in FT30
 
@@ -194,11 +194,9 @@ The first faction costs `50 gold`. Each additional faction increases the price b
 
 -Buy chosen faction
 
-Allows you to buy a faction that you desire for the price of 280 gold.
+Allows you to buy a faction that you desire for the price of 235 gold.
 
-Price scaling is binded to "Buy faction" 
-
-(ft 10 mode) - buy faction 25 gold , 140 for a chosen faction.
+Price scaling is 15 less gold for each faction you own.
 
 -Single Troop Move
 
@@ -261,6 +259,10 @@ In FT20, income decay activates after not buying income for 3 rounds in a row.
 
 It increases by `4%` every round after that.
 
+In FT13, income decay activates after not buying income for 3 rounds in a row.
+
+It increases by `10%` every round after that.
+
 -Match Rewards
 
 Base match rewards are:
@@ -272,7 +274,7 @@ Base match rewards are:
 - Winner: `75 gold` and 1 point
 - Loser: `105 gold`
 
-(ft10)
+(ft13)
 - Winner: `95 gold` and 1 point
 - Loser: `125 gold`
 
@@ -282,9 +284,9 @@ Base match rewards are:
 
 In FT30 mode, match rewards increase by `10 gold` for both winner and loser every 5 rounds.
 
-In FT20 mode, match rewards increase by `15 gold` for both winner and loser every 3 rounds.
+In FT20 mode, match rewards increase by `20 gold` for both winner and loser every 3 rounds.
 
-In FT10 mode, match rewards increase by `40 gold` for both winner and loser every 3 rounds.
+In FT13 mode, match rewards increase by `35 gold` for both winner and loser every 2 rounds.
 
 -Milestones
 
@@ -310,9 +312,9 @@ In FT20, milestone rewards happen every 4 points:
 
 `4, 8, 12, 16, 20`, and so on.
 
-In FT10, milestone rewards happen every 4 points:
+In FT13, milestone rewards happen every 3 points:
 
-`2, 4, 6, 8, 10`, and so on.
+`3, 6, 8, 9, 12`, and so on.
 
 ---
 
@@ -326,9 +328,9 @@ First player to `20 points` wins.
 
 First player to `30 points` wins unless the win-by-2 rule activates.
 
--1v1 FT10 Mode
+-1v1 FT13 Mode
 
-First player to `10 points` wins unless the win-by-2 rule activates.
+First player to `13 points` wins unless the win-by-2 rule activates.
 
 All factions are allowed.
 
