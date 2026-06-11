@@ -196,7 +196,7 @@ The first faction costs `50 gold`. Each additional faction increases the price b
 
 Allows you to buy a faction that you desire for the price of 235 gold.
 
-Price scaling is 15 less gold for each faction you own.
+Price scaling to buy again is 15 less gold for each faction you own.
 
 -Single Troop Move
 
